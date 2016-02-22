@@ -1,0 +1,19 @@
+{
+  "name": "0x",
+  "version": "2.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidmarkclements/0x.git"
+  },
+  "author": "David Mark Clements",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/davidmarkclements/0x/issues"
+  },
+  "homepage": "https://github.com/davidmarkclements/0x#readme"
+}
