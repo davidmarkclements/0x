@@ -1,0 +1,17 @@
+{
+  "name": "slow-rest-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "wrk -d 20 -c 100 http://localhost:3000/a & wrk -d 20 -c 100 http://localhost:3000/b & wrk -d 20 -c 100 http://localhost:3000/c"
+  },
+  "author": "David Mark Clements",
+  "license": "MIT",
+  "dependencies": {
+    "restify": "^4.0.3"
+  },
+  "devDependencies": {
+    "standard": "^5.4.1"
+  }
+}
