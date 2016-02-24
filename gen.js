@@ -3,7 +3,7 @@ var flamer = require('./flamer')
 module.exports = function (stacks, opts) {
   opts = opts || {}
   opts.name = opts.name || 'flamegraph'
-  var min = opts.min || 750
+  var min = opts.min || 950
 
   var height = (diameter(stacks) * 18) + 2
   height = height < min ? min : height

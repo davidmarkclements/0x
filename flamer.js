@@ -11,61 +11,53 @@
       title = "", // graph title
       transitionDuration = 500,
       transitionEase = "cubic-in-out", // tooltip offset
-      sort = true;
+      sort = true,
+      allSamples
 
 
     var labelFormat = function(d) {
-      return d.name + " (" + d3.round(100 * d.dx, 3) + "%, " + d.value + " samples)";
+      return '<strong>' + d.name + '</strong><br>' +
+        (d.top ? 
+          '<strong> Top of Stack:</strong>' + d3.round(100 * (d.top/allSamples), 1) + '%' + 
+          '(' + d.top + ' of ' + allSamples + ' samples)' : ''
+        ) +
+        '<strong> On Stack:</strong>' + d3.round(100 * (d.value/allSamples), 1) + '%' + 
+        '(' + d.value + ' of ' + allSamples + ' samples)'
     }
 
     function setDetails(t) {
-      var details = document.getElementById("details");
-      if (details)
-        details.innerHTML = t;
+      var details = document.getElementById("details")
+      console.log('t', t)
+      if (details) details.innerHTML = t
     }
 
     function label(d) {
-      if (!d.dummy) {
-        return labelFormat(d);
-      } else {
-        return "";
-      }
+      if (d.dummy) return ''
+      return labelFormat(d)
+    }
+
+    function textLabel(d) {
+      return d.name + '\n' +
+        (d.top ? 
+          'Top of Stack:' + d3.round(100 * (d.top/allSamples), 1) + '% ' + 
+          '(' + d.top + ' of ' + allSamples + ' samples)\n' : ''
+        ) +
+        'On Stack:' + d3.round(100 * (d.value/allSamples), 1) + '% ' + 
+        '(' + d.value + ' of ' + allSamples + ' samples)'
     }
 
     function name(d) {
       return d.name;
     }
 
-    function generateHash(name) {
-      // Return a vector (0.0->1.0) that is a hash of the input string.
-      // The hash is computed to favor early characters over later ones, so
-      // that strings with similar starts have similar vectors. Only the first
-      // 6 characters are considered.
-      var hash = 0, weight = 1, max_hash = 0, mod = 10, max_char = 6;
-      if (name) {
-        for (var i = 0; i < name.length; i++) {
-          if (i > max_char) { break; }
-          hash += weight * (name.charCodeAt(i) % mod);
-          max_hash += weight * (mod - 1);
-          weight *= 0.70;
-        }
-        if (max_hash > 0) { hash = hash / max_hash; }
-      }
-      return hash;
-    }
+    function colorHash(d) {
+      var vector = ((d.top/allSamples) * 10) + .1
 
-    function colorHash(name, heat) {
-      var vector = 0;
-      if (name) {
-        name = name.replace(/.*`/, "");   // drop module name if present
-        name = name.replace(/\(.*/, "");  // drop extra info
-        vector = generateHash(name);
-      }
-      var r = 200 + Math.round(55 * vector);
-      var g = 0 + Math.round(230 * (1 - vector));
-      var b = 0 + Math.round(55 * (1 - vector));
-      var a = heat
-      return 'rgb(' + r + ',' + g + ',' + b + ')';
+      var r = 255 + Math.round(155 * vector)
+      var g = 50 + Math.round(100 * (1 - vector))
+      var b = 22 + Math.round(15 * (1 - vector))
+      var a = vector + .5
+      return 'rgba(' + r + ',' + g + ',' + b + ', ' + a + ')';
     }
 
     function augment(data) {
@@ -81,9 +73,10 @@
         if (childValues < data.value) {
           data.children.push(
             {
-              "name": "",
-              "value": data.value - childValues,
-              "dummy": true
+              name: "",
+              value: data.value - childValues,
+              top: 0,
+              dummy: true
             }
           );
         }
@@ -195,7 +188,6 @@
     function update() {
 
       selection.each(function(data) {
-
         var x = d3.scale.linear().range([0, w]),
             y = d3.scale.linear().range([0, c]);
 
@@ -234,12 +226,14 @@
 
         g.select("rect")
           .attr("height", function(d) { return c; })
-          .attr("fill", function(d) {return d.highlight ? "#E600E6" : colorHash(d.name,  d.dx); })
+          .attr("fill", function(d) {
+            return d.highlight ? "#E600E6" : colorHash(d); 
+          })
           .style("visibility", function(d) {return d.dummy ? "hidden" : "visible";});
 
 
           g.select("title")
-            .text(label);
+            .text(textLabel);
 
         g.select("foreignObject")
           .attr("width", function(d) { return d.dx * kx; })
@@ -256,7 +250,7 @@
         g.on('mouseover', function(d) {
           if(!d.dummy) {
 
-            setDetails(label(d));
+            setDetails(label(d, true));
           }
         }).on('mouseout', function(d) {
           if(!d.dummy) {
@@ -274,6 +268,8 @@
       if (!arguments.length) return chart;
 
       selection.each(function(data) {
+        allSamples = data.value
+
 
         var svg = d3.select(this)
           .append("svg:svg")
