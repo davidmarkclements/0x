@@ -6,27 +6,34 @@ var through = require('through2')
 function Node (name) {
   this.name = name
   this.value = 0
+  this.top = 0 
   this.children = {}
 }
 
-Node.prototype.add = function (frames, value) {
+Node.prototype.add = function (frames, value, topper) {
   this.value += value
   if (frames && frames.length > 0) {
     var head = frames[0]
     var child = this.children[head]
+
     if (!child) {
       child = new Node(head)
       this.children[head] = child
     }
+
+    if (head === topper) child.top += 1
+      
     frames.splice(0, 1)
-    child.add(frames, value)
+    child.add(frames, value, topper)
   }
 }
 
 Node.prototype.serialize = function () {
   var res = {
-    'name': this.name,
-    'value': this.value
+    name: this.name,
+    value: this.value,
+    top: this.top,
+
   }
 
   var children = []
@@ -49,6 +56,7 @@ function Profile () {
 Profile.prototype.openStack = function (name) {
   this.stack = []
   this.name = name
+
 }
 
 Profile.prototype.addFrame = function (frame) {
@@ -66,7 +74,7 @@ Profile.prototype.addFrame = function (frame) {
 
 Profile.prototype.closeStack = function () {
   this.stack.unshift(this.name)
-  this.samples.add(this.stack, 1)
+  this.samples.add(this.stack, 1, this.stack[this.stack.length - 1])
   this.stack = []
   this.name = null
 }
@@ -105,9 +113,10 @@ function stream () {
 
 module.exports = function convert (cb) {
   var s = stream()
-
-  eos(s, function () {
-    cb(null, s.profile.samples.serialize())
+  s.on('pipe', function (src) {
+    eos(src, function () {
+      cb(null, s.profile.samples.serialize())
+    })    
   })
 
   return s

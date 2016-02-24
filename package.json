@@ -31,5 +31,8 @@
     "standard": "^6.0.7",
     "through": "^2.3.8",
     "which": "^1.2.4"
+  },
+  "devDependencies": {
+    "deep-diff": "^0.3.3"
   }
 }

@@ -3,6 +3,7 @@ var path = require('path')
 var spawn = require('child_process').spawn
 var which = require('which')
 var pump = require('pump')
+var split = require('split2')
 var eos = require('end-of-stream')
 var concat = require('concat-stream')
 var sym = require('perf-sym')
@@ -33,17 +34,29 @@ function sun(args) {
     ].concat(args._), {
       stdio: 'inherit'
     })
+
   var prof = spawn('sudo', [profile, '-p', proc.pid])
 
+  pump(
+    prof.stdout, fs.createWriteStream('.stacks.' + proc.pid + '.out') 
+  )
 
   process.stdin.resume()
 
   process.on('SIGINT', function () {
+    console.error('Caught SIGINT, generating flamegraph')
+    process.kill(proc.pid, 'SIGINT')
     var translate = sym({silent: true, pid: proc.pid})
     pump(
-      prof.stdout,
+      fs.createReadStream('.stacks.' + proc.pid + '.out'),
       translate,
-      convert(function (json) {
+      fs.createWriteStream('stacks.' + proc.pid + '.out')
+    )
+
+    pump(
+      translate,
+      split(),
+      convert(function (err, json) {
         // bstr('require("./gen")('+json+')', {}).bundle(function (err, src) {
         //   if (err) {
         //     console.error(
@@ -51,22 +64,29 @@ function sun(args) {
         //       err
         //     )
         //   }
+          console.error('converted stacks to intermediate format')
+          fs.writeFileSync('./stacks.' + proc.pid + '.json', JSON.stringify(json, 0, 2))
           gen(json)//, {script: src.toString()})
+          
+          console.error('flamegraph generated')
+
+          console.error('tidying up')
+
+          // fs.readdirSync('./')
+          // .filter(function (f) {
+          //   return /isolate-(0x[0-9A-Fa-f]{2,12})-v8\.log|\.stacks.+/.test(f)
+          // })
+          // .forEach(function (f) {
+          //   fs.unlinkSync('./' + f)
+          // })
+
+          console.error('exiting')
+          // process.exit()
         // })
-      }),
-      function end() {
-        fs.readdirSync('./')
-          .filter(function (f) {
-            return /isolate-(0x[0-9A-Fa-f]{2,12})-v8\.log/.test(f)
-          })
-          .forEach(function (f) {
-            fs.unlinkSync('./' + f)
-          })
-      }
+      })
     )
 
     // pump(cvt, fs.createWriteStream('stacks.' + proc.pid + '.json'))
-    pump(translate, fs.createWriteStream('stacks.' + proc.pid + '.out'))
 
   })
 
