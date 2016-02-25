@@ -1,9 +1,11 @@
 global.d3 = require('d3')
 var flamer = require('./flamer')
-module.exports = function (stacks, opts) {
+module.exports = function (stacks, opts, next, done) {
   opts = opts || {}
   opts.name = opts.name || 'flamegraph'
+  var dir = opts.dir || '.'
   var min = opts.min || 950
+
 
   var height = (diameter(stacks) * 18) + 2
   height = height < min ? min : height
@@ -27,11 +29,8 @@ module.exports = function (stacks, opts) {
     .d3-flame-graph .label{pointer-events:none;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;font-size:12px;font-family:Verdana;margin-left:4px;margin-right:4px;line-height:1.5;padding:0;font-weight:400;color:#000;text-align:left}
   `
 
-  // if (!browser && opts.script) {
-  //   doc.body.innerHTML = '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>'
-  // }
-
-  doc.body.insertBefore(chart, doc.body.firstChild)
+  doc.body.innerHTML = ''
+  doc.body.appendChild(chart)
 
   var meta
 
@@ -49,7 +48,23 @@ module.exports = function (stacks, opts) {
     //TODO - create an SVG and generate a PNG from it, then show the PNG in iTerm
     // require('fs').writeFileSync('./out.svg', chart.innerHTML)
     //concat name so browersify ignores
-    require('f' + 's').writeFileSync('./' + opts.name + '.html', doc.body.innerHTML)
+    var fs = require('f' + 's')
+
+    fs.writeFileSync(dir + '/' + opts.name + '.html', 
+        doc.body.innerHTML + '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>')
+  
+    if (opts.preview) {
+      svg.setAttribute('width', +svg.getAttribute('width')*2)
+      next = next || function(){}
+      require('./flame-' + 'image')(chart.innerHTML, {dir: dir}, next, function () {
+        done && done()
+      })
+    } else {
+      console.log('\n')
+      next() && next()
+      done() && done()
+    }
+
   }
 }
 

@@ -51,12 +51,18 @@
     }
 
     function colorHash(d) {
-      var vector = ((d.top/allSamples) * 10) + .1
+      //TODO allow a colouring mode
+      //kernel calls (syslib), (v8 calls v8::internal)
+      //core js calls (modules without paths)
+      //user js calls (modules with paths)
+      //also allow show hide of each
+      //also implement search
 
+      var vector = ((d.top/allSamples) * 10) + .1
       var r = 255 + Math.round(155 * vector)
       var g = 50 + Math.round(100 * (1 - vector))
       var b = 22 + Math.round(15 * (1 - vector))
-      var a = vector + .5
+      var a = vector + .2
       return 'rgba(' + r + ',' + g + ',' + b + ', ' + a + ')';
     }
 

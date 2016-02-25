@@ -1,5 +1,4 @@
 var fs = require('fs')
-var split = require('split')
 var eos = require('end-of-stream')
 var through = require('through2')
 
@@ -22,7 +21,7 @@ Node.prototype.add = function (frames, value, topper) {
     }
 
     if (head === topper) child.top += 1
-      
+
     frames.splice(0, 1)
     child.add(frames, value, topper)
   }
@@ -73,8 +72,10 @@ Profile.prototype.addFrame = function (frame) {
 }
 
 Profile.prototype.closeStack = function () {
-  this.stack.unshift(this.name)
-  this.samples.add(this.stack, 1, this.stack[this.stack.length - 1])
+  if (this.stack) {
+    this.stack.unshift(this.name)
+    this.samples.add(this.stack, 1, this.stack[this.stack.length - 1])
+  }
   this.stack = []
   this.name = null
 }
@@ -115,7 +116,13 @@ module.exports = function convert (cb) {
   var s = stream()
   s.on('pipe', function (src) {
     eos(src, function () {
-      cb(null, s.profile.samples.serialize())
+      var samples = s.profile.samples
+      if (samples.name === 'root' && samples.children 
+        && samples.children['profile-1ms']) {
+        samples = samples.children['profile-1ms']
+      }
+      samples.name = ''
+      cb(null, samples.serialize())
     })    
   })
 
