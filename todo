@@ -1,0 +1,27 @@
+todo
+
+hide frames by stack type
+
+disable v8 stuff by default
+
+hide frames that are "C"
+
+
+colour key
+readme, gif, image
+
+linting
+
+linux support
+
+highlight stack on mouseover (increase luminosity?)
+
+theme btn doesn't work on firefox
+pointer doesn't work on firefox
+
+
+tier colour and other handling for native C modules
+
+===
+
+capture all trace output, associate with frames

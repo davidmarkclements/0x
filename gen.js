@@ -48,22 +48,22 @@ module.exports = function (stacks, opts, next, done) {
   theme.style.bottom = 0
   theme.style.left = '30px'
 
-  langs.innerHTML = (langsMode ? '−' : '+ ') + ' Langs'
+  langs.innerHTML = (langsMode ? '−' : '+') + ' Langs'
   langs.style.position = 'absolute'
   langs.style.bottom = 0
   langs.style.left = '86px'
 
-  tiers.innerHTML = (tiersMode ? '−' : '+ ') + ' Tiers'
+  tiers.innerHTML = (tiersMode ? '−' : '+') + ' Tiers'
   tiers.style.position = 'absolute'
   tiers.style.bottom = 0
   tiers.style.left = '146px'
 
-  optd.innerHTML = (optdMode ? '−' : '+ ') + 'Optimized'
+  optd.innerHTML = (optdMode ? '−' : '+') + ' Optimized'
   optd.style.position = 'absolute'
   optd.style.bottom = 0
   optd.style.left = '201'
 
-  notOptd.innerHTML = (notOptdMode ? '−' : '+ ') + 'Not Optimized'
+  notOptd.innerHTML = (notOptdMode ? '−' : '+') + ' Not Optimized'
   notOptd.style.position = 'absolute'
   notOptd.style.bottom = 0
   notOptd.style.left = '284px'
@@ -118,30 +118,33 @@ module.exports = function (stacks, opts, next, done) {
   langs.addEventListener('click', function () {
     langsMode = !langsMode
     flamegraph.langs(langsMode)
-    langs.innerHTML = (langsMode ? '−' : '+ ') + ' Langs'
+    langs.innerHTML = (langsMode ? '−' : '+') + ' Langs'
     if (langsMode) {
       tiersMode = false
-      tiers.innerHTML = (tiersMode ? '−' : '+ ') + ' Tiers'
+      tiers.innerHTML = (tiersMode ? '−' : '+') + ' Tiers'
     }
   })
 
   tiers.addEventListener('click', function () {
     tiersMode = !tiersMode
     flamegraph.tiers(tiersMode)
-    tiers.innerHTML = (tiersMode ? '−' : '+ ') + ' Tiers'
+    tiers.innerHTML = (tiersMode ? '−' : '+') + ' Tiers'
     if (tiersMode) {
       langsMode = false
-      langs.innerHTML = (langsMode ? '−' : '+ ') + ' Langs'
+      langs.innerHTML = (langsMode ? '−' : '+') + ' Langs'
     }
   })
 
   optd.addEventListener('click', function () {
     optdMode = !optdMode
+    optd.innerHTML = (optdMode ? '−' : '+') + ' Optimized'
     if (!optdMode) return flamegraph.clear('yellow')
     flamegraph.search('\\*', 'yellow')
+
   })
   notOptd.addEventListener('click', function () {
     notOptdMode = !notOptdMode
+    notOptd.innerHTML = (notOptdMode ? '−' : '+') + ' Not Optimized'
     if (!notOptdMode) return flamegraph.clear('salmon')
     flamegraph.search('~', 'salmon')
   })

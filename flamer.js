@@ -28,9 +28,9 @@ function flameGraph () {
       d.notOptimized && '—not opt\'d—' || ''
 
     var onStack = d.name ? d3.round(100 * (d.value / allSamples), 1) + '% on stack' : ''
-    var topOfStack = d.top ? 
-      d3.round(100 * (d.top / allSamples), 1) + '% stack top' :
-      ''
+    var topOfStack = d.name ?  (d.top ? 
+      d3.round(100 * (d.top / allSamples), 2) + '% stack top' :
+      '') : ''
 
     if (onStack && topOfStack) { onStack += ', ' }
 

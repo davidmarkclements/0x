@@ -28,7 +28,6 @@ module.exports = function (args) {
 }
 
 function sun(args, sudo) {
-  var saveStacks = args['save-stacks']
   var dtrace = pathTo('dtrace')
   var profile = path.join(__dirname, 'node_modules', '.bin', 'profile_1ms.d')
   if (!dtrace) return notFound('dtrace')
@@ -152,6 +151,101 @@ function tidy() {
 function linux(args) {
   var perf = pathTo('perf')
   if (!perf) return notFound('perf')
+
+  var tiers = args.tiers || args.t
+  var langs = args.langs || args.l
+
+  var proc = spawn('perf', [
+      'record',
+      '-e',
+      'cycles:u',
+      '-g',
+      '--',
+      'node',
+      '--perf-basic-prof', 
+      '-r', path.join(__dirname, 'soft-exit')
+    ].concat(args.node), {
+      stdio: 'inherit'
+    }).on('exit', function (code) {
+      if (code !== 0) {
+        tidy()
+        process.exit(code)
+      }
+    })
+
+  
+  var folder = 'profile-' + proc.pid
+  fs.mkdirSync(process.cwd() + '/' + folder)
+
+  setTimeout(log, 100, 'Profiling')
+
+  process.stdin.resume()
+  process.stdout.write('\u001b[?25l')
+
+  process.on('SIGINT', function () {
+    debug('Caught SIGINT, generating flamegraph')
+    log('Caught SIGINT, generating flamegraph ')
+
+    var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
+
+    try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
+
+
+    var prof = spawn('perf', ['script'])
+
+    pump(
+      prof.stdout,
+      translate,
+      fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
+    )
+    pump(
+      translate,
+      split(),
+      convert(function (err, json) {
+        debug('converted stacks to intermediate format')
+        var title = '0x ' + process.argv.slice(2).join(' ')
+        var strOpts = '{title: "' + title + '"' 
+        strOpts += tiers ? ', tiers: "' + tiers + '"' : (langs ? '' : '}')
+        strOpts += langs ? ', langs: "' + langs + '"}' : (tiers ? '}' : '')
+        bstr('require("'+ __dirname + '/gen")(' + JSON.stringify(json) +', ' + strOpts + ')', {})
+            .bundle(function (err, src) {
+              if (err) {
+                debug(
+                  'Unable to generate client side code for flamegraph',
+                  err
+                )
+              }
+
+              var opts = {
+                script: src.toString(), 
+                dir: folder, 
+                preview: preview
+              }
+
+              if (langs) opts.langs = langs
+              if (tiers) opts.tiers = tiers
+              
+              fs.writeFileSync(folder + '/stacks.' + proc.pid + '.json', JSON.stringify(json, 0, 2))
+              gen(json, opts, function () {
+                  log('')
+                  clock.kill()
+                }, function () {
+                  
+                  debug('flamegraph generated')
+
+                  tidy()
+                  console.log('file://' + process.cwd() + '/' + folder + '/flamegraph.html', '\n')
+                  debug('exiting')
+                  process.exit()
+                })
+            })
+      })
+    )
+
+  })
+
+
+
 
 }
 
