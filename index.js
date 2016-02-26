@@ -17,7 +17,7 @@ module.exports = function (args) {
 
     switch(process.platform) {
       //perf: 
-      case 'linux': return linux(args)
+      case 'linux': return linux(args, sudo)
       //unsupported, but.. xperf? intel vtune?
       case 'win32': return unsupported()
       //dtrace: darwin, freebsd, sunos, smartos...
@@ -73,7 +73,8 @@ function sun(args, sudo) {
     log('Caught SIGINT, generating flamegraph ')
 
     var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
-
+    process.on('unCaughtException', clock.kill)
+    
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
     var translate = sym({silent: true, pid: proc.pid})
     if (!translate) {
@@ -148,18 +149,29 @@ function tidy() {
   })
 }
 
-function linux(args) {
+function linux(args, sudo) {
   var perf = pathTo('perf')
   if (!perf) return notFound('perf')
 
+  if (!sudo) {
+    console.log('0x captures stacks using perf, which requires sudo access')
+    return spawn('sudo', ['true'])
+      .on('exit', function () { linux(args, true) })
+  }
+
   var tiers = args.tiers || args.t
   var langs = args.langs || args.l
-
-  var proc = spawn('perf', [
+  var preview = 'preview' in args ? args.preview : true
+  var uid = parseInt(Math.random()*1e9).toString(36)
+  var perfdat = '/tmp/perf-' + uid + '.data'
+  var proc = spawn('sudo', [
+      'perf',
       'record',
       '-e',
       'cycles:u',
       '-g',
+      '-o',
+      perfdat,
       '--',
       'node',
       '--perf-basic-prof', 
@@ -187,19 +199,19 @@ function linux(args) {
     log('Caught SIGINT, generating flamegraph ')
 
     var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
+    process.on('unCaughtException', clock.kill)
 
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
 
 
-    var prof = spawn('perf', ['script'])
+    var prof = spawn('sudo', ['perf', 'script', '-i', perfdat])
 
     pump(
       prof.stdout,
-      translate,
       fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
     )
     pump(
-      translate,
+      prof.stdout,
       split(),
       convert(function (err, json) {
         debug('converted stacks to intermediate format')
