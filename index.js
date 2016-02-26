@@ -162,33 +162,29 @@ function linux(args, sudo) {
   var langs = args.langs || args.l
   var preview = 'preview' in args ? args.preview : true
   var uid = parseInt(Math.random()*1e9).toString(36)
-  
-  var proc = spawn('node', [
-      '--perf-basic-prof', 
-      '-r', path.join(__dirname, 'soft-exit')
-    ].concat(args.node), {
-      stdio: 'inherit'
-    }).on('exit', function (code) {
-      if (code !== 0) {
-        tidy()
-        process.exit(code)
-      }
-    })
+  var perfdat = '/tmp/perf-' + uid + '.data'
 
-  var perfdat = '/tmp/perf-' + proc.pid + '.data'
-  
-  var prof = spawn('sudo', [
+  var proc = spawn('sudo', [
     'perf',
     'record',
     '-e',
     'cpu-clock',
     '-F 1000', //1000 samples per sec === 1ms profiling like dtrace
     '-g',
-    '-p',
-    proc.pid,
     '-o',
-    perfdat
-  ])
+    perfdat,
+    '--',
+    'node',
+    '--perf-basic-prof', 
+    '-r', path.join(__dirname, 'soft-exit')
+  ].concat(args.node), {
+    stdio: 'inherit'
+  }).on('exit', function (code) {
+    if (code !== 0) {
+      tidy()
+      process.exit(code)
+    }
+  })  
 
   var folder = 'profile-' + proc.pid
   fs.mkdirSync(process.cwd() + '/' + folder)
