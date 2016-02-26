@@ -9,3 +9,14 @@
 
   --trace-info  Show output from dtrace or perf tools
                 Default: false
+
+  --theme       Dark or Light theme
+                Default: Dark
+
+  --langs | -l  Coarser form of tiers, colour code by JS or C
+                Default: false
+
+  --tiers | -t  Overrides langs, Colour code frames by type:
+                v8 internals, syscall, native js, core js, dep js, 
+                app js
+                Default: false

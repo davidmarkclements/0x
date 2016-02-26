@@ -40,6 +40,9 @@ function sun(args, sudo) {
       .on('exit', function () { sun(args, true) })
   }
 
+  var tiers = args.tiers || args.t
+  var langs = args.langs || args.l
+
   var proc = spawn('node', [
       '--perf-basic-prof', 
       '-r', path.join(__dirname, 'soft-exit')
@@ -90,29 +93,42 @@ function sun(args, sudo) {
       split(),
       convert(function (err, json) {
         debug('converted stacks to intermediate format')
+        var title = '0x ' + process.argv.slice(2).join(' ')
+        var strOpts = '{title: "' + title + '"' 
+        strOpts += tiers ? ', tiers: "' + tiers + '"' : (langs ? '' : '}')
+        strOpts += langs ? ', langs: "' + langs + '"}' : (tiers ? '}' : '')
+        bstr('require("'+ __dirname + '/gen")(' + JSON.stringify(json) +', ' + strOpts + ')', {})
+            .bundle(function (err, src) {
+              if (err) {
+                debug(
+                  'Unable to generate client side code for flamegraph',
+                  err
+                )
+              }
 
-        bstr('require("'+ __dirname + '/gen")('+JSON.stringify(json)+')', {}).bundle(function (err, src) {
-          if (err) {
-            debug(
-              'Unable to generate client side code for flamegraph',
-              err
-            )
-          }
-          
-          fs.writeFileSync(folder + '/stacks.' + proc.pid + '.json', JSON.stringify(json, 0, 2))
-          gen(json, {script: src.toString(), dir: folder, preview: preview}, function () {
-              log('')
-              clock.kill()
-            }, function () {
+              var opts = {
+                script: src.toString(), 
+                dir: folder, 
+                preview: preview
+              }
+
+              if (langs) opts.langs = langs
+              if (tiers) opts.tiers = tiers
               
-              debug('flamegraph generated')
+              fs.writeFileSync(folder + '/stacks.' + proc.pid + '.json', JSON.stringify(json, 0, 2))
+              gen(json, opts, function () {
+                  log('')
+                  clock.kill()
+                }, function () {
+                  
+                  debug('flamegraph generated')
 
-              tidy()
-              console.log('file://' + process.cwd() + '/' + folder + '/flamegraph.html', '\n')
-              debug('exiting')
-              process.exit()
+                  tidy()
+                  console.log('file://' + process.cwd() + '/' + folder + '/flamegraph.html', '\n')
+                  debug('exiting')
+                  process.exit()
+                })
             })
-        })
       })
     )
 
@@ -126,7 +142,7 @@ function tidy() {
 
   fs.readdirSync('./')
   .filter(function (f) {
-    return /isolate-(0x[0-9A-Fa-f]{2,12})-v8\.log|\.stacks.+/.test(f)
+    return /isolate-(0x[0-9A-Fa-f]{2,12})-v8\.log/.test(f)
   })
   .forEach(function (f) {
     fs.unlinkSync('./' + f)
