@@ -81,7 +81,7 @@ Profile.prototype.closeStack = function () {
 }
 
 function stream () {
-  var stackOpenRx = /(.+):(.+):$/
+  var stackOpenRx = /(.+):(.+): ?$/
   var frameRx = /^\s*(\w+)\s*(.+) \((\S*)\)?/g
   var stackCloseRx = /^$/g
   var commentRx = /^#/g
