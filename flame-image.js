@@ -24,52 +24,13 @@ module.exports = function (svg, opts, next, done) {
     spawn('convert', args)
       .on('close', function () {
         next()
+        process.stdout.wr
+        spawn('bash', [__dirname + '/imgcat', dir + '/flamegraph-small.png'], {stdio: 'inherit'})
+          .on('exit', function (code) {
 
+            done()
+          })
 
-        debug('checking for iTerm')
-        if (process.env.TERM_PROGRAM !== 'iTerm.app') {
-          debug('not iTerm')
-          console.log(dir + '/flamegraph.svg')
-          next()
-          done()
-          return
-        }
-
-        exec('defaults read com.googlecode.iterm2', function (err, stdout, stderr) {
-          if (err || stderr) {
-            debug('Unable to determine iTerm version')
-            console.log(dir + '/flamegraph.svg')
-            next()
-            done()
-            return
-          }
-          var match = (stdout + '').match(/"iTerm Version" = "(.+)"/)
-          if (!match) {
-            debug('Unable to determine iTerm version')
-            console.log(dir + '/flamegraph.svg')
-            next()
-            done()
-            return
-          }
-          var version = parseFloat(match[1])
-          if (isNaN(version)) {
-            debug('Unable to determine iTerm version')
-            console.log(dir + '/flamegraph.svg')
-            next()
-            done()
-            return
-          }
-          if (version < 2.9) {
-            debug('iTerm version too low to display image - ' + match[1])
-            console.log(dir + '/flamegraph.svg')
-            next()
-            done()
-            return
-          }
-
-          spawn('bash', [__dirname + '/imgcat', dir + '/flamegraph-small.png'], {stdio: 'inherit'})
-            .on('close', done)
-        })
       })
   })
 }
