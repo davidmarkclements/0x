@@ -58,13 +58,13 @@ function flameGraph () {
     if (!/.js/.test(name)) {
 
       switch(true) {
-        case /^Builtin:|^Stub:|v8::|^Keyed(.+)IC:/
+        case /^Builtin:|^Stub:|v8::|^(.+)IC:|^Handler:/
           .test(name): return {type: 'v8', lang: 'c'}
         case /^RegExp:/
           .test(name): return {type: 'regexp', lang: 'c'}
         default: return {type: 'nativeC', lang: 'c'}
       }
-      
+
       return
     }
 

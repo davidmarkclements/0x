@@ -2,31 +2,41 @@
   0x [flags] file.js
   0x [flags] node [node-flags] file.js
 
-  --no-preview  Disable flamegraph image generation
-                Depends on imagemagick (brew install imagemagick)
-                If using iTerm 2.9+ image will be output to terminal
-                Default: false
+  --no-preview    Disable flamegraph image generation
+                  Depends on imagemagick (brew install imagemagick)
+                  If using iTerm 2.9+ image will be output to terminal
+                  Default: false
 
-  --trace-info  Show output from dtrace or perf tools
-                Default: false
+  --langs | -l    Coarser form of tiers, colour code by JS or C
+                  Default: false
 
-  --theme       Dark or Light theme
-                Default: Dark
+  --tiers | -t    Overrides langs, Colour code frames by type:
+                  v8 internals, syscall, native js, core js, dep js, 
+                  app js
+                  Default: false
 
-  --langs | -l  Coarser form of tiers, colour code by JS or C
-                Default: false
+  --exclude | -x  Exclude tiers, comma seperated list
+                  Options: v8, regexp, nativeC, nativeJS, core, dep, app
+                  Default: v8
 
-  --tiers | -t  Overrides langs, Colour code frames by type:
-                v8 internals, syscall, native js, core js, dep js, 
-                app js
-                Default: false
+  --trace-info    Show output from dtrace or perf tools
+                  Default: false
 
-  --stacks-only Don't generate the flamegraph, only create the stacks 
-                output.
-                If assigned to '-' stacks output will come through stdout
-                Default: false
+  --include       Include tiers, comma seperated list
+                  Options: v8, regexp, nativeC, nativeJS, core, dep, app
+                  Overwrites exclude
 
-  --cmd | -c    Command Mode - A tool set for processing data in 
-                the profile folder. 
 
-                Run 0x --cmd help for a list of commands
+  --stacks-only   Don't generate the flamegraph, only create the stacks 
+                  output.
+                  If assigned to '-' stacks output will come through stdout
+                  Default: false
+
+
+  --theme         Dark or Light theme
+                  Default: Dark
+
+  --cmd | -c      Command Mode - A tool set for processing data in 
+                  the profile folder. 
+
+                  Run 0x --cmd help for a list of commands
