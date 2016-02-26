@@ -162,18 +162,8 @@ function linux(args, sudo) {
   var langs = args.langs || args.l
   var preview = 'preview' in args ? args.preview : true
   var uid = parseInt(Math.random()*1e9).toString(36)
-  var perfdat = '/tmp/perf-' + uid + '.data'
-  var proc = spawn('sudo', [
-      'perf',
-      'record',
-      '-e',
-      'cpu-clock',
-      '-F 1000', //1000 samples per sec === 1ms profiling like dtrace
-      '-g',
-      '-o',
-      perfdat,
-      '--',
-      'node',
+  
+  var proc = spawn('node', [
       '--perf-basic-prof', 
       '-r', path.join(__dirname, 'soft-exit')
     ].concat(args.node), {
@@ -185,7 +175,21 @@ function linux(args, sudo) {
       }
     })
 
+  var perfdat = '/tmp/perf-' + proc.pid + '.data'
   
+  var prof = spawn('sudo', [
+    'perf',
+    'record',
+    '-e',
+    'cpu-clock',
+    '-F 1000', //1000 samples per sec === 1ms profiling like dtrace
+    '-g',
+    '-p',
+    proc.pid,
+    '-o',
+    perfdat
+  ])
+
   var folder = 'profile-' + proc.pid
   fs.mkdirSync(process.cwd() + '/' + folder)
 
@@ -204,14 +208,14 @@ function linux(args, sudo) {
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
 
 
-    var prof = spawn('sudo', ['perf', 'script', '-i', perfdat])
+    var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat])
 
     pump(
-      prof.stdout,
+      stacks.stdout,
       fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
     )
     pump(
-      prof.stdout,
+      stacks.stdout,
       split(),
       convert(function (err, json) {
         debug('converted stacks to intermediate format')
