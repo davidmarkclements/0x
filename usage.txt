@@ -20,3 +20,13 @@
                 v8 internals, syscall, native js, core js, dep js, 
                 app js
                 Default: false
+
+  --stacks-only Don't generate the flamegraph, only create the stacks 
+                output.
+                If assigned to '-' stacks output will come through stdout
+                Default: false
+
+  --cmd | -c    Command Mode - A tool set for processing data in 
+                the profile folder. 
+
+                Run 0x --cmd help for a list of commands

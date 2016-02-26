@@ -49,7 +49,7 @@ Node.prototype.serialize = function () {
 function Profile () {
   this.samples = new Node('root')
   this.stack = null
-  this.name = null
+  this.name = ''
 }
 
 Profile.prototype.openStack = function (name) {
@@ -77,7 +77,7 @@ Profile.prototype.closeStack = function () {
     this.samples.add(this.stack, 1, this.stack[this.stack.length - 1])
   }
   this.stack = []
-  this.name = null
+  this.name = ''
 }
 
 function stream () {
@@ -117,11 +117,7 @@ module.exports = function convert (cb) {
   s.on('pipe', function (src) {
     eos(src, function () {
       var samples = s.profile.samples
-      if (samples.name === 'root' && samples.children 
-        && samples.children['profile-1ms']) {
-        samples = samples.children['profile-1ms']
-      }
-      samples.name = ''
+
       cb(null, samples.serialize())
     })    
   })

@@ -74,7 +74,6 @@ function sun(args, sudo) {
 
     var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
     process.on('unCaughtException', clock.kill)
-    
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
     var translate = sym({silent: true, pid: proc.pid})
     if (!translate) {
@@ -168,7 +167,8 @@ function linux(args, sudo) {
       'perf',
       'record',
       '-e',
-      'cycles:u',
+      'cpu-clock',
+      '-F 1000', //1000 samples per sec === 1ms profiling like dtrace
       '-g',
       '-o',
       perfdat,
