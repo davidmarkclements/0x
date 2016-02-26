@@ -101,7 +101,9 @@ function stream () {
       return cb()
     }
 
-    profile.addFrame(line+'')
+    if (!/\[unknown\]/.test(line)) {
+      profile.addFrame(line+'')
+    }
 
     cb()
   })

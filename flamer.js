@@ -62,10 +62,9 @@ function flameGraph () {
           .test(name): return {type: 'v8', lang: 'c'}
         case /^RegExp:/
           .test(name): return {type: 'regexp', lang: 'c'}
-        case /^lib|uv_|SSL_|\$|^__|0x5$/
-          .test(name): return {type: 'nativeC', lang: 'c'}
-        default: return {type: 'nativeJS', lang: 'js'}
+        default: return {type: 'nativeC', lang: 'c'}
       }
+      
       return
     }
 
