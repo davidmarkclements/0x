@@ -11,7 +11,10 @@ function flameGraph () {
     sort = true,
     langs = false,
     tiers = false,
-    allSamples
+    filterNeeded = true,
+    filterTypes = ['v8'],
+    allSamples,
+    x
 
   function setDetails(t) {
     var details = document.getElementById('details')
@@ -59,7 +62,7 @@ function flameGraph () {
           .test(name): return {type: 'v8', lang: 'c'}
         case /^RegExp:/
           .test(name): return {type: 'regexp', lang: 'c'}
-        case /^lib|uv_|SSL_|\$|0x5$/
+        case /^lib|uv_|SSL_|\$|^__|0x5$/
           .test(name): return {type: 'nativeC', lang: 'c'}
         default: return {type: 'nativeJS', lang: 'js'}
       }
@@ -123,6 +126,20 @@ function flameGraph () {
     return 'rgba(' + hsl(h, s, l) + ', 0.8)'
   }
 
+  function filter (data) {
+    if (!filterNeeded) return
+    if (data.children && (data.children.length > 0)) {
+      data.children.forEach(filter)
+      data.children.forEach(function (child) {
+        if (~filterTypes.indexOf(child.type)) {
+          child.hide = true
+        } else {
+          child.hide = false
+        }
+      })
+    }
+  }
+
   function augment (data) {
     // Augment partitioning layout with "dummy" nodes so that internal nodes'
     // values dictate their width. Annoying, but seems to be least painful
@@ -134,12 +151,14 @@ function flameGraph () {
         var lt = langtier(child.name)
         child.type = lt.type
         child.lang = lt.lang
+
         if (optRx.test(child.name)) {
           child.optimized = true
         }
         if (notOptRx.test(child.name)) {
           child.notOptimized = true
         }
+
         childValues += child.value
       })
       if (childValues < data.value) {
@@ -225,7 +244,7 @@ function flameGraph () {
         searchTree(child, term, color)
       })
     }
-
+    if (d.hide) return
     if (label.match(re)) {
       d.highlight = color || true
     } else {
@@ -237,7 +256,7 @@ function flameGraph () {
   function clear (d, color) {
     if (color && d.highlight === color) d.highlight = false
     if (!color) d.highlight = false
-
+    if (d.hide) return
     if (d.children) {
       d.children.forEach(function (child) {
         clear(child, color)
@@ -260,88 +279,100 @@ function flameGraph () {
     .value(function (d) { return d.v || d.value; })
     .children(function (d) { return d.c || d.children; })
 
+
+  function translate(d) {
+    var parent = d.parent
+    var depthOffset = parent && parent.hide ? 1 : 0 
+    while (parent && (parent = parent.parent)) {
+      if (parent.hide) depthOffset += 1
+    }
+    var depth = d.depth - depthOffset
+    return 'translate(' + x(d.x) + ',' + (h - (depth * c) - c) + ')'; 
+  }
+
   function update () {
 
-    selection.each(function (data) {
-      var x = d3.scale.linear().range([0, w]),
-        y = d3.scale.linear().range([0, c])
+    selection
+      .each(function (data) {
+        filter(data)
 
-      var nodes = partition(data)
+        var nodes = partition(data)
+        x = d3.scale.linear().range([0, w])
+        var kx = w / data.dx
+        var svg = d3.select(this).select('svg')
+        var g = svg.selectAll('g').data(nodes)
 
-      var kx = w / data.dx
-      var svg = d3.select(this).select('svg')
-      var g = svg.selectAll('g').data(nodes)
+        g.transition()
+          .duration(transitionDuration)
+          .ease(transitionEase)
+          .attr('transform', translate)
 
-      g.transition()
-        .duration(transitionDuration)
-        .ease(transitionEase)
-        .attr('transform', function (d) { return 'translate(' + x(d.x) + ',' + (h - (d.depth * c) - c) + ')'; })
+        g.select('rect').transition()
+          .duration(transitionDuration)
+          .ease(transitionEase)
+          .attr('width', function (d) { return d.dx * kx; })
 
-      g.select('rect').transition()
-        .duration(transitionDuration)
-        .ease(transitionEase)
-        .attr('width', function (d) { return d.dx * kx; })
+        var node = g.enter()
+          .append('svg:g')
+          .attr('transform', translate)
 
-      var node = g.enter()
-        .append('svg:g')
-        .attr('transform', function (d) { return 'translate(' + x(d.x) + ',' + (h - (d.depth * c) - c) + ')'; })
+        var vis = g.filter(function (d) { return !d.hide })
+          .append('svg:rect')
+          .attr('width', function (d) { return d.dx * kx; })
 
-      node.append('svg:rect')
-        .attr('width', function (d) { return d.dx * kx; })
+        node.append('svg:title')
 
-      node.append('svg:title')
+        node.append('foreignObject')
+          .append('xhtml:div')
 
-      node.append('foreignObject')
-        .append('xhtml:div')
+        node.attr('width', function (d) { return d.dx * kx; })
+          .attr('height', function (d) { return c; })
+          .attr('name', function (d) { return d.name; })
+          .attr('class', function (d) { return d.fade ? 'frame fade' : 'frame'; })
 
-      g.attr('width', function (d) { return d.dx * kx; })
-        .attr('height', function (d) { return c; })
-        .attr('name', function (d) { return d.name; })
-        .attr('class', function (d) { return d.fade ? 'frame fade' : 'frame'; })
+        g.select('rect')
+          .attr('height', function (d) { return c; })
+          .style('cursor', 'pointer')
+          .style('stroke', function (d) {
+            return colorHash(d, 1.1)
+          })
+          .attr('fill', function (d) {
+            var highlightColor = '#E600E6'
 
-      g.select('rect')
-        .attr('height', function (d) { return c; })
-        .style('cursor', 'pointer')
-        .style('stroke', function (d) {
-          return colorHash(d, 1.1)
-        })
-        .attr('fill', function (d) {
-          var highlightColor = '#E600E6'
+            if (typeof d.highlight === 'string')
+              highlightColor = d.highlight
 
-          if (typeof d.highlight === 'string')
-            highlightColor = d.highlight
+            return d.highlight ? highlightColor : colorHash(d)
+          })
+          .style('visibility', function (d) {return d.dummy ? 'hidden' : 'visible';})
 
-          return d.highlight ? highlightColor : colorHash(d)
-        })
-        .style('visibility', function (d) {return d.dummy ? 'hidden' : 'visible';})
+        g.select('title')
+          .text(titleLabel)
 
-      g.select('title')
-        .text(titleLabel)
+        g.select('foreignObject')
+          .attr('width', function (d) { return d.dx * kx; })
+          .attr('height', function (d) { return c; })
+          .select('div')
+          .style('display', function (d) { return (d.dx * kx < 35) || d.dummy ? 'none' : 'block';})
+          .style('pointer-events', 'none')
+          .style('white-space', 'nowrap')
+          .style('text-overflow', 'ellipsis')
+          .style('overflow', 'hidden')
+          .style('font-size', '12px')
+          .style('font-family', 'Verdana')
+          .style('margin-left', '4px')
+          .style('margin-right', '4px')
+          .style('line-height', '1.5')
+          .style('padding', '0')
+          .style('font-weight', '400')
+          .style('color', '#000')
+          .style('text-align', 'left')
+          .html(label)
 
-      g.select('foreignObject')
-        .attr('width', function (d) { return d.dx * kx; })
-        .attr('height', function (d) { return c; })
-        .select('div')
-        .style('display', function (d) { return (d.dx * kx < 35) || d.dummy ? 'none' : 'block';})
-        .style('pointer-events', 'none')
-        .style('white-space', 'nowrap')
-        .style('text-overflow', 'ellipsis')
-        .style('overflow', 'hidden')
-        .style('font-size', '12px')
-        .style('font-family', 'Verdana')
-        .style('margin-left', '4px')
-        .style('margin-right', '4px')
-        .style('line-height', '1.5')
-        .style('padding', '0')
-        .style('font-weight', '400')
-        .style('color', '#000')
-        .style('text-align', 'left')
-        .html(label)
+        g.on('click', zoom)
 
-      g.on('click', zoom)
-
-      g.exit().remove()
-    })
+        g.exit().remove()
+      })
   }
 
   function chart (s) {
@@ -359,7 +390,7 @@ function flameGraph () {
         .attr('class', 'partition d3-flame-graph')
 
       augment(data)
-
+      filter(data)
       // "creative" fix for node ordering when partition is called for the first time
       partition(data)
 
@@ -431,6 +462,22 @@ function flameGraph () {
       clear(data, color)
       update()
     })
+  }
+
+  chart.typeHide = function (type) {
+    if (!~filterTypes.indexOf(type)) {
+      filterTypes.push(type)
+      filterNeeded = true
+      if (selection) update()
+    }
+  } 
+  
+  chart.typeShow = function (type) {
+    var ix = filterTypes.indexOf(type)
+    if (!~ix) return
+    filterTypes.splice(ix, 1)
+    filterNeeded = true
+    if (selection) update()
   }
 
   chart.colors = colors
