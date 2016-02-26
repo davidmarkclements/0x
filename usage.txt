@@ -2,9 +2,9 @@
   0x [flags] file.js
   0x [flags] node [node-flags] file.js
 
-  --no-preview  Disable flamegraph preview in the terminal, 
-                Previews will currently only work on iTerm 2.9+, 
-                and depend on imagemagick (brew install imagemagick)
+  --no-preview  Disable flamegraph image generation
+                Depends on imagemagick (brew install imagemagick)
+                If using iTerm 2.9+ image will be output to terminal
                 Default: false
 
   --trace-info  Show output from dtrace or perf tools
