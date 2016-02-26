@@ -1,4 +1,4 @@
-var hsl = require('hsl-to-rgb')
+var hsl = require('hsl-to-rgb-for-reals')
 
 function flameGraph () {
 
