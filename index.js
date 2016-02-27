@@ -37,7 +37,7 @@ function sun(args, sudo) {
     return spawn('sudo', ['true'])
       .on('exit', function () { sun(args, true) })
   }
-
+  var traceInfo = args['trace-info']
   var proc = spawn('node', [
       '--perf-basic-prof', 
       '-r', path.join(__dirname, 'soft-exit')
@@ -51,6 +51,9 @@ function sun(args, sudo) {
     })
 
   var prof = spawn('sudo', [profile, '-p', proc.pid])
+
+  if (traceInfo) { prof.stderr.pipe(process.stderr) }
+
   var folder = 'profile-' + proc.pid
   fs.mkdirSync(process.cwd() + '/' + folder)
 
@@ -103,10 +106,12 @@ function linux(args, sudo) {
 
   var uid = parseInt(Math.random()*1e9).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
+  var traceInfo = args['trace-info']
 
   var proc = spawn('sudo', [
     'perf',
     'record',
+    !traceInfo ? '-q' : '',
     '-e',
     'cpu-clock',
     '-F 1000', //1000 samples per sec === 1ms profiling like dtrace
@@ -117,7 +122,7 @@ function linux(args, sudo) {
     'node',
     '--perf-basic-prof', 
     '-r', path.join(__dirname, 'soft-exit')
-  ].concat(args.node), {
+  ].filter(Boolean).concat(args.node), {
     stdio: 'inherit'
   }).on('exit', function (code) {
     if (code !== 0) {
