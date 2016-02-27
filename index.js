@@ -31,16 +31,12 @@ function sun(args, sudo) {
   var dtrace = pathTo('dtrace')
   var profile = path.join(__dirname, 'node_modules', '.bin', 'profile_1ms.d')
   if (!dtrace) return notFound('dtrace')
-  var preview = 'preview' in args ? args.preview : true
 
   if (!sudo) {
     console.log('0x captures stacks using dtrace, which requires sudo access')
     return spawn('sudo', ['true'])
       .on('exit', function () { sun(args, true) })
   }
-
-  var tiers = args.tiers || args.t
-  var langs = args.langs || args.l
 
   var proc = spawn('node', [
       '--perf-basic-prof', 
@@ -73,7 +69,7 @@ function sun(args, sudo) {
     log('Caught SIGINT, generating flamegraph ')
 
     var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
-    process.on('unCaughtException', clock.kill)
+
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
     var translate = sym({silent: true, pid: proc.pid})
     if (!translate) {
@@ -90,61 +86,8 @@ function sun(args, sudo) {
     pump(
       translate,
       split(),
-      convert(function (err, json) {
-        debug('converted stacks to intermediate format')
-        var title = '0x ' + process.argv.slice(2).join(' ')
-        var strOpts = '{title: "' + title + '"' 
-        strOpts += tiers ? ', tiers: "' + tiers + '"' : (langs ? '' : '}')
-        strOpts += langs ? ', langs: "' + langs + '"}' : (tiers ? '}' : '')
-        bstr('require("'+ __dirname + '/gen")(' + JSON.stringify(json) +', ' + strOpts + ')', {})
-            .bundle(function (err, src) {
-              if (err) {
-                debug(
-                  'Unable to generate client side code for flamegraph',
-                  err
-                )
-              }
-
-              var opts = {
-                script: src.toString(), 
-                dir: folder, 
-                preview: preview
-              }
-
-              if (langs) opts.langs = langs
-              if (tiers) opts.tiers = tiers
-              
-              fs.writeFileSync(folder + '/stacks.' + proc.pid + '.json', JSON.stringify(json, 0, 2))
-              gen(json, opts, function () {
-                  log('')
-                  clock.kill()
-                }, function () {
-                  
-                  debug('flamegraph generated')
-
-                  tidy()
-                  console.log('file://' + process.cwd() + '/' + folder + '/flamegraph.html', '\n')
-                  debug('exiting')
-                  process.exit()
-                })
-            })
-      })
+      sink(args, proc.pid, folder, clock)
     )
-
-  })
-
-}
-
-function tidy() {
-  debug('tidying up')
-  process.stdout.write('\u001b[?25h')
-
-  fs.readdirSync('./')
-  .filter(function (f) {
-    return /isolate-(0x[0-9A-Fa-f]{2,12})-v8\.log/.test(f)
-  })
-  .forEach(function (f) {
-    fs.unlinkSync('./' + f)
   })
 }
 
@@ -158,9 +101,6 @@ function linux(args, sudo) {
       .on('exit', function () { linux(args, true) })
   }
 
-  var tiers = args.tiers || args.t
-  var langs = args.langs || args.l
-  var preview = 'preview' in args ? args.preview : true
   var uid = parseInt(Math.random()*1e9).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
 
@@ -213,54 +153,81 @@ function linux(args, sudo) {
     pump(
       stacks.stdout,
       split(),
-      convert(function (err, json) {
-        debug('converted stacks to intermediate format')
-        var title = '0x ' + process.argv.slice(2).join(' ')
-        var strOpts = '{title: "' + title + '"' 
-        strOpts += tiers ? ', tiers: "' + tiers + '"' : (langs ? '' : '}')
-        strOpts += langs ? ', langs: "' + langs + '"}' : (tiers ? '}' : '')
-        bstr('require("'+ __dirname + '/gen")(' + JSON.stringify(json) +', ' + strOpts + ')', {})
-            .bundle(function (err, src) {
-              if (err) {
-                debug(
-                  'Unable to generate client side code for flamegraph',
-                  err
-                )
-              }
-
-              var opts = {
-                script: src.toString(), 
-                dir: folder, 
-                preview: preview
-              }
-
-              if (langs) opts.langs = langs
-              if (tiers) opts.tiers = tiers
-              
-              fs.writeFileSync(folder + '/stacks.' + proc.pid + '.json', JSON.stringify(json, 0, 2))
-              gen(json, opts, function () {
-                  log('')
-                  clock.kill()
-                }, function () {
-                  
-                  debug('flamegraph generated')
-
-                  tidy()
-                  console.log('file://' + process.cwd() + '/' + folder + '/flamegraph.html', '\n')
-                  debug('exiting')
-                  process.exit()
-                })
-            })
-      })
+      sink(args, proc.pid, folder, clock)
     )
-
   })
-
-
-
-
 }
 
+
+
+
+function sink (args, pid, folder, clock) {
+  var tiers = args.tiers || args.t
+  var langs = args.langs || args.l
+  var exclude = args.exclude || args.x
+  var include = args.include
+  var preview = 'preview' in args ? args.preview : true
+
+  return convert(function (err, json) {
+    debug('converted stacks to intermediate format')
+    var title = '0x ' + process.argv.slice(2).join(' ')
+    var opts = JSON.stringify({
+      title: title,
+      exclude: exclude,
+      include: include
+    })
+    if (langs) opts.langs = langs
+    if (tiers) opts.tiers = tiers
+    bstr('require("'+ __dirname + '/gen")(' + JSON.stringify(json) +', ' + opts + ')', {})
+      .bundle(function (err, src) {
+        if (err) {
+          debug(
+            'Unable to generate client side code for flamegraph',
+            err
+          )
+        }
+
+        var opts = {
+          title: title,
+          script: src.toString(), 
+          dir: folder, 
+          preview: preview,
+          exclude: exclude,
+          include: include
+        }
+
+        if (langs) opts.langs = langs
+        if (tiers) opts.tiers = tiers
+        
+        fs.writeFileSync(folder + '/stacks.' + pid + '.json', JSON.stringify(json, 0, 2))
+        gen(json, opts, function () {
+          log('')
+          clock.kill()
+        }, function () {
+          
+          debug('flamegraph generated')
+
+          tidy()
+          console.log('file://' + process.cwd() + '/' + folder + '/flamegraph.html', '\n')
+          debug('exiting')
+          process.exit()
+        })
+      })
+  })
+}
+
+function tidy() {
+  debug('tidying up')
+  process.stdout.write('\u001b[?25h')
+
+  fs.readdirSync('./')
+  .filter(function (f) {
+    return /isolate-(0x[0-9A-Fa-f]{2,12})-v8\.log/.test(f)
+  })
+  .forEach(function (f) {
+    fs.unlinkSync('./' + f)
+  })
+}
 
 
 function pathTo(bin) {

@@ -12,7 +12,7 @@ function flameGraph () {
     langs = false,
     tiers = false,
     filterNeeded = true,
-    filterTypes = ['v8'],
+    filterTypes = [],
     allSamples,
     x
 
@@ -62,6 +62,9 @@ function flameGraph () {
           .test(name): return {type: 'v8', lang: 'c'}
         case /^RegExp:/
           .test(name): return {type: 'regexp', lang: 'c'}
+        case /apply$|call$|Arguments$/
+          .test(name): return {type: 'nativeJS', lang: 'js'}
+        case /\.$/.test(name): return {type: 'core', lang: 'js'}
         default: return {type: 'nativeC', lang: 'c'}
       }
 
@@ -73,7 +76,7 @@ function flameGraph () {
       case (name.split(':')[1]||'')
         .replace(/(~|\*)?(\s+)?/, '')[0] !== '/': return {type: 'core', lang: 'js'}
       case !/node_modules/.test(name): return {type: 'app', lang: 'js'}
-      default: return {type: 'dep', lang: 'js'}
+      default: return {type: 'deps', lang: 'js'}
     }
 
   }
@@ -84,7 +87,7 @@ function flameGraph () {
     nativeC: {h: 0, s: 50, l: 50},
     nativeJS: {h: 122, s: 50, l: 45},
     core: {h: 23, s: 66, l: 45},
-    dep: {h: 244, s: 50, l: 65},
+    deps: {h: 244, s: 50, l: 65},
     app: {h: 200, s: 50, l: 45},
   }
   colors.def = colors.core
@@ -130,7 +133,7 @@ function flameGraph () {
     if (data.children && (data.children.length > 0)) {
       data.children.forEach(filter)
       data.children.forEach(function (child) {
-        if (~filterTypes.indexOf(child.type)) {
+        if (~filterTypes.indexOf(child.type) || ~filterTypes.indexOf(child.lang)) {
           child.hide = true
         } else {
           child.hide = false

@@ -11,6 +11,15 @@ module.exports = function (stacks, opts, next, done) {
   var langsMode = 'langs' in opts ? opts.langs : false
   var tiersMode = 'tiers' in opts ? opts.tiers : false
 
+  var exclude = (opts.exclude || 'v8').split(',')
+  var include = (opts.include || '').split(',')
+
+  if (!~exclude.indexOf('v8')) exclude.push('v8')
+
+  exclude = exclude.filter(function (s) {
+    return !~include.indexOf(s)
+  })
+
   var optdMode = false
   var notOptdMode = false
 
@@ -28,6 +37,8 @@ module.exports = function (stacks, opts, next, done) {
     .height(height)
     .langs(langsMode)
     .tiers(tiersMode)
+
+  exclude.forEach(flamegraph.typeHide)
 
   //concat name so browersify ignores
   var doc = browser ? document : require('js' + 'dom').jsdom()
