@@ -8,7 +8,8 @@ hide frames that are "C" [done]
 
 linux support [done]
 
-colour key
+colour key [done]
+
 readme, gif, image
 
 linting
@@ -29,10 +30,7 @@ tier colour and other handling for native C modules
 
 capture all trace output, associate with frames
 
-
 allow naming pattern for profile folders (for fuge)
-
-remove browserify-string, maybe
 
 0x ssh
 

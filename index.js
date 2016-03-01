@@ -4,7 +4,6 @@ var spawn = require('child_process').spawn
 var which = require('which')
 var pump = require('pump')
 var split = require('split2')
-var eos = require('end-of-stream')
 var sym = require('perf-sym')
 var bstr = require('browserify-string')
 var convert = require('./stack-convert')
@@ -14,20 +13,21 @@ var log = require('single-line-log').stdout
 
 module.exports = function (args) {
   isSudo(function (sudo) {
-
-    switch(process.platform) {
-      //perf: 
-      case 'linux': return linux(args, sudo)
-      //unsupported, but.. xperf? intel vtune?
-      case 'win32': return unsupported()
-      //dtrace: darwin, freebsd, sunos, smartos...
-      default: return sun(args, sudo)
+    switch (process.platform) {
+      // perf:
+      case 'linux':
+        return linux(args, sudo)
+      // unsupported, but.. xperf? intel vtune?
+      case 'win32':
+        return unsupported()
+      // dtrace: darwin, freebsd, sunos, smartos...
+      default:
+        return sun(args, sudo)
     }
-
   })
 }
 
-function sun(args, sudo) {
+function sun (args, sudo) {
   var dtrace = pathTo('dtrace')
   var profile = path.join(__dirname, 'node_modules', '.bin', 'profile_1ms.d')
   if (!dtrace) return notFound('dtrace')
@@ -38,17 +38,19 @@ function sun(args, sudo) {
       .on('exit', function () { sun(args, true) })
   }
   var traceInfo = args['trace-info']
+  var stacksOnly = args['stacks-only']
+
   var proc = spawn('node', [
-      '--perf-basic-prof', 
-      '-r', path.join(__dirname, 'soft-exit')
-    ].concat(args.node), {
-      stdio: 'inherit'
-    }).on('exit', function (code) {
-      if (code !== 0) {
-        tidy()
-        process.exit(code)
-      }
-    })
+    '--perf-basic-prof',
+    '-r', path.join(__dirname, 'soft-exit')
+  ].concat(args.node), {
+    stdio: 'inherit'
+  }).on('exit', function (code) {
+    if (code !== 0) {
+      tidy()
+      process.exit(code)
+    }
+  })
 
   var prof = spawn('sudo', [profile, '-p', proc.pid])
 
@@ -58,8 +60,8 @@ function sun(args, sudo) {
   fs.mkdirSync(process.cwd() + '/' + folder)
 
   pump(
-    prof.stdout, 
-    fs.createWriteStream(folder + '/.stacks.' + proc.pid + '.out') 
+    prof.stdout,
+    fs.createWriteStream(folder + '/.stacks.' + proc.pid + '.out')
   )
 
   setTimeout(log, 100, 'Profiling')
@@ -67,14 +69,14 @@ function sun(args, sudo) {
   process.stdin.resume()
   process.stdout.write('\u001b[?25l')
 
-  process.on('SIGINT', function () {
-    debug('Caught SIGINT, generating flamegraph')
-    log('Caught SIGINT, generating flamegraph ')
-
+  process.once('SIGINT', function () {
+    debug('Caught SIGINT, generating')
+    log('Caught SIGINT, generating')
     var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
 
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
     var translate = sym({silent: true, pid: proc.pid})
+
     if (!translate) {
       log('Unable to find map file!\n')
       debug('unable to find map file')
@@ -84,8 +86,19 @@ function sun(args, sudo) {
     pump(
       fs.createReadStream(folder + '/.stacks.' + proc.pid + '.out'),
       translate,
-      fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
+      stacksOnly === '-'
+        ? process.stdout
+        : fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
     )
+    if (stacksOnly) {
+      return translate.on('end', function () {
+        clock.kill()
+        process.stdout.write('\u001b[K\n')
+        console.log()
+        tidy()
+        process.exit()
+      })
+    }
     pump(
       translate,
       split(),
@@ -94,7 +107,7 @@ function sun(args, sudo) {
   })
 }
 
-function linux(args, sudo) {
+function linux (args, sudo) {
   var perf = pathTo('perf')
   if (!perf) return notFound('perf')
 
@@ -104,9 +117,10 @@ function linux(args, sudo) {
       .on('exit', function () { linux(args, true) })
   }
 
-  var uid = parseInt(Math.random()*1e9).toString(36)
+  var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
   var traceInfo = args['trace-info']
+  var stacksOnly = args['stacks-only']
 
   var proc = spawn('sudo', [
     'perf',
@@ -114,13 +128,13 @@ function linux(args, sudo) {
     !traceInfo ? '-q' : '',
     '-e',
     'cpu-clock',
-    '-F 1000', //1000 samples per sec === 1ms profiling like dtrace
+    '-F 1000', // 1000 samples per sec === 1ms profiling like dtrace
     '-g',
     '-o',
     perfdat,
     '--',
     'node',
-    '--perf-basic-prof', 
+    '--perf-basic-prof',
     '-r', path.join(__dirname, 'soft-exit')
   ].filter(Boolean).concat(args.node), {
     stdio: 'inherit'
@@ -129,7 +143,7 @@ function linux(args, sudo) {
       tidy()
       process.exit(code)
     }
-  })  
+  })
 
   var folder = 'profile-' + proc.pid
   fs.mkdirSync(process.cwd() + '/' + folder)
@@ -139,7 +153,7 @@ function linux(args, sudo) {
   process.stdin.resume()
   process.stdout.write('\u001b[?25l')
 
-  process.on('SIGINT', function () {
+  process.once('SIGINT', function () {
     debug('Caught SIGINT, generating flamegraph')
     log('Caught SIGINT, generating flamegraph ')
 
@@ -148,13 +162,25 @@ function linux(args, sudo) {
 
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
 
-
     var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat])
+
+    if (traceInfo) { stacks.stderr.pipe(process.stderr) }
 
     pump(
       stacks.stdout,
-      fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
+      stacksOnly === '-'
+        ? process.stdout
+        : fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
     )
+    if (stacksOnly) {
+      return stacks.on('exit', function () {
+        clock.kill()
+        process.stdout.write('\u001b[K\n')
+        console.log()
+        tidy()
+        process.exit()
+      })
+    }
     pump(
       stacks.stdout,
       split(),
@@ -172,6 +198,7 @@ function sink (args, pid, folder, clock) {
   var preview = 'preview' in args ? args.preview : true
 
   return convert(function (err, json) {
+    if (err) { throw err }
     debug('converted stacks to intermediate format')
     var title = '0x ' + process.argv.slice(2).join(' ')
     var opts = JSON.stringify({
@@ -182,7 +209,7 @@ function sink (args, pid, folder, clock) {
     })
     if (langs) opts.langs = langs
     if (tiers) opts.tiers = tiers
-    bstr('require("'+ __dirname + '/gen")(' + JSON.stringify(json) +', ' + opts + ')', {})
+    bstr('require("' + __dirname + '/gen")(' + JSON.stringify(json) + ', ' + opts + ')', {})
       .bundle(function (err, src) {
         if (err) {
           debug(
@@ -194,8 +221,8 @@ function sink (args, pid, folder, clock) {
         var opts = {
           theme: theme,
           title: title,
-          script: src.toString(), 
-          dir: folder, 
+          script: src.toString(),
+          dir: folder,
           preview: preview,
           exclude: exclude,
           include: include
@@ -203,13 +230,12 @@ function sink (args, pid, folder, clock) {
 
         if (langs) opts.langs = langs
         if (tiers) opts.tiers = tiers
-        
+
         fs.writeFileSync(folder + '/stacks.' + pid + '.json', JSON.stringify(json, 0, 2))
         gen(json, opts, function () {
           log('')
           clock.kill()
         }, function () {
-          
           debug('flamegraph generated')
 
           tidy()
@@ -221,42 +247,40 @@ function sink (args, pid, folder, clock) {
   })
 }
 
-function tidy() {
+function tidy () {
   debug('tidying up')
   process.stdout.write('\u001b[?25h')
 
   fs.readdirSync('./')
-  .filter(function (f) {
-    return /isolate-(0x[0-9A-Fa-f]{2,12})-v8\.log/.test(f)
-  })
-  .forEach(function (f) {
-    fs.unlinkSync('./' + f)
-  })
+    .filter(function (f) {
+      return /isolate-(0x[0-9A-Fa-f]{2,12})-v8\.log/.test(f)
+    })
+    .forEach(function (f) {
+      fs.unlinkSync('./' + f)
+    })
 }
 
-
-function pathTo(bin) {
+function pathTo (bin) {
   var path
   try { path = which.sync(bin) } catch (e) {}
   return path
 }
 
-
-function notFound(bin) {
-  process.exit(~
-    console.error('Unable to locate ' + bin + ' - make sure it\'s in your PATH')
+function notFound (bin) {
+  process.exit(~console
+    .error('Unable to locate ' + bin + " - make sure it's in your PATH")
   )
 }
 
-function unsupported() {
-  process.exit(~
-    console.error('Windows is not supported, PRs welcome :D')
+function unsupported () {
+  process.exit(~console
+    .error('Windows is not supported, PRs welcome :D')
   )
 }
 
-function isSudo(cb) {
+function isSudo (cb) {
   var check = spawn('sudo', ['-n', 'true'])
-  check.on('exit', function(code) {
+  check.on('exit', function (code) {
     if (!code) return cb(true)
     cb(false)
   })

@@ -6,7 +6,8 @@
   "bin": "./cmd.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "stress-rest-example": "cd examples/rest-api && npm test"
+    "stress-rest-example": "cd examples/rest-api && npm test",
+    "lint": "standard"
   },
   "repository": {
     "type": "git",

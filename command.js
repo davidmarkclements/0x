@@ -10,18 +10,21 @@ module.exports = function (argv) {
   var args = minimist(argv)
   var cmd = args.c || args.cmd
 
-  if (cmd === 'help') 
+  if (cmd === 'help') {
     return fs.createReadStream('./command-usage.txt')
       .pipe(process.stdout)
+  }
 
-  if (cmd === 'gen')
+  if (cmd === 'gen') {
     return makeFlameGraph(args)
+  }
 }
 
-function makeFlameGraph(args) {
+function makeFlameGraph (args) {
   return fs.createReadStream(args._[0])
     .pipe(split())
     .pipe(convert(function (err, json) {
+      if (err) { throw err }
       debug('converted stacks to intermediate format')
       var opts = JSON.stringify({
         theme: args.theme,
@@ -30,8 +33,8 @@ function makeFlameGraph(args) {
       })
       if (args.langs) opts.langs = args.l || args.langs
       if (args.tiers) opts.tiers = args.t || args.tiers
-      
-      bstr('require("'+ __dirname + '/gen")(' + JSON.stringify(json) +', ' + opts + ')', {})
+
+      bstr('require("' + __dirname + '/gen")(' + JSON.stringify(json) + ', ' + opts + ')', {})
         .bundle(function (err, src) {
           if (err) {
             debug(

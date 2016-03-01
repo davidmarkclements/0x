@@ -7,13 +7,6 @@
     The gen command will regenerate the flamegraph from
     a JSON or stacks.out file (autodetected)
 
-    Recreate the flamegraph from the stacks JSON output 
-    in the profile folder:
-
-    0x -c gen [flags] <stacks.<pid>.json file>
-
-    Flags include `--tiers` and `--langs`
-
     Create a flamegraph from a stacks file (e.g. dtrace
     and perf script output)
 

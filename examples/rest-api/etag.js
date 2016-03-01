@@ -2,7 +2,7 @@ var crypto = require('crypto')
 
 module.exports = etag
 
-function etag(entity, opts) {
+function etag (entity, opts) {
   if (Object(entity) === entity) {
     opts = entity
     entity = opts.entity
@@ -14,11 +14,7 @@ function etag(entity, opts) {
   opts.encoding = opts.encoding || 'utf8'
   opts.output = opts.output || 'base64'
 
-  var match
-
-  if (match) { return k }
-
-  var hash 
+  var hash
 
   try {
     hash = crypto
@@ -27,7 +23,6 @@ function etag(entity, opts) {
   } catch (e) {
     error = true
   }
-      
 
   if (!opts.output || opts.output === 'base64') {
     try {
@@ -39,11 +34,9 @@ function etag(entity, opts) {
     }
 
     if (!error) {
-      return hash  
+      return hash
     }
-    
   }
-
 
   try {
     hash = hash.digest(opts.output)
@@ -93,5 +86,4 @@ function etag(entity, opts) {
    *  BEROWNE. By heaven, all dry-beaten with pure scoff!
    *  KING. Farewell, mad wenches; you have simple wits.
    */
-  
 }
