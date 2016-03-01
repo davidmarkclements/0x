@@ -1,27 +1,53 @@
 todo
 
-hide frames by stack type
+hide frames by stack type - done for cli, now do for ui [done]
 
-disable v8 stuff by default
+disable v8 stuff by default [done]
 
-hide frames that are "C"
+hide frames that are "C" [done]
 
+linux support [done]
 
 colour key
 readme, gif, image
 
 linting
 
-linux support
+optimized / deoptimized / search clearing is broken [fixed]
 
-highlight stack on mouseover (increase luminosity?)
+highlight stack on mouseover (increase luminosity?) [done]
+
+
+===
 
 theme btn doesn't work on firefox
 pointer doesn't work on firefox
 
+linux still has "cpu clock"
 
 tier colour and other handling for native C modules
 
-===
-
 capture all trace output, associate with frames
+
+
+allow naming pattern for profile folders (for fuge)
+
+remove browserify-string, maybe
+
+0x ssh
+
+check docker
+
+ui perf improvements (reduce amount of svg elements, consider canvas)
+
+0x -c ssh options:
+    ssh:
+    Prepend an ordinary SSH invocation with `0x -c` to 
+    pipe stacks to your local machine and generate the
+    flamegraph locally. This tends to result in faster
+    flamegraph generation, prevents a production server
+    from being under load and makes it easier to 
+    access the flamegraph. 
+
+    0x -c ssh [ssh args]
+    0x --cmd ssh [ssh args]

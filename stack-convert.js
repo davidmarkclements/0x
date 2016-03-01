@@ -120,7 +120,6 @@ module.exports = function convert (cb) {
     eos(src, function () {
       var samples = s.profile.samples
       var orphans = samples.children['']
-
       samples = samples.children['profile-1ms'] || samples.children['cpu-clock'] || samples
       samples.name = ''
       cb(null, samples.serialize())

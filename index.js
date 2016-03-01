@@ -163,12 +163,10 @@ function linux(args, sudo) {
   })
 }
 
-
-
-
 function sink (args, pid, folder, clock) {
   var tiers = args.tiers || args.t
   var langs = args.langs || args.l
+  var theme = args.theme
   var exclude = args.exclude || args.x
   var include = args.include
   var preview = 'preview' in args ? args.preview : true
@@ -177,6 +175,7 @@ function sink (args, pid, folder, clock) {
     debug('converted stacks to intermediate format')
     var title = '0x ' + process.argv.slice(2).join(' ')
     var opts = JSON.stringify({
+      theme: theme,
       title: title,
       exclude: exclude,
       include: include
@@ -193,6 +192,7 @@ function sink (args, pid, folder, clock) {
         }
 
         var opts = {
+          theme: theme,
           title: title,
           script: src.toString(), 
           dir: folder, 

@@ -24,10 +24,8 @@ module.exports = function (svg, opts, next, done) {
     spawn('convert', args)
       .on('close', function () {
         next()
-        process.stdout.wr
         spawn('bash', [__dirname + '/imgcat', dir + '/flamegraph-small.png'], {stdio: 'inherit'})
           .on('exit', function (code) {
-
             done()
           })
 

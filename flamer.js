@@ -13,8 +13,7 @@ function flameGraph () {
     tiers = false,
     filterNeeded = true,
     filterTypes = [],
-    allSamples,
-    x
+    allSamples
 
   function setDetails(t) {
     var details = document.getElementById('details')
@@ -31,8 +30,9 @@ function flameGraph () {
       d.notOptimized && '—not opt\'d—' || ''
 
     var onStack = d.name ? d3.round(100 * (d.value / allSamples), 1) + '% on stack' : ''
-    var topOfStack = d.name ?  (d.top ? 
-      d3.round(100 * (d.top / allSamples), 2) + '% stack top' :
+    var top = stackTop(d)
+    var topOfStack = d.name ?  (top ? 
+      d3.round(100 * (top / allSamples), 2) + '% stack top' :
       '') : ''
 
     if (onStack && topOfStack) { onStack += ', ' }
@@ -43,11 +43,34 @@ function flameGraph () {
     return name
   }
 
+  function stackTop(d) {
+    if (!d.children) return d.top
+    var top = d.top
+
+    d.children.forEach(function (child) {
+      if (
+          !child.children || 
+          child.children.filter(function (c) { return c.hide }).length
+      ) {  
+        if (child.hide) {
+          if (!child.children)
+            top += child.top
+
+          top = stackTop(child)
+        }
+        
+      }
+    })
+
+    return top
+  }
+
   function titleLabel (d) {
+    var top = stackTop(d)
     return d.name + '\n' +
-    (d.top ?
-      'Top of Stack:' + d3.round(100 * (d.top / allSamples), 1) + '% ' +
-      '(' + d.top + ' of ' + allSamples + ' samples)\n' : ''
+    (top ?
+      'Top of Stack:' + d3.round(100 * (top / allSamples), 1) + '% ' +
+      '(' + top + ' of ' + allSamples + ' samples)\n' : ''
     ) +
     'On Stack:' + d3.round(100 * (d.value / allSamples), 1) + '% ' +
     '(' + d.value + ' of ' + allSamples + ' samples)'
@@ -92,7 +115,7 @@ function flameGraph () {
   }
   colors.def = colors.core
   colors.js = colors.core
-  colors.c = colors.dep
+  colors.c = colors.deps
 
 
   function colorHash (d, perc) {
@@ -114,7 +137,8 @@ function flameGraph () {
     var h = key.h
     var s = key.s
     var l = key.l
-    var vector = ((d.top / allSamples) * 100) + 1
+    var top = stackTop(d)
+    var vector = ((top / allSamples) * 100) + 1
 
     s *= vector
     l += (vector * 2)
@@ -256,9 +280,9 @@ function flameGraph () {
   }
 
   function clear (d, color) {
-    if (color && d.highlight === color) d.highlight = false
+    if (color && d.highlight === color)
+      d.highlight = false
     if (!color) d.highlight = false
-    if (d.hide) return
     if (d.children) {
       d.children.forEach(function (child) {
         clear(child, color)
@@ -278,28 +302,29 @@ function flameGraph () {
 
   var partition = d3.layout.partition()
     .sort(doSort)
-    .value(function (d) { return d.v || d.value; })
-    .children(function (d) { return d.c || d.children; })
+    .value(function (d) { return d.v || d.value })
+    .children(function (d) { return d.c || d.children })
 
 
   function translate(d) {
+    var x = d3.scale.linear().range([0, w])
     var parent = d.parent
-    var depthOffset = parent && parent.hide ? 1 : 0 
+    var depthOffset = parent && parent.hide ? 1 : 0
     while (parent && (parent = parent.parent)) {
       if (parent.hide) depthOffset += 1
     }
     var depth = d.depth - depthOffset
-    return 'translate(' + x(d.x) + ',' + (h - (depth * c) - c) + ')'; 
+    return 'translate(' + x(d.x) + ',' + (h - (depth * c) - c) + ')'
   }
 
   function update () {
+    var x = d3.scale.linear().range([0, w])
 
     selection
       .each(function (data) {
         filter(data)
 
         var nodes = partition(data)
-        x = d3.scale.linear().range([0, w])
         var kx = w / data.dx
         var svg = d3.select(this).select('svg')
         var g = svg.selectAll('g').data(nodes)
@@ -312,28 +337,28 @@ function flameGraph () {
         g.select('rect').transition()
           .duration(transitionDuration)
           .ease(transitionEase)
-          .attr('width', function (d) { return d.dx * kx; })
+          .attr('width', function (d) { return d.dx * kx })
 
         var node = g.enter()
           .append('svg:g')
           .attr('transform', translate)
 
-        var vis = g.filter(function (d) { return !d.hide })
+        node
           .append('svg:rect')
-          .attr('width', function (d) { return d.dx * kx; })
+          .attr('width', function (d) { return d.dx * kx })
 
         node.append('svg:title')
 
         node.append('foreignObject')
           .append('xhtml:div')
 
-        node.attr('width', function (d) { return d.dx * kx; })
-          .attr('height', function (d) { return c; })
-          .attr('name', function (d) { return d.name; })
-          .attr('class', function (d) { return d.fade ? 'frame fade' : 'frame'; })
+        node.attr('width', function (d) { return d.dx * kx })
+          .attr('height', function (d) { return c })
+          .attr('name', function (d) { return d.name })
+          .attr('class', function (d) { return d.fade ? 'frame fade' : 'frame' })
 
         g.select('rect')
-          .attr('height', function (d) { return c; })
+          .attr('height', function (d) { return d.hide ? 0 :c })
           .style('cursor', 'pointer')
           .style('stroke', function (d) {
             return colorHash(d, 1.1)
@@ -343,19 +368,24 @@ function flameGraph () {
 
             if (typeof d.highlight === 'string')
               highlightColor = d.highlight
-
             return d.highlight ? highlightColor : colorHash(d)
           })
-          .style('visibility', function (d) {return d.dummy ? 'hidden' : 'visible';})
+          .style('visibility', function (d) {return d.dummy ? 'hidden' : 'visible'})
 
         g.select('title')
           .text(titleLabel)
 
         g.select('foreignObject')
-          .attr('width', function (d) { return d.dx * kx; })
-          .attr('height', function (d) { return c; })
+          .transition()
+          .duration(transitionDuration)
+          .ease(transitionEase)
+          .attr('width', function (d) { return d.dx * kx })
+
+        g.select('foreignObject')
+          .style('overflow', 'hidden')
+          .attr('height', function (d) { return d.hide ? 0 : c })
           .select('div')
-          .style('display', function (d) { return (d.dx * kx < 35) || d.dummy ? 'none' : 'block';})
+          .style('display', function (d) { return (d.dx * kx < 35) || d.dummy ? 'none' : 'block' })
           .style('pointer-events', 'none')
           .style('white-space', 'nowrap')
           .style('text-overflow', 'ellipsis')
@@ -372,8 +402,17 @@ function flameGraph () {
           .html(label)
 
         g.on('click', zoom)
-
+        
+        var hidden = g.filter(function (d) { return d.hide })
+        hidden.forEach(function (d) {
+          hide(d)
+        })
+        // hidden.select('rect').remove()
+        // hidden.select('foreignObject').remove()
+        // hidden.select('title').remove()
+        
         g.exit().remove()
+
       })
   }
 
@@ -403,37 +442,37 @@ function flameGraph () {
   }
 
   chart.height = function (_) {
-    if (!arguments.length) { return h; }
+    if (!arguments.length) { return h }
     h = _
     return chart
   }
 
   chart.width = function (_) {
-    if (!arguments.length) { return w; }
+    if (!arguments.length) { return w }
     w = _
     return chart
   }
 
   chart.cellHeight = function (_) {
-    if (!arguments.length) { return c; }
+    if (!arguments.length) { return c }
     c = _
     return chart
   }
 
   chart.transitionDuration = function (_) {
-    if (!arguments.length) { return transitionDuration; }
+    if (!arguments.length) { return transitionDuration }
     transitionDuration = _
     return chart
   }
 
   chart.transitionEase = function (_) {
-    if (!arguments.length) { return transitionEase; }
+    if (!arguments.length) { return transitionEase }
     transitionEase = _
     return chart
   }
 
   chart.sort = function (_) {
-    if (!arguments.length) { return sort; }
+    if (!arguments.length) { return sort }
     sort = _
     return chart
   }
