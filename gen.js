@@ -1,3 +1,4 @@
+/* global innerWidth d3*/
 global.d3 = require('d3')
 var hsl = require('hsl-to-rgb-for-reals')
 var flamer = require('./flamer')
@@ -31,7 +32,7 @@ module.exports = function (stacks, opts, next, done) {
   var width = height
 
   if (browser) {
-    width = innerWidth * .87779
+    width = innerWidth * 0.87779
   }
 
   var flamegraph = flamer()
@@ -42,7 +43,7 @@ module.exports = function (stacks, opts, next, done) {
 
   exclude.forEach(flamegraph.typeHide)
 
-  //concat name so browersify ignores
+  // concat name so browersify ignores
   var doc = browser ? document : require('js' + 'dom').jsdom()
   var chart = doc.createElement('chart')
   var style = doc.createElement('style')
@@ -55,8 +56,6 @@ module.exports = function (stacks, opts, next, done) {
   var optd = doc.createElement('button')
   var notOptd = doc.createElement('button')
 
-
-
   var v8 = doc.createElement('input')
   v8.type = 'checkbox'
   v8.id = 'v8'
@@ -64,7 +63,7 @@ module.exports = function (stacks, opts, next, done) {
   v8Label.appendChild(v8)
   v8Label.appendChild(doc.createTextNode('v8   '))
 
-  var regexp = doc.createElement('input') 
+  var regexp = doc.createElement('input')
   regexp.type = 'checkbox'
   regexp.id = 'regexp'
   var regexpLabel = doc.createElement('label')
@@ -78,7 +77,7 @@ module.exports = function (stacks, opts, next, done) {
   nativeCLabel.appendChild(nativeC)
   nativeCLabel.appendChild(doc.createTextNode('nativeC   '))
 
-  var nativeJS = doc.createElement('input') 
+  var nativeJS = doc.createElement('input')
   nativeJS.type = 'checkbox'
   nativeJS.id = 'nativeJS'
   var nativeJSLabel = doc.createElement('label')
@@ -126,22 +125,22 @@ module.exports = function (stacks, opts, next, done) {
     if (!~exclude.indexOf(t)) el.input.checked = true
   })
 
-  function showTiersKey() {
+  function showTiersKey () {
     Object.keys(typeEls).forEach(function (t) {
       var el = typeEls[t]
       var col = flamegraph.colors[t]
-      el.label.style.background = 'rgba(' + 
-        hsl(col.h, col.s/100 * 1.2, col.l/100 * 1.2) + 
+      el.label.style.background = 'rgba(' +
+        hsl(col.h, col.s / 100 * 1.2, col.l / 100 * 1.2) +
         ', 1)'
       el.label.style.color = 'black'
     })
   }
 
-  function showLangsKey() {
+  function showLangsKey () {
     var c = flamegraph.colors.c
-    c = 'rgba(' + 
-      hsl(c.h, c.s/100 * 1.2, c.l/100 * 1.2) + 
-    ', 1)'
+    c = 'rgba(' +
+      hsl(c.h, c.s / 100 * 1.2, c.l / 100 * 1.2) +
+      ', 1)'
 
     ;['v8', 'regexp', 'nativeC'].forEach(function (t) {
       var el = typeEls[t]
@@ -150,9 +149,9 @@ module.exports = function (stacks, opts, next, done) {
     })
 
     var js = flamegraph.colors.js
-    js = 'rgba(' + 
-      hsl(js.h, js.s/100 * 1.2, js.l/100 * 1.2) + 
-    ', 1)'
+    js = 'rgba(' +
+      hsl(js.h, js.s / 100 * 1.2, js.l / 100 * 1.2) +
+      ', 1)'
 
     ;['app', 'deps', 'core', 'nativeJS'].forEach(function (t) {
       var el = typeEls[t]
@@ -161,10 +160,9 @@ module.exports = function (stacks, opts, next, done) {
     })
   }
 
-  function hideKey() {
+  function hideKey () {
     Object.keys(typeEls).forEach(function (t) {
       var el = typeEls[t]
-      var col = flamegraph.colors[t]
       el.label.style.background = bg
       el.label.style.color = bg === 'black' ? 'white' : 'black'
     })
@@ -172,7 +170,6 @@ module.exports = function (stacks, opts, next, done) {
 
   if (tiersMode) showTiersKey()
   if (langsMode) showLangsKey()
-
 
   v8.addEventListener('change', function () {
     if (v8.checked) return flamegraph.typeShow('v8')
@@ -259,18 +256,18 @@ module.exports = function (stacks, opts, next, done) {
   search.addEventListener('keydown', function (e) {
     setTimeout(function () {
       if (!e.target.value) return flamegraph.clear()
-      flamegraph.search(e.target.value)  
-    }, 0)    
-  })  
+      flamegraph.search(e.target.value)
+    }, 0)
+  })
 
   var zoom = 1
   zoomout.addEventListener('click', function () {
-    zoom -= .3
+    zoom -= 0.3
     if (zoom < 0.1) zoom = 0.1
     svg.style.transform = 'scale(' + zoom + ')'
   })
   zoomin.addEventListener('click', function () {
-    zoom += .3
+    zoom += 0.3
     if (zoom > 1) zoom = 1
     svg.style.transform = 'scale(' + zoom + ')'
   })
@@ -308,7 +305,6 @@ module.exports = function (stacks, opts, next, done) {
     optd.innerHTML = (optdMode ? '−' : '+') + ' Optimized'
     if (!optdMode) return flamegraph.clear('yellow')
     flamegraph.search('\\*', 'yellow')
-
   })
   notOptd.addEventListener('click', function () {
     notOptdMode = !notOptdMode
@@ -331,7 +327,7 @@ module.exports = function (stacks, opts, next, done) {
 
   var types = doc.createElement('div')
   types.style = 'position: absolute; bottom: 0; right: 30px; color: ' + (bg === 'black' ? 'white' : 'black')
-  
+
   types.appendChild(appLabel)
   types.appendChild(depsLabel)
   types.appendChild(coreLabel)
@@ -362,20 +358,19 @@ module.exports = function (stacks, opts, next, done) {
     doc.body.insertBefore(head, doc.body.firstChild)
   }
 
-
   if (!browser) {
     var fs = require('f' + 's')
 
     if (opts.name === '-') {
       process.stdout.write(doc.body.innerHTML + '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>')
     } else {
-      fs.writeFileSync(dir + '/' + opts.name + '.html', 
+      fs.writeFileSync(dir + '/' + opts.name + '.html',
         doc.body.innerHTML + '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>')
     }
-    
+
     if (opts.preview) {
-      svg.setAttribute('width', +svg.getAttribute('width')*2)
-      next = next || function(){}
+      svg.setAttribute('width', +svg.getAttribute('width') * 2)
+      next = next || function () {}
       require('./flame-' + 'image')(chart.innerHTML, {dir: dir}, next, function () {
         done && done()
       })
@@ -384,11 +379,10 @@ module.exports = function (stacks, opts, next, done) {
       next() && next()
       done() && done()
     }
-
   }
 }
 
-function diameter(stacks) {
+function diameter (stacks) {
   var tree = d3.layout.tree()
   var deepest = 0
   tree.nodes(stacks).forEach(function (d) {

@@ -1,64 +1,58 @@
+/* global d3 */
 var hsl = require('hsl-to-rgb-for-reals')
 
 function flameGraph () {
-
-  var w = 960, // graph width
-    h = 1024, // graph height
-    c = 18, // cell height
-    selection = null, // selection
-    transitionDuration = 500,
-    transitionEase = 'cubic-in-out', // tooltip offset
-    sort = true,
-    langs = false,
-    tiers = false,
-    filterNeeded = true,
-    filterTypes = [],
-    allSamples
-
-  function setDetails(t) {
-    var details = document.getElementById('details')
-    if (details) details.innerHTML = t
-  }
-
+  var w = 960 // graph width
+  var h = 1024 // graph height
+  var c = 18 // cell height
+  var selection = null // selection
+  var transitionDuration = 500
+  var transitionEase = 'cubic-in-out' // tooltip offset
+  var sort = true
+  var langs = false
+  var tiers = false
+  var filterNeeded = true
+  var filterTypes = []
+  var allSamples
   var labelRx = /^LazyCompile:|Function:|Script:/
   var optRx = /^\w+:(\s+)?\*/
   var notOptRx = /^\w+:(\s+)?~/
 
   function label (d) {
-    if (d.dummy) return ''  
-    var optInfo = d.optimized && '—opt\'d—' || 
+    if (d.dummy) return ''
+    var optInfo = d.optimized && '—opt\'d—' ||
       d.notOptimized && '—not opt\'d—' || ''
 
     var onStack = d.name ? d3.round(100 * (d.value / allSamples), 1) + '% on stack' : ''
     var top = stackTop(d)
-    var topOfStack = d.name ?  (top ? 
-      d3.round(100 * (top / allSamples), 2) + '% stack top' :
-      '') : ''
+    var topOfStack = d.name ? (top
+      ? d3.round(100 * (top / allSamples), 2) + '% stack top'
+      : '') : ''
 
     if (onStack && topOfStack) { onStack += ', ' }
 
-    var name = d.name.replace(labelRx, '') + 
+    var name = d.name.replace(labelRx, '') +
       '<small>' + ' ' + optInfo + ' ' + onStack + ' ' + topOfStack + '</small>'
 
     return name
   }
 
-  function stackTop(d) {
+  function stackTop (d) {
     if (!d.children) return d.top
     var top = d.top
 
     d.children.forEach(function (child) {
       if (
-          !child.children || 
+          !child.children ||
           child.children.filter(function (c) { return c.hide }).length
-      ) {  
+      ) {
         if (child.hide) {
-          if (!child.children)
+          if (!child.children) {
             top += child.top
+          }
 
           top = stackTop(child)
         }
-        
       }
     })
 
@@ -67,20 +61,18 @@ function flameGraph () {
 
   function titleLabel (d) {
     var top = stackTop(d)
-    return d.name + '\n' +
-    (top ?
-      'Top of Stack:' + d3.round(100 * (top / allSamples), 1) + '% ' +
-      '(' + top + ' of ' + allSamples + ' samples)\n' : ''
-    ) +
+    return d.name + '\n' + (top
+      ? 'Top of Stack:' + d3.round(100 * (top / allSamples), 1) + '% ' +
+      '(' + top + ' of ' + allSamples + ' samples)\n'
+      : '') +
     'On Stack:' + d3.round(100 * (d.value / allSamples), 1) + '% ' +
     '(' + d.value + ' of ' + allSamples + ' samples)'
   }
 
-  function langtier(name) {
-    //todo: C deps
+  function langtier (name) {
+    // todo: C deps
     if (!/.js/.test(name)) {
-
-      switch(true) {
+      switch (true) {
         case /^Builtin:|^Stub:|v8::|^(.+)IC:|^Handler:/
           .test(name): return {type: 'v8', lang: 'c'}
         case /^RegExp:/
@@ -90,18 +82,16 @@ function flameGraph () {
         case /\.$/.test(name): return {type: 'core', lang: 'js'}
         default: return {type: 'nativeC', lang: 'c'}
       }
-
       return
     }
 
-    switch(true) {
+    switch (true) {
       case / native /.test(name): return {type: 'nativeJS', lang: 'js'}
-      case (name.split(':')[1]||'')
+      case (name.split(':')[1] || '')
         .replace(/(~|\*)?(\s+)?/, '')[0] !== '/': return {type: 'core', lang: 'js'}
       case !/node_modules/.test(name): return {type: 'app', lang: 'js'}
       default: return {type: 'deps', lang: 'js'}
     }
-
   }
 
   var colors = {
@@ -111,12 +101,11 @@ function flameGraph () {
     nativeJS: {h: 122, s: 50, l: 45},
     core: {h: 23, s: 66, l: 45},
     deps: {h: 244, s: 50, l: 65},
-    app: {h: 200, s: 50, l: 45},
+    app: {h: 200, s: 50, l: 45}
   }
   colors.def = colors.core
   colors.js = colors.core
   colors.c = colors.deps
-
 
   function colorHash (d, perc) {
     if (!d.name) {
@@ -247,13 +236,6 @@ function flameGraph () {
     }
   }
 
-  function getRoot (d) {
-    if (d.parent) {
-      return getRoot(d.parent)
-    }
-    return d
-  }
-
   function zoom (d) {
     hideSiblings(d)
     show(d)
@@ -262,27 +244,29 @@ function flameGraph () {
   }
 
   function searchTree (d, term, color) {
-    var re = new RegExp(term),
-      label = d.name
+    var re = new RegExp(term)
+    var label = d.name
 
     if (d.children) {
       d.children.forEach(function (child) {
         searchTree(child, term, color)
       })
     }
-    if (d.hide) return
+    if (d.hide) { return }
     if (label.match(re)) {
       d.highlight = color || true
     } else {
-      if (typeof d.highlight === 'boolean')
+      if (typeof d.highlight === 'boolean') {
         d.highlight = false
+      }
     }
   }
 
   function clear (d, color) {
-    if (color && d.highlight === color)
+    if (color && d.highlight === color) {
       d.highlight = false
-    if (!color) d.highlight = false
+    }
+    if (!color) { d.highlight = false }
     if (d.children) {
       d.children.forEach(function (child) {
         clear(child, color)
@@ -305,8 +289,7 @@ function flameGraph () {
     .value(function (d) { return d.v || d.value })
     .children(function (d) { return d.c || d.children })
 
-
-  function translate(d) {
+  function translate (d) {
     var x = d3.scale.linear().range([0, w])
     var parent = d.parent
     var depthOffset = parent && parent.hide ? 1 : 0
@@ -318,8 +301,6 @@ function flameGraph () {
   }
 
   function update () {
-    var x = d3.scale.linear().range([0, w])
-
     selection
       .each(function (data) {
         filter(data)
@@ -358,7 +339,7 @@ function flameGraph () {
           .attr('class', function (d) { return d.fade ? 'frame fade' : 'frame' })
 
         g.select('rect')
-          .attr('height', function (d) { return d.hide ? 0 :c })
+          .attr('height', function (d) { return d.hide ? 0 : c })
           .style('cursor', 'pointer')
           .style('stroke', function (d) {
             return colorHash(d, 1.1)
@@ -366,11 +347,12 @@ function flameGraph () {
           .attr('fill', function (d) {
             var highlightColor = '#E600E6'
 
-            if (typeof d.highlight === 'string')
+            if (typeof d.highlight === 'string') {
               highlightColor = d.highlight
+            }
             return d.highlight ? highlightColor : colorHash(d)
           })
-          .style('visibility', function (d) {return d.dummy ? 'hidden' : 'visible'})
+          .style('visibility', function (d) { return d.dummy ? 'hidden' : 'visible' })
 
         g.select('title')
           .text(titleLabel)
@@ -402,7 +384,7 @@ function flameGraph () {
           .html(label)
 
         g.on('click', zoom)
-        
+
         var hidden = g.filter(function (d) { return d.hide })
         hidden.forEach(function (d) {
           hide(d)
@@ -410,9 +392,8 @@ function flameGraph () {
         // hidden.select('rect').remove()
         // hidden.select('foreignObject').remove()
         // hidden.select('title').remove()
-        
-        g.exit().remove()
 
+        g.exit().remove()
       })
   }
 
@@ -424,7 +405,7 @@ function flameGraph () {
     selection.each(function (data) {
       allSamples = data.value
 
-      var svg = d3.select(this)
+      d3.select(this)
         .append('svg:svg')
         .attr('width', w)
         .attr('height', h)
@@ -437,7 +418,6 @@ function flameGraph () {
 
       // first draw
       update()
-
     })
   }
 
@@ -511,8 +491,8 @@ function flameGraph () {
       filterNeeded = true
       if (selection) update()
     }
-  } 
-  
+  }
+
   chart.typeShow = function (type) {
     var ix = filterTypes.indexOf(type)
     if (!~ix) return

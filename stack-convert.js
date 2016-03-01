@@ -1,4 +1,3 @@
-var fs = require('fs')
 var eos = require('end-of-stream')
 var through = require('through2')
 var profLabel = process.platform === 'darwin' ? 'profile-1ms' : 'cpu-clock'
@@ -6,7 +5,7 @@ var profLabel = process.platform === 'darwin' ? 'profile-1ms' : 'cpu-clock'
 function Node (name) {
   this.name = name
   this.value = 0
-  this.top = 0 
+  this.top = 0
   this.children = {}
 }
 
@@ -32,8 +31,7 @@ Node.prototype.serialize = function () {
   var res = {
     name: this.name,
     value: this.value,
-    top: this.top,
-
+    top: this.top
   }
 
   var children = []
@@ -56,7 +54,6 @@ function Profile () {
 Profile.prototype.openStack = function (name) {
   this.stack = []
   this.name = name
-
 }
 
 Profile.prototype.addFrame = function (frame) {
@@ -83,7 +80,6 @@ Profile.prototype.closeStack = function () {
 
 function stream () {
   var stackOpenRx = /(.+):(.+): ?$/
-  var frameRx = /^\s*(\w+)\s*(.+) \((\S*)\)?/g
   var stackCloseRx = /^$/g
   var commentRx = /^#/g
   var profile = new Profile()
@@ -103,7 +99,7 @@ function stream () {
     }
 
     if (!/\[unknown\]/.test(line)) {
-      profile.addFrame(line+'')
+      profile.addFrame(line + '')
     }
 
     cb()
@@ -119,13 +115,11 @@ module.exports = function convert (cb) {
   s.on('pipe', function (src) {
     eos(src, function () {
       var samples = s.profile.samples
-      var orphans = samples.children['']
       samples = samples.children['profile-1ms'] || samples.children['cpu-clock'] || samples
       samples.name = ''
       cb(null, samples.serialize())
-    })    
+    })
   })
 
   return s
-
 }
