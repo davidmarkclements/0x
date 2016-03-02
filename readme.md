@@ -52,15 +52,8 @@ Once we're ready to generate a flamegraph we send a SIGINT.
 
 The simplest way to do this is pressing CTRL+C.
 
-When `0x` catches the SIGINT, it begins to generate
-the stacks and flamegraph output.
-
-If we're using iTerm 2.9 (OS X terminal) or greater, and have imagemagick installed we'll see a gorgeous preview in the terminal.
-
-We'll also have a `file://` URL pointing to the generated `flamegraph.html` file, on OS X we can use cmd+click to open the URL in the default
-browser.
-
-![](terminal-flamegraph.png)
+When `0x` catches the SIGINT, it process the stacks and 
+generates a profile folder, containing flamegraph.html
 
 
 ## Production Servers
