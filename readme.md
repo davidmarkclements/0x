@@ -10,6 +10,10 @@ Let's start with the highest priority item, how does one pronounce 0x.
 
 Like this: Zero Ex
 
+## Do I need to know about `dtrace` or `perf record`?
+
+Nope.
+
 ## Demo
 
 ![](demo.gif)
@@ -53,10 +57,10 @@ the stacks and flamegraph output.
 
 If we're using iTerm 2.9 (OS X terminal) or greater, and have imagemagick installed we'll see a gorgeous preview in the terminal.
 
-![](terminal-flamegraph.png)
-
 We'll also have a `file://` URL pointing to the generated `flamegraph.html` file, on OS X we can use cmd+click to open the URL in the default
 browser.
+
+![](terminal-flamegraph.png)
 
 ## 0x Flags
 
@@ -125,7 +129,9 @@ to generate the flamegraph from raw stacks.
 Options: false | true | -
 
 Examples: 
+
 `0x --stacks-only my-app.js`
+
 `0x --stacks-only=- my-app.js`
 
 Default: false
@@ -153,7 +159,7 @@ outputs advanced usage (i.e. the commands).
 
 #### `0x -c gen` 
 
-The gen command will regenerate the flamegraph from
+The gen command will generate the flamegraph from
 a stacks.out file.
 
 Example: `0x -c gen [flags] profile-$PID/stacks.$PID.out > flamegraph.html`
@@ -169,10 +175,12 @@ The Profile Folder can contain the following files
 
 * flamegraph-small.png - the preview image output to terminal
 * flamegraph.svg - an SVG rendering of the flamegraph
-* stacks.3866.out - the traced stacks (run through perf-sym on OS X)
+* stacks.3866.out - the traced stacks (run through [perf-sym](http://npmjs.com/perf-sym) on OS X)
 * flamegraph.html - the interactive flamegraph
 * stacks.3866.json - a JSON tree generated from the stacks, this tree is rendered by d3.js in the flamegraph.html
 
+The is helpful, because there's other things you can do with 
+stacks output. For instance, checkout [cpuprofilify](http://npmjs.com/cpuprofilify) and [traceviewify](http://npmjs.com/traceviewify).
 
 ## Example
 
@@ -197,6 +205,10 @@ Now try some other options, e.g.
 ```sh
 0x -t examples/rest-api
 ```
+
+## Contributions
+
+Yes please!
 
 ## Alternatives
 

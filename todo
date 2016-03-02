@@ -1,26 +1,3 @@
-todo
-
-hide frames by stack type - done for cli, now do for ui [done]
-
-disable v8 stuff by default [done]
-
-hide frames that are "C" [done]
-
-linux support [done]
-
-colour key [done]
-
-readme, gif, image
-
-linting
-
-optimized / deoptimized / search clearing is broken [fixed]
-
-highlight stack on mouseover (increase luminosity?) [done]
-
-
-===
-
 theme btn doesn't work on firefox
 pointer doesn't work on firefox
 
