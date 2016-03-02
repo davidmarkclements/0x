@@ -229,6 +229,11 @@ Now try some other options, e.g.
 0x -t examples/rest-api
 ```
 
+## v1 
+
+Don't use v1, it was an experiment and is  non functional
+Should have be v0...
+
 ## Contributions
 
 Yes please!
