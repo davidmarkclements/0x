@@ -20,6 +20,9 @@ Nope.
 
 An example interactive flamegraph can be viewed at <http://davidmarkclements.github.io/0x-demo/>
 
+This demo shows a terminal preview, the default behaviour 
+is *not* to show a preview, you can use `-p` to turn it on.
+
 ## Install
 
 ```sh
