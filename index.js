@@ -73,7 +73,11 @@ function sun (args, sudo) {
     debug('Caught SIGINT, generating')
     log('Caught SIGINT, generating')
     var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
-
+    process.on('uncaughtException', function (e) {
+      clock.kill()
+      throw e
+    })
+    process.on('exit', clock.kill)
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
     var translate = sym({silent: true, pid: proc.pid})
 
@@ -158,8 +162,11 @@ function linux (args, sudo) {
     log('Caught SIGINT, generating flamegraph ')
 
     var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
-    process.on('unCaughtException', clock.kill)
-
+    process.on('uncaughtException', function (e) {
+      clock.kill()
+      throw e
+    })
+    process.on('exit', clock.kill)
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
 
     var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat])
@@ -195,8 +202,8 @@ function sink (args, pid, folder, clock) {
   var theme = args.theme
   var exclude = args.exclude || args.x
   var include = args.include
-  var preview = 'preview' in args ? args.preview : true
-
+  var preview = args.preview || args.p
+  debug('begin rendering')
   return convert(function (err, json) {
     if (err) { throw err }
     debug('converted stacks to intermediate format')
@@ -241,6 +248,7 @@ function sink (args, pid, folder, clock) {
           tidy()
           console.log('file://' + process.cwd() + '/' + folder + '/flamegraph.html', '\n')
           debug('exiting')
+          debug('done rendering')
           process.exit()
         })
       })

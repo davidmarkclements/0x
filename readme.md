@@ -68,6 +68,17 @@ browser.
 
 Print usage info
 
+### --preview    
+
+Generates an SVG file, prerenders SVG inside HTML
+and outputs a PNG to the terminal (if possible)
+Depends on imagemagick (brew install imagemagick)
+If using iTerm 2.9+ image will be output to terminal
+Warning - depending on the amount of stacks this 
+option can take tens of seconds
+
+Default: false
+
 ### --langs | -l
 
 Color code the stacks by JS and C
@@ -139,14 +150,6 @@ Default: false
 ### --trace-info    
 
 Show output from dtrace or perf tools
-
-Default: false
-
-### --no-preview    
-
-Disable flamegraph image generation
-Depends on imagemagick (brew install imagemagick)
-If using iTerm 2.9+ image will be output to terminal
 
 Default: false
 

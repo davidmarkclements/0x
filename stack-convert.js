@@ -1,7 +1,7 @@
 var eos = require('end-of-stream')
 var through = require('through2')
 var profLabel = process.platform === 'darwin' ? 'profile-1ms' : 'cpu-clock'
-
+var debug = require('debug')('0x:stack-convert')
 function Node (name) {
   this.name = name
   this.value = 0
@@ -117,7 +117,10 @@ module.exports = function convert (cb) {
       var samples = s.profile.samples
       samples = samples.children['profile-1ms'] || samples.children['cpu-clock'] || samples
       samples.name = ''
-      cb(null, samples.serialize())
+      debug('serializing samples')
+      samples = samples.serialize()
+      debug('samples serialized')
+      cb(null, samples)
     })
   })
 

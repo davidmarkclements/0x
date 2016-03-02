@@ -3,6 +3,14 @@
   0x [flags] node [node-flags] file.js
 
 
+  --preview | -p  Generates an SVG file, prerenders SVG inside HTML
+                  and outputs a PNG to the terminal (if possible)
+                  Depends on imagemagick (brew install imagemagick)
+                  If using iTerm 2.9+ image will be output to terminal
+                  Warning - depending on the amount of stacks this 
+                  option can take tens of seconds
+                  Default: false
+
   --langs | -l    Coarser form of tiers, colour code by JS or C
                   Default: false
 
@@ -26,11 +34,6 @@
                   Default: false
 
   --trace-info    Show output from dtrace or perf tools
-                  Default: false
-
-  --no-preview    Disable flamegraph image generation
-                  Depends on imagemagick (brew install imagemagick)
-                  If using iTerm 2.9+ image will be output to terminal
                   Default: false
 
   --cmd | -c      Command Mode - A tool set for processing data in 

@@ -1,11 +1,12 @@
 /* global innerWidth d3*/
 global.d3 = require('d3')
 var hsl = require('hsl-to-rgb-for-reals')
+
 var flamer = require('./flamer')
 module.exports = function (stacks, opts, next, done) {
   opts = opts || {}
   opts.name = opts.name || 'flamegraph'
-  // opts.title = opts.title || 'Flamegraph'
+
   var dir = opts.dir || '.'
   var min = opts.min || 950
   var browser = !!global.document
@@ -26,6 +27,20 @@ module.exports = function (stacks, opts, next, done) {
   var optdMode = false
   var notOptdMode = false
 
+
+  if (!browser && !opts.preview) {
+    require('f' + 's')
+      .writeFileSync(dir + '/' + opts.name + '.html', 
+        '<meta charset="utf-8">' +
+        '<h1 style="color: rgb(68, 68, 68);">' + opts.title + '</h1>' +
+        '<style>body {padding-left: 2%; background:black}rect:hover {opacity: 0.9}</style>' +
+        '<chart></chart>' +
+        '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>')
+    next && next()
+    done && done()
+    return
+  }
+
   var height = (diameter(stacks) * 18) + 10 + 2
   height = height < min ? min : height
 
@@ -43,7 +58,6 @@ module.exports = function (stacks, opts, next, done) {
 
   exclude.forEach(flamegraph.typeHide)
 
-  // concat name so browersify ignores
   var doc = browser ? document : require('js' + 'dom').jsdom()
   var chart = doc.createElement('chart')
   var style = doc.createElement('style')
@@ -105,9 +119,6 @@ module.exports = function (stacks, opts, next, done) {
   coreLabel.appendChild(core)
   coreLabel.appendChild(doc.createTextNode('core   '))
 
-  // colors.js = colors.core
-  // colors.c = colors.deps
-
   var typeEls = {
     v8: {input: v8, label: v8Label},
     regexp: {input: regexp, label: regexpLabel},
@@ -134,7 +145,6 @@ module.exports = function (stacks, opts, next, done) {
         ', 1)'
     })
     types.style.color = 'black'
-
   }
 
   function showLangsKey () {
@@ -349,9 +359,11 @@ module.exports = function (stacks, opts, next, done) {
     doc.body.insertBefore(meta, doc.body.firstChild)
   }
 
-  d3.select(chart).datum(stacks).call(flamegraph)
-  var svg = chart.querySelector('svg')
-  svg.style.transition = 'transform 200ms ease-in-out'
+  if (browser || opts.preview) {
+    d3.select(chart).datum(stacks).call(flamegraph)
+    var svg = chart.querySelector('svg')
+    svg.style.transition = 'transform 200ms ease-in-out'
+  }
 
   if (opts.title) {
     var head = doc.createElement('h1')
