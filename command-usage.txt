@@ -14,5 +14,3 @@
 
     Flags include `--tiers` and `--langs`
 
-    This file is also created in the profile folder
-

@@ -2,10 +2,6 @@
   0x [flags] file.js
   0x [flags] node [node-flags] file.js
 
-  --no-preview    Disable flamegraph image generation
-                  Depends on imagemagick (brew install imagemagick)
-                  If using iTerm 2.9+ image will be output to terminal
-                  Default: false
 
   --langs | -l    Coarser form of tiers, colour code by JS or C
                   Default: false
@@ -21,6 +17,9 @@
 
   --include       Include tiers, Overwrites exclude
 
+  --theme         Dark or Light theme
+                  Default: Dark
+
   --stacks-only   Don't generate the flamegraph, only create the stacks 
                   output.
                   If assigned to '-' stacks output will come through stdout
@@ -29,8 +28,10 @@
   --trace-info    Show output from dtrace or perf tools
                   Default: false
 
-  --theme         Dark or Light theme
-                  Default: Dark
+  --no-preview    Disable flamegraph image generation
+                  Depends on imagemagick (brew install imagemagick)
+                  If using iTerm 2.9+ image will be output to terminal
+                  Default: false
 
   --cmd | -c      Command Mode - A tool set for processing data in 
                   the profile folder. 
