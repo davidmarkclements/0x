@@ -4,16 +4,6 @@
 
 `0x` can profile and generate an interactive flamegraph for a Node process in a single command, on both Linux *and* OS X. Whilst this seems trivial... it's not. Well it wasn't before `0x`.
 
-## Pronunciation
-
-Let's start with the highest priority item, how does one pronounce 0x.
-
-Like this: Zero Ex
-
-## Do I need to know about `dtrace` or `perf record`?
-
-Nope.
-
 ## Demo
 
 ![](demo.gif)
@@ -22,6 +12,13 @@ An example interactive flamegraph can be viewed at <http://davidmarkclements.git
 
 This demo shows a terminal preview, the default behaviour 
 is *not* to show a preview, you can use `-p` to turn it on.
+
+## Support
+
+* Linux
+* OS X
+* SmartOS
+* *not* Windows (PR's welcome)
 
 ## Install
 
@@ -64,6 +61,33 @@ We'll also have a `file://` URL pointing to the generated `flamegraph.html` file
 browser.
 
 ![](terminal-flamegraph.png)
+
+
+## Production Servers
+
+Generating a flamegraph can be quite intense on CPU and memory,
+if we have restricted resources we should generate the flamegraph
+in two pieces. 
+
+First we can use the `--stacks-only` flag to purely capture stacks.
+
+```sh
+0x --stacks-only my-app.js  #0x on the server
+```
+
+Press ctrl+c when ready, this will create the usual profile folder,
+holding one file, that `stacks.$PID.out` file. 
+
+Now we need to transfer the stacks file from our production server 
+to our local dev machine.
+
+Let's say the pid was 7777, we can generate the flamegraph locally with
+
+```sh
+0x -c gen stacks.7777.out # 0x locally
+```
+
+Now the hard work is done away from production, ensuring we avoid any service-level problems. 
 
 ## 0x Flags
 
