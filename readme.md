@@ -259,3 +259,7 @@ the following people and their Open Source/Info Sharing efforts
 * Brendan Gregg (<http://www.brendangregg.com/>)
 * Martin Spier (<http://martinspier.io/>)
 
+## License
+
+MIT and Apache (depending on the code, see LICENSE.md)
+
