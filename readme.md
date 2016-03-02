@@ -99,6 +99,15 @@ option can take tens of seconds
 
 Default: false
 
+### --delay | -d   
+
+Milliseconds. Delay before tracing begins, allows us to ignore
+initialisation stacks (e.g. module loading).
+
+Example: `0x -d 2000 my-app.js`
+
+Default: 300
+
 ### --langs | -l
 
 Color code the stacks by JS and C
@@ -237,6 +246,10 @@ Should have be v0...
 ## Contributions
 
 Yes please!
+
+## Debugging
+
+`DEBUG=0x* 0x my-app.js`
 
 ## Alternatives
 

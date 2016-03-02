@@ -33,6 +33,7 @@ function cmd () {
 
   var args = require('minimist')(argv.slice(0, ix))
   args.node = argv.slice(ix + 1)
-
+  args.delay = args.delay || args.d
+  if (typeof args.delay === 'undefined') args.delay = 300
   require('./')(args)
 }

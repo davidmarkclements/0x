@@ -31,7 +31,6 @@ function sun (args, sudo) {
   var dtrace = pathTo('dtrace')
   var profile = path.join(__dirname, 'node_modules', '.bin', 'profile_1ms.d')
   if (!dtrace) return notFound('dtrace')
-
   if (!sudo) {
     console.log('0x captures stacks using dtrace, which requires sudo access')
     return spawn('sudo', ['true'])
@@ -39,6 +38,9 @@ function sun (args, sudo) {
   }
   var traceInfo = args['trace-info']
   var stacksOnly = args['stacks-only']
+  var delay = args.delay || args.d
+  delay = parseInt(delay, 10)
+  if (isNaN(delay)) { delay = 0 }
 
   var proc = spawn('node', [
     '--perf-basic-prof',
@@ -51,25 +53,40 @@ function sun (args, sudo) {
       process.exit(code)
     }
   })
+  var folder
+  var prof
+  function start() {
+    prof = spawn('sudo', [profile, '-p', proc.pid])
 
-  var prof = spawn('sudo', [profile, '-p', proc.pid])
+    if (traceInfo) { prof.stderr.pipe(process.stderr) }
 
-  if (traceInfo) { prof.stderr.pipe(process.stderr) }
+    folder = 'profile-' + proc.pid
+    fs.mkdirSync(process.cwd() + '/' + folder)
 
-  var folder = 'profile-' + proc.pid
-  fs.mkdirSync(process.cwd() + '/' + folder)
+    pump(
+      prof.stdout,
+      fs.createWriteStream(folder + '/.stacks.' + proc.pid + '.out')
+    )
 
-  pump(
-    prof.stdout,
-    fs.createWriteStream(folder + '/.stacks.' + proc.pid + '.out')
-  )
+    setTimeout(log, 100, 'Profiling')
 
-  setTimeout(log, 100, 'Profiling')
+    process.stdin.resume()
+    process.stdout.write('\u001b[?25l')
+  }
 
-  process.stdin.resume()
-  process.stdout.write('\u001b[?25l')
+  if (delay) {
+    setTimeout(start, delay)
+  } else {
+    start()
+  }
 
   process.once('SIGINT', function () {
+    if (!prof) {
+      debug('Profiling not begun')
+      console.log('No stacks, profiling had not begun')
+      tidy()
+      process.exit()
+    }
     debug('Caught SIGINT, generating')
     log('Caught SIGINT, generating')
     var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
@@ -125,11 +142,15 @@ function linux (args, sudo) {
   var perfdat = '/tmp/perf-' + uid + '.data'
   var traceInfo = args['trace-info']
   var stacksOnly = args['stacks-only']
+  var delay = args.delay || args.d
+    delay = parseInt(delay, 10)
+    if (isNaN(delay)) { delay = 0 }
 
   var proc = spawn('sudo', [
     'perf',
     'record',
     !traceInfo ? '-q' : '',
+    delay ? '--initial-delay=' + delay : '',
     '-e',
     'cpu-clock',
     '-F 1000', // 1000 samples per sec === 1ms profiling like dtrace
@@ -152,7 +173,7 @@ function linux (args, sudo) {
   var folder = 'profile-' + proc.pid
   fs.mkdirSync(process.cwd() + '/' + folder)
 
-  setTimeout(log, 100, 'Profiling')
+  setTimeout(log, delay || 100, 'Profiling')
 
   process.stdin.resume()
   process.stdout.write('\u001b[?25l')

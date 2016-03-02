@@ -3,6 +3,11 @@
   0x [flags] node [node-flags] file.js
 
 
+  --delay | -d    Delay before tracing begins, allows us to ignore
+                  initialisation stacks (e.g. module loading). 
+                  Milliseconds
+                  Default: 0
+
   --preview | -p  Generates an SVG file, prerenders SVG inside HTML
                   and outputs a PNG to the terminal (if possible)
                   Depends on imagemagick (brew install imagemagick)
