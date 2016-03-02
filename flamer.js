@@ -103,7 +103,9 @@ function flameGraph () {
   colors.def = colors.core
   colors.js = colors.core
   colors.c = colors.deps
+
   var diffScale = d3.scale.linear().range([0, 0.2])
+
   function colorHash (d, perc) {
     if (!d.name) {
       return perc ? 'rgb(127, 127, 127)' : 'rgba(0, 0, 0, 0)'
