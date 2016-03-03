@@ -150,7 +150,6 @@ function linux (args, sudo) {
     'perf',
     'record',
     !traceInfo ? '-q' : '',
-    delay,
     '-e',
     'cpu-clock',
     '-F 1000', // 1000 samples per sec === 1ms profiling like dtrace
