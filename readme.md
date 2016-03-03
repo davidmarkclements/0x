@@ -104,6 +104,8 @@ Default: false
 
 ### --delay | -d   
 
+*note* only supported on OS X at the moment
+
 Milliseconds. Delay before tracing begins, allows us to ignore
 initialisation stacks (e.g. module loading).
 
