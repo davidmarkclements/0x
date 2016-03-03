@@ -15,10 +15,13 @@ is *not* to show a preview, you can use `-p` to turn it on.
 
 ## Support
 
-* Linux
-* OS X
-* SmartOS
-* *not* Windows (PR's welcome)
+* Node v4+
+
+* OS
+  * Linux
+  * OS X
+  * SmartOS
+  * *not* Windows (PR's welcome)
 
 ## Install
 
