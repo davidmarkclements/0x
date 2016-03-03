@@ -6,6 +6,7 @@ var pump = require('pump')
 var split = require('split2')
 var sym = require('perf-sym')
 var bstr = require('browserify-string')
+var through = require('through2')
 var convert = require('./stack-convert')
 var gen = require('./gen')
 var debug = require('debug')('0x')
@@ -192,9 +193,9 @@ function linux (args, sudo) {
     var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat])
 
     if (traceInfo) { stacks.stderr.pipe(process.stderr) }
-
+    var stacksOut = stackLine(stacks, delay)
     pump(
-      stacks.stdout,
+      stacksOut,
       stacksOnly === '-'
         ? process.stdout
         : fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
@@ -208,12 +209,47 @@ function linux (args, sudo) {
         process.exit()
       })
     }
-    pump(
-      stacks.stdout,
-      split(),
-      sink(args, proc.pid, folder, clock)
-    )
+    stacks.on('exit', function () {
+      pump(
+        fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
+        split(),
+        sink(args, proc.pid, folder, clock)
+      )
+    })
+
   })
+}
+
+function stackLine(stacks, delay) {
+  if (!delay) {
+    return pump(stacks.stdout, split())
+  }
+
+  var start
+  var pastDelay
+
+  return pump(
+    stacks.stdout,
+    split(),
+    through(function (line, enc, cb) {
+      var diff 
+      line += ''
+      if (/cpu-clock:/.test(line)) {
+          if (!start) {
+            start = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10)
+          } else {
+            diff = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10) - start
+            pastDelay = (diff > delay)
+          }
+      }    
+      if (pastDelay) { 
+        cb(null, line + '\n')
+      } else {
+        cb()
+      }
+    })
+  )
+
 }
 
 function sink (args, pid, folder, clock) {

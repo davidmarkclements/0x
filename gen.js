@@ -29,13 +29,18 @@ module.exports = function (stacks, opts, next, done) {
 
 
   if (!browser && !opts.preview) {
-    require('f' + 's')
-      .writeFileSync(dir + '/' + opts.name + '.html', 
-        '<meta charset="utf-8">' +
-        '<h1 style="color: rgb(68, 68, 68);">' + opts.title + '</h1>' +
-        '<style>body {padding-left: 2%; background:black}rect:hover {opacity: 0.9}</style>' +
-        '<chart></chart>' +
-        '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>')
+    var f = '<meta charset="utf-8">' +
+            '<h1 style="color: rgb(68, 68, 68);">' + opts.title + '</h1>' +
+            '<style>body {padding-left: 2%; background:black}rect:hover {opacity: 0.9}</style>' +
+            '<chart></chart>' +
+            '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>'
+            
+    if (opts.name === '-') {
+      process.stdout.write(f)
+    } else {  
+      require('f' + 's')
+        .writeFileSync(dir + '/' + opts.name + '.html', f)
+    }
     next && next()
     done && done()
     return

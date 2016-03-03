@@ -104,9 +104,7 @@ Default: false
 
 ### --delay | -d   
 
-*note* only supported on OS X at the moment
-
-Milliseconds. Delay before tracing begins, allows us to ignore
+Milliseconds. Delay before tracing begins (or before stacks are processed in the Linux case), allows us to ignore
 initialisation stacks (e.g. module loading).
 
 Example: `0x -d 2000 my-app.js`
