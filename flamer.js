@@ -316,6 +316,12 @@ function flameGraph () {
         var svg = d3.select(this).select('svg')
         var g = svg.selectAll('g').data(nodes)
 
+        svg.on('click', function (d) {
+          if (d3.event.path[0] === this) {
+            zoom(d)
+          }
+        })
+
         g.transition()
           .duration(transitionDuration)
           .ease(transitionEase)
@@ -395,9 +401,6 @@ function flameGraph () {
         hidden.forEach(function (d) {
           hide(d)
         })
-        // hidden.select('rect').remove()
-        // hidden.select('foreignObject').remove()
-        // hidden.select('title').remove()
 
         g.exit().remove()
       })
