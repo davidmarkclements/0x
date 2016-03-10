@@ -166,7 +166,7 @@ function linux (args, sudo) {
   ].filter(Boolean).concat(args.node), {
     stdio: 'inherit'
   }).on('exit', function (code) {
-    if (code !== 0 && code !== 143) {
+    if (code !== 0 && code !== 143 && code !== 130) {
       tidy()
       process.exit(code)
     }
