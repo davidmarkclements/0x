@@ -37,13 +37,14 @@ function sun (args, sudo) {
     return spawn('sudo', ['true'])
       .on('exit', function () { sun(args, true) })
   }
+  var node = pathTo('node')
   var traceInfo = args['trace-info']
   var stacksOnly = args['stacks-only']
   var delay = args.delay || args.d
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
 
-  var proc = spawn('node', [
+  var proc = spawn(node, [
     '--perf-basic-prof',
     '-r', path.join(__dirname, 'soft-exit')
   ].concat(args.node), {
@@ -139,6 +140,7 @@ function linux (args, sudo) {
       .on('exit', function () { linux(args, true) })
   }
 
+  var node = pathTo('node')
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
   var traceInfo = args['trace-info']
@@ -158,13 +160,13 @@ function linux (args, sudo) {
     '-o',
     perfdat,
     '--',
-    'node',
+    node,
     '--perf-basic-prof',
     '-r', path.join(__dirname, 'soft-exit')
   ].filter(Boolean).concat(args.node), {
     stdio: 'inherit'
   }).on('exit', function (code) {
-    if (code !== 0) {
+    if (code !== 0 && code !== 143 && code !== 130) {
       tidy()
       process.exit(code)
     }
