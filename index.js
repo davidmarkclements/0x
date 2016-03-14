@@ -172,7 +172,7 @@ function linux (args, sudo) {
     }
   })
 
-  var folder = 'profile-' + proc.pid
+  var folder = 'profile-' + proc.pid + '-' + (new Date()).getTime();
   fs.mkdirSync(process.cwd() + '/' + folder)
 
   setTimeout(log, delay || 100, 'Profiling')

@@ -39,5 +39,6 @@
   "devDependencies": {
     "deep-diff": "^0.3.3",
     "standard": "^6.0.7"
-  }
+  },
+  "browserify-shim": {}
 }
