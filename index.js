@@ -28,6 +28,16 @@ module.exports = function (args) {
   })
 }
 
+function getProfileFolderName(args, proc) {
+  var name = 'profile-' + proc.pid
+
+  if (args['timestamp-profiles']) {
+    name += '-' + Date.now()
+  }
+
+  return name
+}
+
 function sun (args, sudo) {
   var dtrace = pathTo('dtrace')
   var profile = path.join(__dirname, 'node_modules', '.bin', 'profile_1ms.d')
@@ -62,7 +72,7 @@ function sun (args, sudo) {
 
     if (traceInfo) { prof.stderr.pipe(process.stderr) }
 
-    folder = 'profile-' + proc.pid
+    folder = getProfileFolderName(args, proc)
     fs.mkdirSync(process.cwd() + '/' + folder)
 
     pump(
@@ -172,7 +182,7 @@ function linux (args, sudo) {
     }
   })
 
-  var folder = 'profile-' + proc.pid
+  var folder = getProfileFolderName(args, proc)
   fs.mkdirSync(process.cwd() + '/' + folder)
 
   setTimeout(log, delay || 100, 'Profiling')
@@ -234,7 +244,7 @@ function stackLine(stacks, delay) {
     stacks.stdout,
     split(),
     through(function (line, enc, cb) {
-      var diff 
+      var diff
       line += ''
       if (/cpu-clock:/.test(line)) {
           if (!start) {
@@ -243,8 +253,8 @@ function stackLine(stacks, delay) {
             diff = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10) - start
             pastDelay = (diff > delay)
           }
-      }    
-      if (pastDelay) { 
+      }
+      if (pastDelay) {
         cb(null, line + '\n')
       } else {
         cb()
