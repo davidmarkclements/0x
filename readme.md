@@ -59,6 +59,22 @@ When `0x` catches the SIGINT, it process the stacks and
 generates a profile folder, containing flamegraph.html
 
 
+## Docker
+Due to security reasons Docker containers tend to result in the following error:
+
+```bash
+Cannot read kernel map
+perf_event_open(..., PERF_FLAG_FD_CLOEXEC) failed with unexpected error 1 (Operation not permitted)
+perf_event_open(..., 0) failed unexpectedly with error 1 (Operation not permitted)
+Error:
+You may not have permission to collect stats.
+[...]
+```
+We can work around this problem by running our container with the `--privileged` option
+or add `privileged: true` in your `docker-compose.yml` file.
+See the [Docker's doc](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) for more info.
+
+
 ## Production Servers
 
 Generating a flamegraph can be quite intense on CPU and memory,
@@ -201,6 +217,13 @@ Example: `0x -c gen [flags] profile-$PID/stacks.$PID.out > flamegraph.html`
 
 Flags include all the flags that can be passed to 0x
 
+#### `--timestamp-profiles`
+
+Adds the current timestamp to the Profile Folder's name minimizing collisions
+for in containerized environments
+
+Example: `profile-3866-`
+
 ## The Profile Folder
 
 A profile folder will be created and named after the PID, e.g.
@@ -253,21 +276,6 @@ Yes please!
 ## Debugging
 
 `DEBUG=0x* 0x my-app.js`
-
-## Docker
-In a docker container, due to security reasons, you most likelly gonna end up with the follwing error:
-
-```bash
-Cannot read kernel map
-perf_event_open(..., PERF_FLAG_FD_CLOEXEC) failed with unexpected error 1 (Operation not permitted)
-perf_event_open(..., 0) failed unexpectedly with error 1 (Operation not permitted)
-Error:
-You may not have permission to collect stats.
-[...]
-```
-You can work around this problem running your container with the `--privileged` option
-(please check [docker's doc](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) for further insights)
-or add `privileged: true` in your `docker-compose.yml`.
 
 ## Alternatives
 

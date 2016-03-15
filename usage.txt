@@ -3,46 +3,48 @@
   0x [flags] node [node-flags] file.js
 
 
-  --delay | -d    Delay before tracing begins, allows us to ignore
-                  initialisation stacks (e.g. module loading). 
-                  Milliseconds
-                  Default: 0
+  --delay | -d            Delay before tracing begins, allows us to ignore
+                          initialisation stacks (e.g. module loading).
+                          Milliseconds
+                          Default: 0
 
-  --preview | -p  Generates an SVG file, prerenders SVG inside HTML
-                  and outputs a PNG to the terminal (if possible)
-                  Depends on imagemagick (brew install imagemagick)
-                  If using iTerm 2.9+ image will be output to terminal
-                  Warning - depending on the amount of stacks this 
-                  option can take tens of seconds
-                  Default: false
+  --preview | -p          Generates an SVG file, prerenders SVG inside HTML
+                          and outputs a PNG to the terminal (if possible)
+                          Depends on imagemagick (brew install imagemagick)
+                          If using iTerm 2.9+ image will be output to terminal
+                          Warning - depending on the amount of stacks this
+                          option can take tens of seconds
+                          Default: false
 
-  --langs | -l    Coarser form of tiers, colour code by JS or C
-                  Default: false
+  --langs | -l            Coarser form of tiers, colour code by JS or C
+                          Default: false
 
-  --tiers | -t    Overrides langs, Colour code frames by type:
-                  v8, regexp, nativeC, nativeJS, core, deps, app
-                  Default: false
+  --tiers | -t            Overrides langs, Colour code frames by type:
+                          v8, regexp, nativeC, nativeJS, core, deps, app
+                          Default: false
 
-  --exclude | -x  Exclude tiers or langs, comma seperated list
-                  Tiers: v8, regexp, nativeC, nativeJS, core, deps, app
-                  Langs: js, c
-                  Default: v8
+  --exclude | -x          Exclude tiers or langs, comma seperated list
+                          Tiers: v8, regexp, nativeC, nativeJS, core, deps, app
+                          Langs: js, c
+                          Default: v8
 
-  --include       Include tiers, Overwrites exclude
+  --include               Include tiers, Overwrites exclude
 
-  --theme         Dark or Light theme
-                  Default: Dark
+  --theme                 Dark or Light theme
+                          Default: Dark
 
-  --stacks-only   Don't generate the flamegraph, only create the stacks 
-                  output.
-                  If assigned to '-' stacks output will come through stdout
-                  Default: false
+  --stacks-only           Don't generate the flamegraph, only create the stacks
+                          output.
+                          If assigned to '-' stacks output will come through stdout
+                          Default: false
 
-  --trace-info    Show output from dtrace or perf tools
-                  Default: false
+  --trace-info            Show output from dtrace or perf tools
+                          Default: false
 
-  --cmd | -c      Command Mode - A tool set for processing data in 
-                  the profile folder. 
+  --cmd | -c              Command Mode - A tool set for processing data in
+                          the profile folder.
 
-                  Run 0x --cmd help for a list of commands
+                          Run 0x --cmd help for a list of commands
+
+  --timestamp-profiles    Add timestamp to you profile folder's name
 
