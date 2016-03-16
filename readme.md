@@ -264,6 +264,27 @@ Now try some other options, e.g.
 0x -t examples/rest-api
 ```
 
+### Or using [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
+_this process has been tested on linux, different milage may apply on OSX with boot2docker_
+Clone this repo and `cd` to the `examples/docker` folder
+
+```
+docker-compose up
+```
+open another shell and send you SIGINT:
+
+```
+sudo kill -s SIGINT `ps aux | grep 'node /usr/local/bin/0x' | head -1| awk '{print $2}'`
+# might differ for boot2docker
+```
+docker-compose can now be stopped, the profile directory will be inside `examples/rest-api`.
+
+For an interactive test run:
+
+```
+docker-compose run flames bash
+```
+
 ## v1
 
 Don't use v1, it was an experiment and is  non functional

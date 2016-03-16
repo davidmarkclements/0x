@@ -1,0 +1,8 @@
+flames:
+  build: .
+  privileged: true
+  environment:
+    DEBUG: '0x*'
+  volumes:
+   - ../rest-api:/app
+  command: bash -c 'cd /app && 0x --timestamp-profiles node --trace-opt index.js& sleep 2; cd /app && npm test'
