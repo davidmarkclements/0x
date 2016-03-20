@@ -9,7 +9,7 @@ setTimeout(()=>{
     console.log(res);
 
     if (count >= max) {
-      console.log('Process exited now.');
+      console.log('Process exited now. Hit ctrl+c');
       return process.exit()
     }
 
