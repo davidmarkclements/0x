@@ -6,7 +6,7 @@
   --delay | -d            Delay before tracing begins, allows us to ignore
                           initialisation stacks (e.g. module loading).
                           Milliseconds
-                          Default: 0
+                          Default: 300
 
   --preview | -p          Generates an SVG file, prerenders SVG inside HTML
                           and outputs a PNG to the terminal (if possible)
