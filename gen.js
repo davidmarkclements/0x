@@ -34,10 +34,10 @@ module.exports = function (stacks, opts, next, done) {
             '<style>body {padding-left: 2%; background:black}rect:hover {opacity: 0.9}</style>' +
             '<chart></chart>' +
             '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>'
-            
+
     if (opts.name === '-') {
       process.stdout.write(f)
-    } else {  
+    } else {
       require('f' + 's')
         .writeFileSync(dir + '/' + opts.name + '.html', f)
     }
@@ -74,6 +74,12 @@ module.exports = function (stacks, opts, next, done) {
   var zoomin = doc.createElement('button')
   var optd = doc.createElement('button')
   var notOptd = doc.createElement('button')
+
+  // auto-scroll to buttom of chart when content is loaded
+  doc.addEventListener("DOMContentLoaded", function(event) {
+    var element = doc.querySelector("chart");
+    element.scrollTop = element.scrollHeight;
+  });
 
   var v8 = doc.createElement('input')
   v8.type = 'checkbox'
