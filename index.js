@@ -12,18 +12,18 @@ var gen = require('./gen')
 var debug = require('debug')('0x')
 var log = require('single-line-log').stdout
 
-module.exports = function (args) {
+module.exports = function (args, binary) {
   isSudo(function (sudo) {
     switch (process.platform) {
       // perf:
       case 'linux':
-        return linux(args, sudo)
+        return linux(args, sudo, binary)
       // unsupported, but.. xperf? intel vtune?
       case 'win32':
         return unsupported()
       // dtrace: darwin, freebsd, sunos, smartos...
       default:
-        return sun(args, sudo)
+        return sun(args, sudo, binary)
     }
   })
 }
@@ -38,7 +38,7 @@ function getProfileFolderName(args, proc) {
   return name
 }
 
-function sun (args, sudo) {
+function sun (args, sudo, binary) {
   var dtrace = pathTo('dtrace')
   var profile = path.join(__dirname, 'node_modules', '.bin', 'profile_1ms.d')
   if (!dtrace) return notFound('dtrace')
@@ -47,7 +47,7 @@ function sun (args, sudo) {
     return spawn('sudo', ['true'])
       .on('exit', function () { sun(args, true) })
   }
-  var node = pathTo('node')
+  var node = binary === 'node' ? pathTo('node') : binary
   var traceInfo = args['trace-info']
   var stacksOnly = args['stacks-only']
   var delay = args.delay || args.d
@@ -140,7 +140,7 @@ function sun (args, sudo) {
   })
 }
 
-function linux (args, sudo) {
+function linux (args, sudo, binary) {
   var perf = pathTo('perf')
   if (!perf) return notFound('perf')
 
@@ -150,7 +150,7 @@ function linux (args, sudo) {
       .on('exit', function () { linux(args, true) })
   }
 
-  var node = pathTo('node')
+  var node = binary === 'node' ? pathTo('node') : binary
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
   var traceInfo = args['trace-info']
