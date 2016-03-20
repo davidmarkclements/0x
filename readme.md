@@ -49,6 +49,14 @@ When node flags aren't required, we can use the shorthand form:
 0x my-app.js
 ```
 
+If we want to test against a local `node` binary, simply reference the binary directly.
+
+For example if the `node` binary is the current working directory:
+
+```sh
+0x ./node my-app.js
+```
+
 ## Generating
 
 Once we're ready to generate a flamegraph we send a SIGINT.
