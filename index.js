@@ -337,8 +337,10 @@ function tidy () {
 }
 
 function pathTo (bin) {
+  if (fs.existsSync(bin)) { return bin }
   var path
   try { path = which.sync(bin) } catch (e) {}
+  if (!path) { throw Error('Cannot find ' + bin + ' on your system!') }
   return path
 }
 
