@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const path = require('path')
 
 cmd()
 
@@ -20,7 +21,16 @@ function cmd () {
     argv.splice(stacksOnlyIx + 1, 1)
   }
 
-  var ix = argv.indexOf('node')
+  // get the position of node binary in argv; else stay -1
+  var ix = -1
+  var bin = ''
+  argv.forEach((el, index) => {
+    if (path.basename(el) === 'node' && el !== 'node') {
+      ix = index
+      bin = argv[index]
+      return
+    }
+  })
 
   if (ix === -1) {
     var c = argv.length
@@ -35,5 +45,6 @@ function cmd () {
   args.node = argv.slice(ix + 1)
   args.delay = args.delay || args.d
   if (typeof args.delay === 'undefined') args.delay = 300
-  require('./')(args)
+  // also pass binary, if provided. Fallback to simple 'node'
+  require('./')(args, bin ? argv[ix] : 'node')
 }
