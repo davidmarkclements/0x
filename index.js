@@ -67,7 +67,14 @@ function sun (args, sudo, binary) {
   })
   var folder
   var prof
-  function start() {
+
+  function start () {
+    // on script end, bail automatically, don't when no-autoexit flag is set
+    proc.on('exit', () => {
+      debug(proc.pid, 'exiting')
+      process.kill(process.pid, 'SIGINT') // keeps compat, with original API
+    })
+
     prof = spawn('sudo', [profile, '-p', proc.pid])
 
     if (traceInfo) { prof.stderr.pipe(process.stderr) }
