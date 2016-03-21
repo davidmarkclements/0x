@@ -64,10 +64,13 @@ function sun (args, sudo, binary) {
       tidy()
       process.exit(code)
     }
+    // on script end, bail automatically, don't when no-autoexit flag is set
+    process.kill(process.pid, 'SIGINT') // keeps compat, with original API
   })
   var folder
   var prof
-  function start() {
+
+  function start () {
     prof = spawn('sudo', [profile, '-p', proc.pid])
 
     if (traceInfo) { prof.stderr.pipe(process.stderr) }
@@ -180,6 +183,7 @@ function linux (args, sudo, binary) {
       tidy()
       process.exit(code)
     }
+    process.kill(process.pid, 'SIGINT')
   })
 
   var folder = getProfileFolderName(args, proc)

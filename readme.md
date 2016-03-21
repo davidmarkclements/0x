@@ -307,4 +307,3 @@ the following people and their Open Source/Info Sharing efforts
 ## License
 
 MIT and Apache (depending on the code, see LICENSE.md)
-
