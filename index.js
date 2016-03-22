@@ -11,6 +11,27 @@ var convert = require('./stack-convert')
 var gen = require('./gen')
 var debug = require('debug')('0x')
 var log = require('single-line-log').stdout
+var EventEmitter = require('events')
+var ee = new EventEmitter()
+
+var traceInfo
+var profile
+var proc
+var prof
+var folder
+
+var clock
+// handle everything that might be leaking here
+process.on('exit', () => {
+  if (clock) {
+    clock.kill()
+  }
+})
+// handle premature exit here (when already registered .on('target_exited')).
+// REALLY early exiting (right after start) is handled in listener
+process.on('SIGINT', () => {
+  ee.emit('target_exited')
+})
 
 module.exports = function (args, binary) {
   isSudo(function (sudo) {
@@ -28,19 +49,38 @@ module.exports = function (args, binary) {
   })
 }
 
-function getProfileFolderName(args, proc) {
+function getProfileFolderName (args, proc) {
   var name = 'profile-' + proc.pid
 
   if (args['timestamp-profiles']) {
     name += '-' + Date.now()
   }
-
   return name
+}
+
+// start profiler
+function startSunProfiler (args) {
+  prof = spawn('sudo', [profile, '-p', proc.pid])
+
+  if (traceInfo) { prof.stderr.pipe(process.stderr) }
+
+  folder = getProfileFolderName(args, proc)
+  fs.mkdirSync(process.cwd() + '/' + folder)
+
+  pump(
+    prof.stdout,
+    fs.createWriteStream(folder + '/.stacks.' + proc.pid + '.out')
+  )
+
+  setTimeout(log, 100, 'Profiling')
+
+  process.stdin.resume()
+  process.stdout.write('\u001b[?25l')
 }
 
 function sun (args, sudo, binary) {
   var dtrace = pathTo('dtrace')
-  var profile = path.join(__dirname, 'node_modules', '.bin', 'profile_1ms.d')
+  profile = path.join(__dirname, 'node_modules', '.bin', 'profile_1ms.d')
   if (!dtrace) return notFound('dtrace')
   if (!sudo) {
     console.log('0x captures stacks using dtrace, which requires sudo access')
@@ -48,54 +88,15 @@ function sun (args, sudo, binary) {
       .on('exit', function () { sun(args, true) })
   }
   var node = binary === 'node' ? pathTo('node') : binary
-  var traceInfo = args['trace-info']
+  traceInfo = args['trace-info']
   var stacksOnly = args['stacks-only']
   var delay = args.delay || args.d
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
 
-  var proc = spawn(node, [
-    '--perf-basic-prof',
-    '-r', path.join(__dirname, 'soft-exit')
-  ].concat(args.node), {
-    stdio: 'inherit'
-  }).on('exit', function (code) {
-    if (code !== 0) {
-      tidy()
-      process.exit(code)
-    }
-    // on script end, bail automatically, don't when no-autoexit flag is set
-    process.kill(process.pid, 'SIGINT') // keeps compat, with original API
-  })
-  var folder
-  var prof
-
-  function start () {
-    prof = spawn('sudo', [profile, '-p', proc.pid])
-
-    if (traceInfo) { prof.stderr.pipe(process.stderr) }
-
-    folder = getProfileFolderName(args, proc)
-    fs.mkdirSync(process.cwd() + '/' + folder)
-
-    pump(
-      prof.stdout,
-      fs.createWriteStream(folder + '/.stacks.' + proc.pid + '.out')
-    )
-
-    setTimeout(log, 100, 'Profiling')
-
-    process.stdin.resume()
-    process.stdout.write('\u001b[?25l')
-  }
-
-  if (delay) {
-    setTimeout(start, delay)
-  } else {
-    start()
-  }
-
-  process.once('SIGINT', function () {
+  // register this event early since it can happen prematurely. In any case
+  // handle profiling output
+  ee.once('target_exited', function () {
     if (!prof) {
       debug('Profiling not begun')
       console.log('No stacks, profiling had not begun')
@@ -104,13 +105,15 @@ function sun (args, sudo, binary) {
     }
     debug('Caught SIGINT, generating')
     log('Caught SIGINT, generating')
-    var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
+
+    clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
+
     process.on('uncaughtException', function (e) {
       clock.kill()
       throw e
     })
-    process.on('exit', clock.kill)
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
+
     var translate = sym({silent: true, pid: proc.pid})
 
     if (!translate) {
@@ -141,6 +144,28 @@ function sun (args, sudo, binary) {
       sink(args, proc.pid, folder, clock)
     )
   })
+  // start early or late according to user
+  // ...optimistacally start early though
+  if (delay) {
+    setTimeout(() => {
+      startSunProfiler(args)
+    }, delay)
+  } else {
+    startSunProfiler(args)
+  }
+  // target process
+  proc = spawn(node, [
+    '--perf-basic-prof',
+    '-r', path.join(__dirname, 'soft-exit')
+  ].concat(args.node), {
+    stdio: 'inherit'
+  }).on('exit', function (code) {
+    if (code !== 0) {
+      tidy()
+      process.exit(code)
+    }
+    ee.emit('target_exited')
+  })
 }
 
 function linux (args, sudo, binary) {
@@ -156,54 +181,22 @@ function linux (args, sudo, binary) {
   var node = binary === 'node' ? pathTo('node') : binary
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
-  var traceInfo = args['trace-info']
+  traceInfo = args['trace-info']
   var stacksOnly = args['stacks-only']
   var delay = args.delay || args.d
-    delay = parseInt(delay, 10)
-    if (isNaN(delay)) { delay = 0 }
+  delay = parseInt(delay, 10)
+  if (isNaN(delay)) { delay = 0 }
 
-  var proc = spawn('sudo', [
-    'perf',
-    'record',
-    !traceInfo ? '-q' : '',
-    '-e',
-    'cpu-clock',
-    '-F 1000', // 1000 samples per sec === 1ms profiling like dtrace
-    '-g',
-    '-o',
-    perfdat,
-    '--',
-    node,
-    '--perf-basic-prof',
-    '-r', path.join(__dirname, 'soft-exit')
-  ].filter(Boolean).concat(args.node), {
-    stdio: 'inherit'
-  }).on('exit', function (code) {
-    if (code !== 0 && code !== 143 && code !== 130) {
-      tidy()
-      process.exit(code)
-    }
-    process.kill(process.pid, 'SIGINT')
-  })
-
-  var folder = getProfileFolderName(args, proc)
-  fs.mkdirSync(process.cwd() + '/' + folder)
-
-  setTimeout(log, delay || 100, 'Profiling')
-
-  process.stdin.resume()
-  process.stdout.write('\u001b[?25l')
-
-  process.once('SIGINT', function () {
+  ee.once('target_exited', function () {
     debug('Caught SIGINT, generating flamegraph')
     log('Caught SIGINT, generating flamegraph ')
 
-    var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
+    clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
+
     process.on('uncaughtException', function (e) {
       clock.kill()
       throw e
     })
-    process.on('exit', clock.kill)
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
 
     var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat])
@@ -232,11 +225,42 @@ function linux (args, sudo, binary) {
         sink(args, proc.pid, folder, clock)
       )
     })
-
   })
+
+  proc = spawn('sudo', [
+    'perf',
+    'record',
+    !traceInfo ? '-q' : '',
+    '-e',
+    'cpu-clock',
+    '-F 1000', // 1000 samples per sec === 1ms profiling like dtrace
+    '-g',
+    '-o',
+    perfdat,
+    '--',
+    node,
+    '--perf-basic-prof',
+    '-r', path.join(__dirname, 'soft-exit')
+  ].filter(Boolean).concat(args.node), {
+    stdio: 'inherit'
+  }).on('exit', function (code) {
+    if (code !== 0 && code !== 143 && code !== 130) {
+      tidy()
+      process.exit(code)
+    }
+    ee.emit('target_exited')
+  })
+
+  folder = getProfileFolderName(args, proc)
+  fs.mkdirSync(process.cwd() + '/' + folder)
+
+  setTimeout(log, delay || 100, 'Profiling')
+
+  process.stdin.resume()
+  process.stdout.write('\u001b[?25l')
 }
 
-function stackLine(stacks, delay) {
+function stackLine (stacks, delay) {
   if (!delay) {
     return pump(stacks.stdout, split())
   }
@@ -251,12 +275,12 @@ function stackLine(stacks, delay) {
       var diff
       line += ''
       if (/cpu-clock:/.test(line)) {
-          if (!start) {
-            start = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10)
-          } else {
-            diff = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10) - start
-            pastDelay = (diff > delay)
-          }
+        if (!start) {
+          start = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10)
+        } else {
+          diff = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10) - start
+          pastDelay = (diff > delay)
+        }
       }
       if (pastDelay) {
         cb(null, line + '\n')
@@ -265,7 +289,6 @@ function stackLine(stacks, delay) {
       }
     })
   )
-
 }
 
 function sink (args, pid, folder, clock) {
