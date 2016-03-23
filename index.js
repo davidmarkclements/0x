@@ -45,7 +45,9 @@ function sun (args, sudo, binary) {
   if (!sudo) {
     console.log('0x captures stacks using dtrace, which requires sudo access')
     return spawn('sudo', ['true'])
-      .on('exit', function () { sun(args, true) })
+      .on('exit', function (code) { 
+        if (code === 0) { sun(args, true) }
+      })
   }
   var node = binary === 'node' ? pathTo('node') : binary
   var traceInfo = args['trace-info']
@@ -67,6 +69,7 @@ function sun (args, sudo, binary) {
     // on script end, bail automatically, don't when no-autoexit flag is set
     process.kill(process.pid, 'SIGINT') // keeps compat, with original API
   })
+
   var folder
   var prof
 
@@ -150,7 +153,9 @@ function linux (args, sudo, binary) {
   if (!sudo) {
     console.log('0x captures stacks using perf, which requires sudo access')
     return spawn('sudo', ['true'])
-      .on('exit', function () { linux(args, true) })
+      .on('exit', function (code) { 
+        if (code === 0) { linux(args, true) }
+      })
   }
 
   var node = binary === 'node' ? pathTo('node') : binary
