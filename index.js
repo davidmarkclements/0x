@@ -206,7 +206,7 @@ function linux (args, sudo, binary) {
     process.stdin.resume() 
     process.stdout.write('\u001b[?25l')
   }
-  
+
   process.once('SIGINT', analyze)
 
   function analyze (manual) {
