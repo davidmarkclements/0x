@@ -45,7 +45,7 @@ function sun (args, sudo, binary) {
   if (!sudo) {
     console.log('0x captures stacks using dtrace, which requires sudo access')
     return spawn('sudo', ['true'])
-      .on('exit', function () { sun(args, true) })
+      .on('exit', function () { sun(args, true, binary) })
   }
   var node = !binary || binary === 'node' ? pathTo('node') : binary
   var traceInfo = args['trace-info']
@@ -158,7 +158,7 @@ function linux (args, sudo, binary) {
   if (!sudo) {
     console.log('0x captures stacks using perf, which requires sudo access')
     return spawn('sudo', ['true'])
-      .on('exit', function () { linux(args, true) })
+      .on('exit', function () { linux(args, true, binary) })
   }
 
   var node = !binary || binary === 'node' ? pathTo('node') : binary
