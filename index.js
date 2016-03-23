@@ -45,17 +45,15 @@ function sun (args, sudo, binary) {
   if (!sudo) {
     console.log('0x captures stacks using dtrace, which requires sudo access')
     return spawn('sudo', ['true'])
-      .on('exit', function (code) { 
-        if (code === 0) { sun(args, true) }
-      })
+      .on('exit', function () { sun(args, true) })
   }
-  var node = !binary || binary === 'node' ? pathTo('node') : binary
+  var node = binary === 'node' ? pathTo('node') : binary
   var traceInfo = args['trace-info']
   var stacksOnly = args['stacks-only']
   var delay = args.delay || args.d
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
-  console.log(node, binary)
+  Error.stackTraceLimit = Infinity
   var proc = spawn(node, [
     '--perf-basic-prof',
     '-r', path.join(__dirname, 'soft-exit')
@@ -66,10 +64,8 @@ function sun (args, sudo, binary) {
       tidy()
       process.exit(code)
     }
-    // on script end, bail automatically
-    process.kill(process.pid, 'SIGINT') // keeps compat, with original API
+    analyze(true)
   })
-
   var folder
   var prof
 
@@ -98,15 +94,24 @@ function sun (args, sudo, binary) {
     start()
   }
 
-  process.once('SIGINT', function () {
+  process.once('SIGINT', analyze)
+
+  function analyze(manual) {
+    if (analyze.called) { return }
+    analyze.called = true
+
     if (!prof) {
       debug('Profiling not begun')
       console.log('No stacks, profiling had not begun')
       tidy()
       process.exit()
     }
-    debug('Caught SIGINT, generating')
-    log('Caught SIGINT, generating')
+
+    if (!manual) {
+      debug('Caught SIGINT, generating flamegraph')
+      log('Caught SIGINT, generating flamegraph ')      
+    }
+
     var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
     process.on('uncaughtException', function (e) {
       clock.kill()
@@ -143,7 +148,7 @@ function sun (args, sudo, binary) {
       split(),
       sink(args, proc.pid, folder, clock)
     )
-  })
+  }
 }
 
 function linux (args, sudo, binary) {
@@ -153,12 +158,10 @@ function linux (args, sudo, binary) {
   if (!sudo) {
     console.log('0x captures stacks using perf, which requires sudo access')
     return spawn('sudo', ['true'])
-      .on('exit', function (code) { 
-        if (code === 0) { linux(args, true) }
-      })
+      .on('exit', function () { linux(args, true) })
   }
 
-  var node = !binary || binary === 'node' ? pathTo('node') : binary
+  var node = binary === 'node' ? pathTo('node') : binary
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
   var traceInfo = args['trace-info']
@@ -188,7 +191,7 @@ function linux (args, sudo, binary) {
       tidy()
       process.exit(code)
     }
-    process.kill(process.pid, 'SIGINT')
+    analyze(true)
   })
 
   var folder = getProfileFolderName(args, proc)
@@ -199,9 +202,16 @@ function linux (args, sudo, binary) {
   process.stdin.resume()
   process.stdout.write('\u001b[?25l')
 
-  process.once('SIGINT', function () {
-    debug('Caught SIGINT, generating flamegraph')
-    log('Caught SIGINT, generating flamegraph ')
+  process.once('SIGINT', analyze)
+
+  function analyze (manual) {
+    if (analyze.called) { return }
+    analyze.called = true
+
+    if (!manual) {
+      debug('Caught SIGINT, generating flamegraph')
+      log('Caught SIGINT, generating flamegraph ')      
+    }
 
     var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
     process.on('uncaughtException', function (e) {
@@ -238,7 +248,7 @@ function linux (args, sudo, binary) {
       )
     })
 
-  })
+  }
 }
 
 function stackLine(stacks, delay) {
@@ -326,12 +336,15 @@ function sink (args, pid, folder, clock) {
           console.log('file://' + process.cwd() + '/' + folder + '/flamegraph.html', '\n')
           debug('exiting')
           debug('done rendering')
+          clock.kill()
           process.exit()
+          
         })
       })
   })
 }
 
+global.count = 0
 function tidy () {
   debug('tidying up')
   process.stdout.write('\u001b[?25h')
@@ -346,6 +359,7 @@ function tidy () {
 }
 
 function pathTo (bin) {
+  if (fs.existsSync(bin)) { return bin }
   var path
   try { path = which.sync(bin) } catch (e) {}
   if (!path) { throw Error('Cannot find ' + bin + ' on your system!') }
