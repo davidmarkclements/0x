@@ -46,5 +46,5 @@ function cmd () {
   args.delay = args.delay || args.d
   if (typeof args.delay === 'undefined') args.delay = 300
   // also pass binary, if provided. Fallback to simple 'node'
-  require('./')(args, bin ? argv[ix] : 'node')
+  require('./')(args, bin ? bin : 'node')
 }
