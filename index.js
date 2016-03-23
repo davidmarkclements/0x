@@ -84,8 +84,11 @@ function sun (args, sudo, binary) {
 
     setTimeout(log, 100, 'Profiling')
 
-    process.stdin.resume()
-    process.stdout.write('\u001b[?25l')
+    if (process.stdin.isPaused()) { 
+      process.stdin.resume() 
+      process.stdout.write('\u001b[?25l')
+    }
+    
   }
 
   if (delay) {
@@ -199,9 +202,11 @@ function linux (args, sudo, binary) {
 
   setTimeout(log, delay || 100, 'Profiling')
 
-  process.stdin.resume()
-  process.stdout.write('\u001b[?25l')
-
+  if (process.stdin.isPaused()) { 
+    process.stdin.resume() 
+    process.stdout.write('\u001b[?25l')
+  }
+  
   process.once('SIGINT', analyze)
 
   function analyze (manual) {
