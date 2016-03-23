@@ -47,7 +47,7 @@ function sun (args, sudo, binary) {
     return spawn('sudo', ['true'])
       .on('exit', function () { sun(args, true) })
   }
-  var node = binary === 'node' ? pathTo('node') : binary
+  var node = !binary || binary === 'node' ? pathTo('node') : binary
   var traceInfo = args['trace-info']
   var stacksOnly = args['stacks-only']
   var delay = args.delay || args.d
@@ -161,7 +161,7 @@ function linux (args, sudo, binary) {
       .on('exit', function () { linux(args, true) })
   }
 
-  var node = binary === 'node' ? pathTo('node') : binary
+  var node = !binary || binary === 'node' ? pathTo('node') : binary
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
   var traceInfo = args['trace-info']
