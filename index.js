@@ -13,6 +13,7 @@ var debug = require('debug')('0x')
 var log = require('single-line-log').stdout
 
 module.exports = function (args, binary) {
+  if (args.q) { log = noop }
   isSudo(function (sudo) {
     switch (process.platform) {
       // perf:
@@ -61,7 +62,7 @@ function sun (args, sudo, binary) {
     stdio: 'inherit'
   }).on('exit', function (code) {
     if (code !== 0) {
-      tidy()
+      tidy(args)
       process.exit(code)
     }
     analyze(true)
@@ -86,7 +87,7 @@ function sun (args, sudo, binary) {
 
     if (process.stdin.isPaused()) { 
       process.stdin.resume() 
-      process.stdout.write('\u001b[?25l')
+      if (!args.q) { process.stdout.write('\u001b[?25l') }
     }
     
   }
@@ -106,7 +107,7 @@ function sun (args, sudo, binary) {
     if (!prof) {
       debug('Profiling not begun')
       console.log('No stacks, profiling had not begun')
-      tidy()
+      tidy(args)
       process.exit()
     }
 
@@ -115,7 +116,7 @@ function sun (args, sudo, binary) {
       log('Caught SIGINT, generating flamegraph ')      
     }
 
-    var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
+    var clock = makeClock(args)
     process.on('uncaughtException', function (e) {
       clock.kill()
       throw e
@@ -127,7 +128,7 @@ function sun (args, sudo, binary) {
     if (!translate) {
       log('Unable to find map file!\n')
       debug('unable to find map file')
-      tidy()
+      tidy(args)
       process.exit()
     }
     pump(
@@ -140,9 +141,9 @@ function sun (args, sudo, binary) {
     if (stacksOnly) {
       return translate.on('end', function () {
         clock.kill()
-        process.stdout.write('\u001b[K\n')
+        if (!args.q) { process.stdout.write('\u001b[K\n') }
         console.log()
-        tidy()
+        tidy(args)
         process.exit()
       })
     }
@@ -191,7 +192,7 @@ function linux (args, sudo, binary) {
     stdio: 'inherit'
   }).on('exit', function (code) {
     if (code !== 0 && code !== 143 && code !== 130) {
-      tidy()
+      tidy(args)
       process.exit(code)
     }
     analyze(true)
@@ -204,7 +205,7 @@ function linux (args, sudo, binary) {
 
   if (process.stdin.isPaused()) { 
     process.stdin.resume() 
-    process.stdout.write('\u001b[?25l')
+    if (!args.q) { process.stdout.write('\u001b[?25l') }
   }
 
   process.once('SIGINT', analyze)
@@ -218,7 +219,7 @@ function linux (args, sudo, binary) {
       log('Caught SIGINT, generating flamegraph ')      
     }
 
-    var clock = spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
+    var clock = makeClock(args)
     process.on('uncaughtException', function (e) {
       clock.kill()
       throw e
@@ -239,9 +240,9 @@ function linux (args, sudo, binary) {
     if (stacksOnly) {
       return stacks.on('exit', function () {
         clock.kill()
-        process.stdout.write('\u001b[K\n')
+        if (!args.q) { process.stdout.write('\u001b[K\n') }
         console.log()
-        tidy()
+        tidy(args)
         process.exit()
       })
     }
@@ -337,7 +338,7 @@ function sink (args, pid, folder, clock) {
         }, function () {
           debug('flamegraph generated')
 
-          tidy()
+          tidy(args)
           console.log('file://' + process.cwd() + '/' + folder + '/flamegraph.html', '\n')
           debug('exiting')
           debug('done rendering')
@@ -350,9 +351,9 @@ function sink (args, pid, folder, clock) {
 }
 
 global.count = 0
-function tidy () {
+function tidy (args) {
   debug('tidying up')
-  process.stdout.write('\u001b[?25h')
+  if (!args.q) { process.stdout.write('\u001b[?25h') }
 
   fs.readdirSync('./')
     .filter(function (f) {
@@ -390,3 +391,11 @@ function isSudo (cb) {
     cb(false)
   })
 }
+
+function makeClock(args) {
+  return args.q ?
+    {kill: noop}  :
+    spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
+}
+
+function noop () {}

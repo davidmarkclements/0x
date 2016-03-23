@@ -41,6 +41,9 @@
   --trace-info            Show output from dtrace or perf tools
                           Default: false
 
+  -q                      Only output flamegraph URI
+                          Default: false
+
   --cmd | -c              Command Mode - A tool set for processing data in
                           the profile folder.
 
