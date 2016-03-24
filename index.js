@@ -54,7 +54,7 @@ function sun (args, sudo, binary) {
   var delay = args.delay || args.d
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
-  Error.stackTraceLimit = Infinity
+
   var proc = spawn(node, [
     '--perf-basic-prof',
     '-r', path.join(__dirname, 'soft-exit')
@@ -175,6 +175,7 @@ function linux (args, sudo, binary) {
     if (isNaN(delay)) { delay = 0 }
 
   var proc = spawn('sudo', [
+    '-E',
     'perf',
     'record',
     !traceInfo ? '-q' : '',
