@@ -1,6 +1,6 @@
 {
   "name": "0x",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "",
   "main": "index.js",
   "bin": "./cmd.js",
