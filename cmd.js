@@ -32,7 +32,7 @@ function cmd () {
   var ix = -1
   var bin = ''
   argv.forEach((el, index) => {
-    if (path.basename(el) === 'node' && el !== 'node') {
+    if (path.basename(el) === 'node') {
       ix = index
       bin = argv[index]
       return
@@ -50,6 +50,7 @@ function cmd () {
 
   var args = require('minimist')(argv.slice(0, ix))
   args.node = argv.slice(ix + 1)
+
   args.delay = typeof args.delay === 'number' ? args.delay : args.d
   if (typeof args.delay !== 'number') args.delay = 300
   // also pass binary, if provided. Fallback to simple 'node'
