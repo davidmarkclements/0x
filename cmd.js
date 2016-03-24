@@ -11,10 +11,17 @@ function cmd () {
   }
 
   if (!argv.length || ~argv.indexOf('-h') || ~argv.indexOf('--help')) {
+    process.stdout.write('\n')
+    banner()
     return require('fs')
       .createReadStream(__dirname + '/usage.txt')
       .pipe(process.stdout)
   }
+
+  if (~argv.indexOf('-v') || ~argv.indexOf('--version')) {
+    return banner()
+  }
+
   var stacksOnlyIx = argv.indexOf('--stacks-only')
   if (argv[stacksOnlyIx + 1] === '-') {
     argv[stacksOnlyIx] = '--stacks-only=-'
@@ -47,4 +54,9 @@ function cmd () {
   if (typeof args.delay !== 'number') args.delay = 300
   // also pass binary, if provided. Fallback to simple 'node'
   require('./')(args, bin ? bin : 'node')
+}
+
+function banner() {
+  var version = require('./package.json').version
+  process.stdout.write('0x ' + version + '\n')
 }
