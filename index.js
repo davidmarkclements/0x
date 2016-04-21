@@ -357,7 +357,7 @@ function sink (args, pid, folder, clock) {
 process.on('exit', (path) => {
   clock.kill()
 
-if (process.env['NO_OPEN_0X'] === 'true') {
+if (process.env['NO_OPEN_0X'] === 'true' || !path) {
   return
 }
 
