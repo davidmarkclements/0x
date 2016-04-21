@@ -5,6 +5,7 @@
   "main": "index.js",
   "bin": "./cmd.js",
   "scripts": {
+    "preinstall": "./build.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "stress-rest-example": "cd examples/rest-api && npm test",
     "lint": "standard"
@@ -25,7 +26,6 @@
     "clockface": "^1.1.1",
     "d3": "^3.5.16",
     "debug": "^2.2.0",
-    "electron-prebuilt": "^0.37.6",
     "end-of-stream": "^1.1.0",
     "hsl-to-rgb-for-reals": "^1.1.0",
     "jsdom": "^8.0.4",
@@ -38,6 +38,7 @@
     "which": "^1.2.4"
   },
   "devDependencies": {
+    "electron-prebuilt": "^0.37.6",
     "deep-diff": "^0.3.3",
     "standard": "^6.0.7"
   },
