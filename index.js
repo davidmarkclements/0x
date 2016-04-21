@@ -88,11 +88,11 @@ function sun (args, sudo, binary) {
 
     setTimeout(log, 100, 'Profiling')
 
-    if (process.stdin.isPaused()) { 
-      process.stdin.resume() 
+    if (process.stdin.isPaused()) {
+      process.stdin.resume()
       if (!args.q) { process.stdout.write('\u001b[?25l') }
     }
-    
+
   }
 
   if (delay) {
@@ -116,7 +116,7 @@ function sun (args, sudo, binary) {
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      log('Caught SIGINT, generating flamegraph ')      
+      log('Caught SIGINT, generating flamegraph ')
     }
 
     clock = makeClock(args)
@@ -207,8 +207,8 @@ function linux (args, sudo, binary) {
 
   setTimeout(log, delay || 100, 'Profiling')
 
-  if (process.stdin.isPaused()) { 
-    process.stdin.resume() 
+  if (process.stdin.isPaused()) {
+    process.stdin.resume()
     if (!args.q) { process.stdout.write('\u001b[?25l') }
   }
 
@@ -220,7 +220,7 @@ function linux (args, sudo, binary) {
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      log('Caught SIGINT, generating flamegraph ')      
+      log('Caught SIGINT, generating flamegraph ')
     }
 
     clock = makeClock(args)
@@ -356,6 +356,11 @@ function sink (args, pid, folder, clock) {
 
 process.on('exit', (path) => {
   clock.kill()
+
+if (process.env['NO_OPEN_0X'] === 'true') {
+  return
+}
+
   view.start(path)
 })
 
