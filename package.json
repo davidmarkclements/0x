@@ -25,6 +25,7 @@
     "clockface": "^1.1.1",
     "d3": "^3.5.16",
     "debug": "^2.2.0",
+    "electron-prebuilt": "^0.37.6",
     "end-of-stream": "^1.1.0",
     "hsl-to-rgb-for-reals": "^1.1.0",
     "jsdom": "^8.0.4",
