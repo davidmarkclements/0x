@@ -273,6 +273,11 @@ Now try some other options, e.g.
 0x -t examples/rest-api
 ```
 
+Babel (ES6 Transpile) Examples
+-------
+
+See `./examples/babel` for an example. Note the babel require hook is not currently supported. Notes on using the babel-cli instead can be found in the babel example readme.
+
 ## v1
 
 Don't use v1, it was an experiment and is  non functional
