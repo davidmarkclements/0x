@@ -84,8 +84,7 @@ function flameGraph () {
 
     switch (true) {
       case / native /.test(name): return {type: 'nativeJS', lang: 'js'}
-      case (name.split(':')[1] || '')
-        .replace(/(~|\*)?(\s+)?/, '')[0] !== '/': return {type: 'core', lang: 'js'}
+      case (name.indexOf('/') === -1 || /internal\//.test(name) && !/ \//.test(name)): return {type: 'core', lang: 'js'}
       case !/node_modules/.test(name): return {type: 'app', lang: 'js'}
       default: return {type: 'deps', lang: 'js'}
     }
