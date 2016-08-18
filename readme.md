@@ -30,6 +30,12 @@ is *not* to show a preview, you can use `-p` to turn it on.
 npm install -g 0x
 ```
 
+It is also possible to install `0x` without the `electron` dependency.
+
+```sh
+NO_OPEN_0X=true npm install -g 0x
+```
+
 ## Basic Usage
 
 Prefix the usual command for starting a process with 0x:
@@ -111,6 +117,10 @@ Let's say the pid was 7777, we can generate the flamegraph locally with
 Now the hard work is done away from production, ensuring we avoid any service-level problems.
 
 ## 0x Flags
+
+### NO_OPEN_OX=true 0x [script.js]
+
+Will not open the `electron` at the end of the script execution.
 
 ### --help | -h
 

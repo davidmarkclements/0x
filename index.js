@@ -11,6 +11,9 @@ var convert = require('./stack-convert')
 var gen = require('./gen')
 var debug = require('debug')('0x')
 var log = require('single-line-log').stdout
+var view = require('./lib/view/0x-view')
+
+var clock
 
 module.exports = function (args, binary) {
   if (args.q) { log = noop }
@@ -85,11 +88,11 @@ function sun (args, sudo, binary) {
 
     setTimeout(log, 100, 'Profiling')
 
-    if (process.stdin.isPaused()) { 
-      process.stdin.resume() 
+    if (process.stdin.isPaused()) {
+      process.stdin.resume()
       if (!args.q) { process.stdout.write('\u001b[?25l') }
     }
-    
+
   }
 
   if (delay) {
@@ -113,15 +116,15 @@ function sun (args, sudo, binary) {
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      log('Caught SIGINT, generating flamegraph ')      
+      log('Caught SIGINT, generating flamegraph ')
     }
 
-    var clock = makeClock(args)
+    clock = makeClock(args)
     process.on('uncaughtException', function (e) {
       clock.kill()
       throw e
     })
-    process.on('exit', clock.kill)
+
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
     var translate = sym({silent: true, pid: proc.pid})
 
@@ -204,8 +207,8 @@ function linux (args, sudo, binary) {
 
   setTimeout(log, delay || 100, 'Profiling')
 
-  if (process.stdin.isPaused()) { 
-    process.stdin.resume() 
+  if (process.stdin.isPaused()) {
+    process.stdin.resume()
     if (!args.q) { process.stdout.write('\u001b[?25l') }
   }
 
@@ -217,15 +220,15 @@ function linux (args, sudo, binary) {
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      log('Caught SIGINT, generating flamegraph ')      
+      log('Caught SIGINT, generating flamegraph ')
     }
 
-    var clock = makeClock(args)
+    clock = makeClock(args)
     process.on('uncaughtException', function (e) {
       clock.kill()
       throw e
     })
-    process.on('exit', clock.kill)
+
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
 
     var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat])
@@ -344,12 +347,22 @@ function sink (args, pid, folder, clock) {
           debug('exiting')
           debug('done rendering')
           clock.kill()
-          process.exit()
-          
+          process.exit('file://' + process.cwd() + '/' + folder + '/flamegraph.html')
+
         })
       })
   })
 }
+
+process.on('exit', (path) => {
+  clock.kill()
+
+if (process.env['NO_OPEN_0X'] === 'true' || !path) {
+  return
+}
+
+  view.start(path)
+})
 
 global.count = 0
 function tidy (args) {
