@@ -10,10 +10,12 @@ var through = require('through2')
 var convert = require('./stack-convert')
 var gen = require('./gen')
 var debug = require('debug')('0x')
-var log = require('single-line-log').stdout
+var status = require('single-line-log').stderr
+
+function log () { process.stderr.write.apply(process.stderr, arguments) }
 
 module.exports = function (args, binary) {
-  if (args.q) { log = noop }
+  if (args.q) { log = status = noop }
   isSudo(function (sudo) {
     switch (process.platform) {
       // perf:
@@ -44,7 +46,7 @@ function sun (args, sudo, binary) {
   var profile = path.join(__dirname, 'node_modules', '.bin', 'profile_1ms.d')
   if (!dtrace) return notFound('dtrace')
   if (!sudo) {
-    console.log('0x captures stacks using dtrace, which requires sudo access')
+    log('0x captures stacks using dtrace, which requires sudo access\n')
     return spawn('sudo', ['true'])
       .on('exit', function () { sun(args, true, binary) })
   }
@@ -83,11 +85,11 @@ function sun (args, sudo, binary) {
       fs.createWriteStream(folder + '/.stacks.' + proc.pid + '.out')
     )
 
-    setTimeout(log, 100, 'Profiling')
+    setTimeout(status, 100, 'Profiling')
 
     if (process.stdin.isPaused()) { 
       process.stdin.resume() 
-      if (!args.q) { process.stdout.write('\u001b[?25l') }
+      log('\u001b[?25l')
     }
     
   }
@@ -106,14 +108,14 @@ function sun (args, sudo, binary) {
 
     if (!prof) {
       debug('Profiling not begun')
-      console.log('No stacks, profiling had not begun')
+      log('No stacks, profiling had not begun\n')
       tidy(args)
       process.exit()
     }
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      log('Caught SIGINT, generating flamegraph ')      
+      status('Caught SIGINT, generating flamegraph ')      
     }
 
 
@@ -121,7 +123,7 @@ function sun (args, sudo, binary) {
     var translate = sym({silent: true, pid: proc.pid})
 
     if (!translate) {
-      log('Unable to find map file!\n')
+      status('Unable to find map file!\n')
       debug('unable to find map file')
       tidy(args)
       process.exit()
@@ -135,8 +137,7 @@ function sun (args, sudo, binary) {
     )
     if (stacksOnly) {
       return translate.on('end', function () {
-        if (!args.q) { process.stdout.write('\u001b[K\n') }
-        console.log()
+        log('\u001b[K\n\n')
         tidy(args)
         process.exit()
       })
@@ -154,7 +155,7 @@ function linux (args, sudo, binary) {
   if (!perf) return notFound('perf')
 
   if (!sudo) {
-    console.log('0x captures stacks using perf, which requires sudo access')
+    log('0x captures stacks using perf, which requires sudo access\n')
     return spawn('sudo', ['true'])
       .on('exit', function () { linux(args, true, binary) })
   }
@@ -196,11 +197,11 @@ function linux (args, sudo, binary) {
   var folder = getProfileFolderName(args, proc)
   fs.mkdirSync(process.cwd() + '/' + folder)
 
-  setTimeout(log, delay || 100, 'Profiling')
+  setTimeout(status, delay || 100, 'Profiling')
 
   if (process.stdin.isPaused()) { 
     process.stdin.resume() 
-    if (!args.q) { process.stdout.write('\u001b[?25l') }
+    log('\u001b[?25l')
   }
 
   process.once('SIGINT', analyze)
@@ -211,7 +212,7 @@ function linux (args, sudo, binary) {
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      log('Caught SIGINT, generating flamegraph ')      
+      status('Caught SIGINT, generating flamegraph ')      
     }
 
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
@@ -228,8 +229,8 @@ function linux (args, sudo, binary) {
     )
     if (stacksOnly) {
       return stacks.on('exit', function () {
-        if (!args.q) { process.stdout.write('\u001b[K\n') }
-        console.log()
+        log('\u001b[K\n')
+        log('\n')
         tidy(args)
         process.exit()
       })
@@ -321,11 +322,11 @@ function sink (args, pid, folder) {
 
         fs.writeFileSync(folder + '/stacks.' + pid + '.json', JSON.stringify(json, 0, 2))
         gen(json, opts, function () {
-          log('')
+          status('')
         }, function () {
           debug('flamegraph generated')
           tidy(args)
-          console.log('file://' + process.cwd() + '/' + folder + '/flamegraph.html', '\n')
+          log('file://' + process.cwd() + '/' + folder + '/flamegraph.html\n\n')
           debug('exiting')
           debug('done rendering')
           process.exit()
@@ -338,7 +339,7 @@ function sink (args, pid, folder) {
 global.count = 0
 function tidy (args) {
   debug('tidying up')
-  if (!args.q) { process.stdout.write('\u001b[?25h') }
+  log('\u001b[?25h')
 
   fs.readdirSync('./')
     .filter(function (f) {
