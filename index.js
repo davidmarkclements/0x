@@ -116,12 +116,7 @@ function sun (args, sudo, binary) {
       log('Caught SIGINT, generating flamegraph ')      
     }
 
-    var clock = makeClock(args)
-    process.on('uncaughtException', function (e) {
-      clock.kill()
-      throw e
-    })
-    process.on('exit', clock.kill)
+
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
     var translate = sym({silent: true, pid: proc.pid})
 
@@ -140,7 +135,6 @@ function sun (args, sudo, binary) {
     )
     if (stacksOnly) {
       return translate.on('end', function () {
-        clock.kill()
         if (!args.q) { process.stdout.write('\u001b[K\n') }
         console.log()
         tidy(args)
@@ -150,7 +144,7 @@ function sun (args, sudo, binary) {
     pump(
       translate,
       split(),
-      sink(args, proc.pid, folder, clock)
+      sink(args, proc.pid, folder)
     )
   }
 }
@@ -220,12 +214,6 @@ function linux (args, sudo, binary) {
       log('Caught SIGINT, generating flamegraph ')      
     }
 
-    var clock = makeClock(args)
-    process.on('uncaughtException', function (e) {
-      clock.kill()
-      throw e
-    })
-    process.on('exit', clock.kill)
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
 
     var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat])
@@ -240,7 +228,6 @@ function linux (args, sudo, binary) {
     )
     if (stacksOnly) {
       return stacks.on('exit', function () {
-        clock.kill()
         if (!args.q) { process.stdout.write('\u001b[K\n') }
         console.log()
         tidy(args)
@@ -251,7 +238,7 @@ function linux (args, sudo, binary) {
       pump(
         fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
         split(),
-        sink(args, proc.pid, folder, clock)
+        sink(args, proc.pid, folder)
       )
     })
 
@@ -290,7 +277,7 @@ function stackLine(stacks, delay) {
 
 }
 
-function sink (args, pid, folder, clock) {
+function sink (args, pid, folder) {
   var tiers = args.tiers || args.t
   var langs = args.langs || args.l
   var theme = args.theme
@@ -335,15 +322,12 @@ function sink (args, pid, folder, clock) {
         fs.writeFileSync(folder + '/stacks.' + pid + '.json', JSON.stringify(json, 0, 2))
         gen(json, opts, function () {
           log('')
-          clock.kill()
         }, function () {
           debug('flamegraph generated')
-
           tidy(args)
           console.log('file://' + process.cwd() + '/' + folder + '/flamegraph.html', '\n')
           debug('exiting')
           debug('done rendering')
-          clock.kill()
           process.exit()
           
         })
@@ -391,12 +375,6 @@ function isSudo (cb) {
     if (!code) return cb(true)
     cb(false)
   })
-}
-
-function makeClock(args) {
-  return args.q ?
-    {kill: noop}  :
-    spawn(__dirname + '/node_modules/.bin/clockface', {stdio: 'inherit'})
 }
 
 function noop () {}
