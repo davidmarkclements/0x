@@ -5,10 +5,12 @@ var which = require('which')
 var pump = require('pump')
 var split = require('split2')
 var sym = require('perf-sym')
-var bstr = require('clean-browserify-string')
 var through = require('through2')
 var convert = require('./stack-convert')
-var gen = require('./gen')
+var browserify = require('browserify')
+var multistream = require('multistream')
+var concat = require('concat-stream')
+var gen = require('./gen.js')
 var debug = require('debug')('0x')
 var status = require('single-line-log').stderr
 
@@ -298,41 +300,42 @@ function sink (args, pid, folder) {
     })
     if (langs) opts.langs = langs
     if (tiers) opts.tiers = tiers
-    bstr('require("' + __dirname + '/gen")(' + JSON.stringify(json) + ', ' + opts + ')', {})
-      .bundle(function (err, src) {
-        if (err) {
-          debug(
-            'Unable to generate client side code for flamegraph',
-            err
-          )
-        }
 
-        var opts = {
-          theme: theme,
-          title: title,
-          script: src.toString(),
-          dir: folder,
-          preview: preview,
-          exclude: exclude,
-          include: include
-        }
+    multistream([
+      browserify({standalone: 'd3'}).add(require.resolve('d3')).bundle(),
+      browserify({standalone: 'hsl'}).add(require.resolve('hsl-to-rgb-for-reals')).bundle(),
+      browserify({standalone: 'flamer'}).add(path.join(__dirname, './flamer')).bundle(),
+      browserify({standalone: 'gen'}).add(path.join(__dirname, './gen')).bundle()
+    ]).pipe(concat(function (bundle) {
+      write(bundle + '\ngen(' + JSON.stringify(json) + ', ' + opts + ')')
+    }))
 
-        if (langs) opts.langs = langs
-        if (tiers) opts.tiers = tiers
+    function write (src) {
+      var opts = {
+        theme: theme,
+        title: title,
+        script: src.toString(),
+        dir: folder,
+        preview: preview,
+        exclude: exclude,
+        include: include
+      }
 
-        fs.writeFileSync(folder + '/stacks.' + pid + '.json', JSON.stringify(json, 0, 2))
-        gen(json, opts, function () {
-          status('')
-        }, function () {
-          debug('flamegraph generated')
-          tidy(args)
-          log('file://' + process.cwd() + '/' + folder + '/flamegraph.html\n\n')
-          debug('exiting')
-          debug('done rendering')
-          process.exit()
-          
-        })
+      if (langs) opts.langs = langs
+      if (tiers) opts.tiers = tiers
+
+      fs.writeFileSync(folder + '/stacks.' + pid + '.json', JSON.stringify(json, 0, 2))
+      gen(json, opts, function () {
+        status('')
+      }, function () {
+        debug('flamegraph generated')
+        tidy(args)
+        log('file://' + process.cwd() + '/' + folder + '/flamegraph.html\n\n')
+        debug('exiting')
+        debug('done rendering')
+        process.exit()
       })
+    }
   })
 }
 

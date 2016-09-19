@@ -1,6 +1,9 @@
 var fs = require('fs')
+var path = require('path')
 var minimist = require('minimist')
-var bstr = require('browserify-string')
+var multistream = require('multistream')
+var concat = require('concat-stream')
+var browserify = require('browserify')
 var split = require('split2')
 var convert = require('./stack-convert')
 var gen = require('./gen')
@@ -34,31 +37,32 @@ function makeFlameGraph (args) {
       if (args.langs) opts.langs = args.l || args.langs
       if (args.tiers) opts.tiers = args.t || args.tiers
 
-      bstr('require("' + __dirname + '/gen")(' + JSON.stringify(json) + ', ' + opts + ')', {})
-        .bundle(function (err, src) {
-          if (err) {
-            debug(
-              'Unable to generate client side code for flamegraph',
-              err
-            )
-          }
+      multistream([
+        browserify({standalone: 'd3'}).add(require.resolve('d3')).bundle(),
+        browserify({standalone: 'hsl'}).add(require.resolve('hsl-to-rgb-for-reals')).bundle(),
+        browserify({standalone: 'flamer'}).add(path.join(__dirname, './flamer')).bundle(),
+        browserify({standalone: 'gen'}).add(path.join(__dirname, './gen')).bundle()
+      ]).pipe(concat(function (bundle) {
+        write(bundle + '\ngen(' + JSON.stringify(json) + ', ' + opts + ')')
+      }))
 
-          var opts = {
-            name: '-',
-            theme: args.theme,
-            title: args.title,
-            script: src.toString(),
-            exclude: args.exclude
-          }
+      function write (src) {
+        var opts = {
+          name: '-',
+          theme: args.theme,
+          title: args.title,
+          script: src.toString(),
+          exclude: args.exclude
+        }
 
-          if (args.langs) opts.langs = args.langs
-          if (args.tiers) opts.tiers = args.tiers
+        if (args.langs) opts.langs = args.langs
+        if (args.tiers) opts.tiers = args.tiers
 
-          gen(json, opts, function () {}, function () {
-            debug('flamegraph generated')
-            debug('exiting')
-            process.exit()
-          })
+        gen(json, opts, function () {}, function () {
+          debug('flamegraph generated')
+          debug('exiting')
+          process.exit()
         })
+      }
     }))
 }
