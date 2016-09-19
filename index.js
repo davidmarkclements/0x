@@ -122,33 +122,43 @@ function sun (args, sudo, binary) {
 
 
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
-    var translate = sym({silent: true, pid: proc.pid})
+    capture(5)
+    function capture (attempts) {
+      var translate = sym({silent: true, pid: proc.pid})
 
-    if (!translate) {
-      status('Unable to find map file!\n')
-      debug('unable to find map file')
-      tidy(args)
-      process.exit()
-    }
-    pump(
-      fs.createReadStream(folder + '/.stacks.' + proc.pid + '.out'),
-      translate,
-      stacksOnly === '-'
-        ? process.stdout
-        : fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
-    )
-    if (stacksOnly) {
-      return translate.on('end', function () {
-        log('\u001b[K\n\n')
+      if (!translate) {
+        debug('unable to find map file')
+        if (attempts) {
+          status('Unable to find map file - waiting 300ms and retrying\n')
+          debug('retrying')
+          setTimeout(capture, 300, attempts--)
+          return
+        }
+        status('Unable to find map file!\n')
+        debug('Unable to find map file after multiple attempts')
         tidy(args)
         process.exit()
-      })
+      }
+      pump(
+        fs.createReadStream(folder + '/.stacks.' + proc.pid + '.out'),
+        translate,
+        stacksOnly === '-'
+          ? process.stdout
+          : fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
+      )
+      if (stacksOnly) {
+        return translate.on('end', function () {
+          log('\u001b[K\n\n')
+          tidy(args)
+          process.exit()
+        })
+      }
+      pump(
+        translate,
+        split(),
+        sink(args, proc.pid, folder)
+      )
     }
-    pump(
-      translate,
-      split(),
-      sink(args, proc.pid, folder)
-    )
   }
 }
 
