@@ -229,30 +229,32 @@ function linux (args, sudo, binary) {
 
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
 
-    var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat])
+    proc.on('exit', function() {
+      var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat])
 
-    if (traceInfo) { stacks.stderr.pipe(process.stderr) }
-    var stacksOut = stackLine(stacks, delay)
-    pump(
-      stacksOut,
-      stacksOnly === '-'
-        ? process.stdout
-        : fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
-    )
-    if (stacksOnly) {
-      return stacks.on('exit', function () {
-        log('\u001b[K\n')
-        log('\n')
-        tidy(args)
-        process.exit()
-      })
-    }
-    stacks.on('exit', function () {
+      if (traceInfo) { stacks.stderr.pipe(process.stderr) }
+      var stacksOut = stackLine(stacks, delay)
       pump(
-        fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-        split(),
-        sink(args, proc.pid, folder)
+        stacksOut,
+        stacksOnly === '-'
+          ? process.stdout
+          : fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
       )
+      if (stacksOnly) {
+        return stacks.on('exit', function () {
+          log('\u001b[K\n')
+          log('\n')
+          tidy(args)
+          process.exit()
+        })
+      }
+      stacks.on('exit', function () {
+        pump(
+          fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
+          split(),
+          sink(args, proc.pid, folder)
+        )
+      })
     })
 
   }
