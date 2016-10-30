@@ -1,5 +1,7 @@
 # 0x
 
+Discover the bottlenecks and hot paths in your code, with flamegraphs.
+
 ## Visualize Stack Traces
 
 `0x` can profile and generate an interactive flamegraph for a Node process in a single command, on both Linux *and* OS X. Whilst this seems trivial... it's not. Well it wasn't before `0x`.
