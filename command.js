@@ -14,7 +14,7 @@ module.exports = function (argv) {
   var cmd = args.c || args.cmd
 
   if (cmd === 'help') {
-    return fs.createReadStream('./command-usage.txt')
+    return fs.createReadStream(path.join(__dirname, './command-usage.txt'))
       .pipe(process.stdout)
   }
 
