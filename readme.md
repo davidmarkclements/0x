@@ -1,4 +1,7 @@
-# 0x
+# <img alt=0x src=0x-logo.png width=350>
+
+
+🔥 single-command flamegraph profiling 🔥
 
 Discover the bottlenecks and hot paths in your code, with flamegraphs.
 

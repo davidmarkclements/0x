@@ -1,7 +1,7 @@
 {
   "name": "0x",
   "version": "2.2.13",
-  "description": "",
+  "description": "🔥 single-command flamegraph profiling 🔥",
   "main": "index.js",
   "bin": "./cmd.js",
   "scripts": {
