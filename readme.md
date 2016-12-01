@@ -26,6 +26,7 @@ is *not* to show a preview, you can use `-p` to turn it on.
   * Linux
     * requires [perf](https://en.wikipedia.org/wiki/Perf_(Linux))
   * OS X
+    * Up-to-date XCode
   * SmartOS
   * *not* Windows (PR's welcome)
 
