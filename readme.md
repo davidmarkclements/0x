@@ -116,6 +116,22 @@ Let's say the pid was 7777, we can generate the flamegraph locally with
 
 Now the hard work is done away from production, ensuring we avoid any service-level problems.
 
+## Memory Issues
+
+As your stack grows you may have memory issues with both Node and your browser.
+
+For Node, run with the following flag
+```
+--stack-size=8024
+```
+
+For Chrome, run with the following flag
+```
+--js-flags="--stack-size 8024"
+```
+
+Where 8024 is the megabytes of RAM required to run load stack. Adjust this as needed and confirm you have it to spare.
+
 ## 0x Flags
 
 ### --help | -h
