@@ -45,7 +45,7 @@ function getProfileFolderName(args, proc) {
 
 function sun (args, sudo, binary) {
   var dtrace = pathTo('dtrace')
-  var profile = pathTo('profile_1ms.d')
+  var profile = require.resolve('perf-sym/profile_1ms.d')
   if (!dtrace) return notFound('dtrace')
   if (!sudo) {
     log('0x captures stacks using dtrace, which requires sudo access\n')
