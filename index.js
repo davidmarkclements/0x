@@ -59,10 +59,12 @@ function sun (args, sudo, binary) {
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
 
-  var proc = spawn(node, [
+  var args = [
     '--perf-basic-prof',
     '-r', path.join(__dirname, 'soft-exit')
-  ].concat(args.node), {
+  ].concat(args.node)
+
+  var proc = spawn(node, args, {
     stdio: 'inherit'
   }).on('exit', function (code) {
     if (code !== 0) {
@@ -73,6 +75,7 @@ function sun (args, sudo, binary) {
   })
   var folder
   var prof
+  var profExited = false
 
   function start () {
     prof = spawn('sudo', [profile, '-p', proc.pid])
@@ -80,20 +83,29 @@ function sun (args, sudo, binary) {
     if (traceInfo) { prof.stderr.pipe(process.stderr) }
 
     folder = getProfileFolderName(args, proc)
-    fs.mkdirSync(process.cwd() + '/' + folder)
+    fs.mkdirSync(path.join(process.cwd(), folder))
+
+    prof.on('exit', function (code) {
+      profExited = true
+    })
 
     pump(
       prof.stdout,
-      fs.createWriteStream(folder + '/.stacks.' + proc.pid + '.out')
-    )
+      fs.createWriteStream(path.join(folder, '.stacks.' + proc.pid + '.out')),
+      function (err) {
+        if (err) {
+          status(err.message)
+          process.exit(1)
+        }
+        debug('dtrace out closed')
+      })
 
     setTimeout(status, 100, 'Profiling')
 
-    if (process.stdin.isPaused()) { 
-      process.stdin.resume() 
+    if (process.stdin.isPaused()) {
+      process.stdin.resume()
       log('\u001b[?25l')
     }
-    
   }
 
   if (delay) {
@@ -117,13 +129,26 @@ function sun (args, sudo, binary) {
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      status('Caught SIGINT, generating flamegraph ')      
+      status('Caught SIGINT, generating flamegraph ')
     }
 
-
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
-    capture(5)
+    try { process.kill(prof.pid, 'SIGINT') } catch (e) {}
+
+    capture(10)
     function capture (attempts) {
+      if (!profExited) {
+        if (attempts) {
+          setTimeout(capture, 300, attempts--)
+        } else {
+          status('Unable to find map file!\n')
+          debug('Unable to find map file after multiple attempts')
+          tidy(args)
+          process.exit(1)
+        }
+        return
+      }
+
       var translate = sym({silent: true, pid: proc.pid})
 
       if (!translate) {
@@ -137,7 +162,7 @@ function sun (args, sudo, binary) {
         status('Unable to find map file!\n')
         debug('Unable to find map file after multiple attempts')
         tidy(args)
-        process.exit()
+        process.exit(1)
       }
       pump(
         fs.createReadStream(folder + '/.stacks.' + proc.pid + '.out'),
@@ -211,8 +236,8 @@ function linux (args, sudo, binary) {
 
   setTimeout(status, delay || 100, 'Profiling')
 
-  if (process.stdin.isPaused()) { 
-    process.stdin.resume() 
+  if (process.stdin.isPaused()) {
+    process.stdin.resume()
     log('\u001b[?25l')
   }
 
@@ -224,7 +249,7 @@ function linux (args, sudo, binary) {
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      status('Caught SIGINT, generating flamegraph ')      
+      status('Caught SIGINT, generating flamegraph ')
     }
 
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
