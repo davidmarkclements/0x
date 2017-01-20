@@ -34,13 +34,29 @@ module.exports = function (args, binary) {
 }
 
 function getProfileFolderName(args, proc) {
-  var name = 'profile-' + proc.pid
+  var name = args['output-dir']
+
+  if (!name) {
+    name = 'profile-' + proc.pid
+  }
 
   if (args['timestamp-profiles']) {
     name += '-' + Date.now()
   }
 
-  return name
+  return path.resolve(process.cwd(), name)
+}
+
+function ensureDirExists(path) {
+  try {
+    fs.accessSync(path)
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      fs.mkdirSync(path)
+    } else {
+      throw e
+    }
+  }
 }
 
 function sun (args, sudo, binary) {
@@ -83,7 +99,7 @@ function sun (args, sudo, binary) {
     if (traceInfo) { prof.stderr.pipe(process.stderr) }
 
     folder = getProfileFolderName(args, proc)
-    fs.mkdirSync(path.join(process.cwd(), folder))
+    ensureDirExists(folder)
 
     prof.on('exit', function (code) {
       profExited = true
@@ -232,7 +248,7 @@ function linux (args, sudo, binary) {
   })
 
   var folder = getProfileFolderName(args, proc)
-  fs.mkdirSync(process.cwd() + '/' + folder)
+  ensureDirExists(folder)
 
   setTimeout(status, delay || 100, 'Profiling')
 
@@ -367,7 +383,7 @@ function sink (args, pid, folder) {
       }, function () {
         debug('flamegraph generated')
         tidy(args)
-        log('file://' + process.cwd() + '/' + folder + '/flamegraph.html\n\n')
+        log('file:/' + folder + '/flamegraph.html\n\n')
         debug('exiting')
         debug('done rendering')
         process.exit()

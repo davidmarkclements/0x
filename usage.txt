@@ -8,6 +8,9 @@
                           Milliseconds
                           Default: 300
 
+  --output-dir | -o       Specify artifact output directory
+                          Default: '${process.cwd()}/profile-${PID}(-${Date.now()})?'
+
   --preview | -p          Generates an SVG file, prerenders SVG inside HTML
                           and outputs a PNG to the terminal (if possible)
                           Depends on imagemagick (brew install imagemagick)

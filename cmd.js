@@ -53,6 +53,7 @@ function cmd () {
 
   args.delay = typeof args.delay === 'number' ? args.delay : args.d
   if (typeof args.delay !== 'number') args.delay = 300
+  args['output-dir'] = typeof args['output-dir'] === 'string' ? args['output-dir'] : args.o
   // also pass binary, if provided. Fallback to simple 'node'
   require('./')(args, bin ? bin : 'node')
 }
