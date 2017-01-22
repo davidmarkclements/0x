@@ -4,7 +4,16 @@ var which = require('which')
 var debug = require('debug')('0x:flame-image')
 
 module.exports = function (svg, opts, next, done) {
+  var dir = opts.dir || '.'
   debug('checking for convert binary')
+
+  if (!opts.preview) {
+    write(svg, dir)
+    next()
+    done()
+    return
+  }
+
   which('convert', function (err, path) {
     if (err) {
       debug('imagemagick is not installed')
@@ -13,9 +22,8 @@ module.exports = function (svg, opts, next, done) {
       return
     }
 
-    var dir = opts.dir || '.'
-    debug('writing svg')
-    fs.writeFileSync(dir + '/flamegraph.svg', svg)
+    write(svg, dir)    
+
     var background = 'black'
     var args = ['-background', background, '-trim', '-resize',
       'x460', dir + '/flamegraph.svg', dir + '/flamegraph-small.png']
@@ -29,4 +37,10 @@ module.exports = function (svg, opts, next, done) {
           })
       })
   })
+
+  function write (svg, dir) {
+    debug('writing svg')
+    svg = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + svg
+    fs.writeFileSync(dir + '/flamegraph.svg', svg)
+  }
 }

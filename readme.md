@@ -138,6 +138,17 @@ Where 8024 is the megabytes of RAM required to run load stack. Adjust this as ne
 
 Print usage info
 
+### --output-dir | -o      
+
+Specify artifact output directory
+Default: '${process.cwd()}/profile-${PID}(-${Date.now()})?'
+
+
+### --svg
+
+Generates an `flamegraph.svg` file in the artifact output directory,
+in addition to the `flamegraph.html` file. 
+
 ### --preview
 
 Generates an SVG file, prerenders SVG inside HTML
@@ -257,8 +268,8 @@ Example: `profile-3866-`
 
 ## The Profile Folder
 
-A profile folder will be created and named after the PID, e.g.
-`profile-3866`.
+By default, a profile folder will be created and named after the PID, e.g.
+`profile-3866` (we can set this name manually using the `--output-dir` flag).
 
 The Profile Folder can contain the following files
 

@@ -75,10 +75,10 @@ function sun (args, sudo, binary) {
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
 
-  var args = [
+  args = Object.assign([
     '--perf-basic-prof',
     '-r', path.join(__dirname, 'soft-exit')
-  ].concat(args.node)
+  ].concat(args.node), args)
 
   var proc = spawn(node, args, {
     stdio: 'inherit'
@@ -340,6 +340,9 @@ function sink (args, pid, folder) {
   var exclude = args.exclude || args.x
   var include = args.include
   var preview = args.preview || args.p
+  if (preview) args.svg = true
+  var svg = args.svg 
+  
   debug('begin rendering')
   return convert(function (err, json) {
     if (err) { throw err }
@@ -369,6 +372,7 @@ function sink (args, pid, folder) {
         title: title,
         script: src.toString(),
         dir: folder,
+        svg: svg,
         preview: preview,
         exclude: exclude,
         include: include

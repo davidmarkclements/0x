@@ -11,6 +11,9 @@
   --output-dir | -o       Specify artifact output directory
                           Default: '${process.cwd()}/profile-${PID}(-${Date.now()})?'
 
+  --svg                   Generates an `flamegraph.svg` file in the artifact 
+                          output directory, in addition to the `flamegraph.html` file. 
+
   --preview | -p          Generates an SVG file, prerenders SVG inside HTML
                           and outputs a PNG to the terminal (if possible)
                           Depends on imagemagick (brew install imagemagick)

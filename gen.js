@@ -28,7 +28,7 @@ module.exports = function (stacks, opts, next, done) {
   var notOptdMode = false
 
 
-  if (!browser && !opts.preview) {
+  if (!browser && !opts.svg) {
     var f = '<meta charset="utf-8">' +
             '<h1 style="color: rgb(68, 68, 68);">' + opts.title + '</h1>' +
             '<style>body {padding-left: 2%; background:black}rect:hover {opacity: 0.9}</style>' +
@@ -55,7 +55,7 @@ module.exports = function (stacks, opts, next, done) {
     width = innerWidth * 0.87779
   }
 
-  var flamegraph = flamer()
+  var flamegraph = flamer(opts)
     .width(width)
     .height(height)
     .langs(langsMode)
@@ -370,7 +370,7 @@ module.exports = function (stacks, opts, next, done) {
     doc.body.insertBefore(meta, doc.body.firstChild)
   }
 
-  if (browser || opts.preview) {
+  if (browser || opts.svg) {
     d3.select(chart).datum(stacks).call(flamegraph)
     var svg = chart.querySelector('svg')
     svg.style.transition = 'transform 200ms ease-in-out'
@@ -393,8 +393,15 @@ module.exports = function (stacks, opts, next, done) {
         doc.body.innerHTML + '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>')
     }
 
-    if (opts.preview) {
+    if (opts.svg) {
       svg.setAttribute('width', +svg.getAttribute('width') * 2)
+      svg.setAttribute('xmlns:dc', 'http://purl.org/dc/elements/1.1/')
+      svg.setAttribute('xmlns:cc', 'http://creativecommons.org/ns#')
+      svg.setAttribute('xmlns:rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
+      svg.setAttribute('xmlns:svg', 'http://www.w3.org/2000/svg')
+      svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+      svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+      svg.setAttribute('version', '1.0')
       next = next || function () {}
       require('./flame-' + 'image')(chart.innerHTML, {dir: dir}, next, function () {
         done && done()
