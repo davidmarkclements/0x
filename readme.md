@@ -132,6 +132,13 @@ For Chrome, run with the following flag
 
 Where 8024 is the megabytes of RAM required to run load stack. Adjust this as needed and confirm you have it to spare.
 
+## Empty Output Stacks
+
+If you are getting empty output stacks, you may have to run with `sudo`:
+```sh
+sudo 0x my-app.js
+```
+
 ## 0x Flags
 
 ### --help | -h
