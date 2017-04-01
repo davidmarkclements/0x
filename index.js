@@ -155,7 +155,11 @@ function sun (args, sudo, binary) {
     function capture (attempts) {
       if (!profExited) {
         if (attempts) {
-          setTimeout(capture, 300, attempts--)
+          if (attempts < 5) {
+            // desperate, killing prof process
+            try { process.kill(prof.pid, 'SIGKILL') } catch (e) {}
+          }
+          setTimeout(capture, 300, attempts - 1)
         } else {
           status('Unable to find map file!\n')
           debug('Unable to find map file after multiple attempts')
@@ -341,8 +345,8 @@ function sink (args, pid, folder) {
   var include = args.include
   var preview = args.preview || args.p
   if (preview) args.svg = true
-  var svg = args.svg 
-  
+  var svg = args.svg
+
   debug('begin rendering')
   return convert(function (err, json) {
     if (err) { throw err }
