@@ -391,7 +391,7 @@ function sink (args, pid, folder) {
       }, function () {
         debug('flamegraph generated')
         tidy(args)
-        log('file:/' + folder + '/flamegraph.html\n\n')
+        log('file://' + folder + '/flamegraph.html\n\n')
         debug('exiting')
         debug('done rendering')
         process.exit()
