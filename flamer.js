@@ -70,7 +70,7 @@ function flameGraph () {
     // todo: C deps
     if (!/.js/.test(name)) {
       switch (true) {
-        case /^Builtin:|^Stub:|v8::|^(.+)IC:|^Handler:/
+        case /^Builtin:|^Stub:|v8::|^(.+)IC:|^.*Handler:/
           .test(name): return {type: 'v8', lang: 'c'}
         case /^RegExp:/
           .test(name): return {type: 'regexp', lang: 'c'}
