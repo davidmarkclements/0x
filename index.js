@@ -244,7 +244,7 @@ function linux (args, sudo, binary) {
   ].filter(Boolean).concat(args.node), {
     stdio: 'inherit'
   }).on('exit', function (code) {
-    if (code !== 0 && code !== 143 && code !== 130) {
+    if (code !== null && code !== 0 && code !== 143 && code !== 130) {
       tidy(args)
       process.exit(code)
     }
@@ -272,8 +272,6 @@ function linux (args, sudo, binary) {
       status('Caught SIGINT, generating flamegraph ')
     }
 
-    try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
-
     proc.on('exit', function() {
       var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat])
 
@@ -300,8 +298,12 @@ function linux (args, sudo, binary) {
           sink(args, proc.pid, folder)
         )
       })
+
     })
 
+    spawn('sudo', ['kill', '-SIGINT', '' + proc.pid], {
+      stdio: 'inherit'
+    })
   }
 }
 
