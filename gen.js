@@ -13,7 +13,8 @@ module.exports = function (stacks, opts, next, done) {
 
   var langsMode = 'langs' in opts ? opts.langs : false
   var tiersMode = 'tiers' in opts ? opts.tiers : false
-  var bg = opts.theme === 'light' ? 'white' : 'black'
+
+  var bg = opts.theme === 'dark' ? 'black' : 'white'
 
   var exclude = (opts.exclude || 'v8').split(',')
   var include = (opts.include || '').split(',')
@@ -31,7 +32,7 @@ module.exports = function (stacks, opts, next, done) {
   if (!browser && !opts.svg) {
     var f = '<meta charset="utf-8">' +
             '<h1 style="color: rgb(68, 68, 68);">' + opts.title + '</h1>' +
-            '<style>body {padding-left: 2%; background:black}rect:hover {opacity: 0.9}</style>' +
+            '<style>body {padding: 0px; margin:0px; background:black;}rect:hover {opacity: 0.9}</style>' +
             '<chart></chart>' +
             '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>'
 
@@ -52,7 +53,7 @@ module.exports = function (stacks, opts, next, done) {
   var width = height
 
   if (browser) {
-    width = innerWidth * 0.87779
+    width = innerWidth * 0.85
   }
 
   var flamegraph = flamer(opts)
@@ -223,30 +224,26 @@ module.exports = function (stacks, opts, next, done) {
   })
 
   search.placeholder = search.type = 'search  '
+
   theme.innerHTML = 'Theme'
-  theme.style.position = 'absolute'
-  theme.style.bottom = 0
-  theme.style.left = '30px'
-
+  theme.style['padding-left'] = '0.1em'
   langs.innerHTML = (langsMode ? '−' : '+') + ' Langs'
-  langs.style.position = 'absolute'
-  langs.style.bottom = 0
-  langs.style.left = '86px'
-
+  langs.style['padding-left'] = '0.1em'
   tiers.innerHTML = (tiersMode ? '−' : '+') + ' Tiers'
-  tiers.style.position = 'absolute'
-  tiers.style.bottom = 0
-  tiers.style.left = '146px'
-
+  tiers.style['padding-left'] = '0.1em'
   optd.innerHTML = (optdMode ? '−' : '+') + ' Optimized'
-  optd.style.position = 'absolute'
-  optd.style.bottom = 0
-  optd.style.left = '201'
-
+  optd.style['padding-left'] = '0.1em'
   notOptd.innerHTML = (notOptdMode ? '−' : '+') + ' Not Optimized'
-  notOptd.style.position = 'absolute'
-  notOptd.style.bottom = 0
-  notOptd.style.left = '284px'
+  notOptd.style['padding-left'] = '0.1em'
+
+  var controlPanel = doc.createElement('div')
+  controlPanel.style = 'position: absolute; bottom: 0; left: 5%; color: ' + (bg === 'black' ? 'white' : 'black') + '; min-height: 5%;'
+
+  controlPanel.appendChild(theme)
+  controlPanel.appendChild(langs)
+  controlPanel.appendChild(tiers)
+  controlPanel.appendChild(optd)
+  controlPanel.appendChild(notOptd)
 
   zoomout.innerHTML = '−'
   zoomout.style.position = 'absolute'
@@ -260,7 +257,7 @@ module.exports = function (stacks, opts, next, done) {
   zoomin.style.right = '5%'
   zoomin.style.marginRight = '138px'
 
-  style.innerHTML = 'body {padding-left: 2%; background:' + bg + '}'
+  style.innerHTML = 'body {padding: 2%; background:' + bg + '; font: 15px arial, sans-serif;}'
   style.innerHTML += 'rect:hover {opacity: 0.9}'
 
   doc.body.style.transition = 'background 500ms ease-in-out'
@@ -340,16 +337,12 @@ module.exports = function (stacks, opts, next, done) {
   doc.body.appendChild(style)
   doc.body.appendChild(chart)
   doc.body.appendChild(search)
-  doc.body.appendChild(theme)
-  doc.body.appendChild(langs)
-  doc.body.appendChild(tiers)
   doc.body.appendChild(zoomout)
   doc.body.appendChild(zoomin)
-  doc.body.appendChild(optd)
-  doc.body.appendChild(notOptd)
+  doc.body.appendChild(controlPanel)
 
   var types = doc.createElement('div')
-  types.style = 'position: absolute; bottom: 0; right: 30px; color: ' + (bg === 'black' ? 'white' : 'black')
+  types.style = 'position: absolute; bottom: 0; right: 5%; color: ' + (bg === 'black' ? 'white' : 'black') + '; min-height: 5%'
 
   types.appendChild(appLabel)
   types.appendChild(depsLabel)
@@ -362,7 +355,7 @@ module.exports = function (stacks, opts, next, done) {
 
   var meta
 
-  chart.style = 'padding-left: 5%;padding-right:5%;display: block;overflow-y: scroll;overflow-x:hidden;height: 90%;'
+  chart.style = 'padding-left: 5%;padding-right:5%;display: block;overflow-y: scroll;overflow-x:hidden;height: 85%;'
 
   if (!browser) {
     meta = doc.createElement('meta')

@@ -95,7 +95,7 @@ function flameGraph () {
     regexp: {h: 310, s: 86, l: 18},
     nativeC: {h: 0, s: 50, l: 50},
     nativeJS: {h: 122, s: 50, l: 45},
-    core: {h: 23, s: 66, l: 45},
+    core: {h: 10, s: 66, l: 80},
     deps: {h: 244, s: 50, l: 65},
     app: {h: 200, s: 50, l: 45}
   }
@@ -126,6 +126,7 @@ function flameGraph () {
     var l = key.l
     var top = stackTop(d)
     var vector = ((top / allSamples) * 100) + 1
+
     s *= vector
     l += (vector * 2)
 
@@ -142,8 +143,9 @@ function flameGraph () {
     }
 
     var rgb = hsl(h, s, l)
-    
-    return 'rgba(' + rgb + ', ' + a + ')'
+    var res = 'rgba(' + rgb + ', ' + a + ')'
+
+    return res
   }
 
   function filter (data) {
