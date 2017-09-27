@@ -32,7 +32,7 @@ module.exports = function (stacks, opts, next, done) {
   if (!browser && !opts.svg) {
     var f = '<meta charset="utf-8">' +
             '<h1 style="color: rgb(68, 68, 68);">' + opts.title + '</h1>' +
-            '<style>body {padding: 0px; margin:0px; background:black;}rect:hover {opacity: 0.9}</style>' +
+            '<style>' + bodyStyle() + '</style>' +
             '<chart></chart>' +
             '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>'
 
@@ -257,8 +257,7 @@ module.exports = function (stacks, opts, next, done) {
   zoomin.style.right = '5%'
   zoomin.style.marginRight = '138px'
 
-  style.innerHTML = 'body {padding: 2%; background:' + bg + '; font: 15px arial, sans-serif;}'
-  style.innerHTML += 'rect:hover {opacity: 0.9}'
+  style.innerHTML = bodyStyle()
 
   doc.body.style.transition = 'background 500ms ease-in-out'
   doc.body.style.background = bg
@@ -414,4 +413,11 @@ function diameter (stacks) {
     if (d.depth > deepest) deepest = d.depth
   })
   return deepest + 1
+}
+
+function bodyStyle (bg) {
+  var res = ''
+  res += 'body { margin: 0px; padding: 2%; background:' + bg + '; font: 15px arial, sans-serif;}\n'
+  res += 'rect:hover {opacity: 0.9}'
+  return res
 }
