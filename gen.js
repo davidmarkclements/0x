@@ -32,7 +32,7 @@ module.exports = function (stacks, opts, next, done) {
   if (!browser && !opts.svg) {
     var f = '<meta charset="utf-8">' +
             '<h1 style="color: rgb(68, 68, 68);">' + opts.title + '</h1>' +
-            '<style>' + bodyStyle() + '</style>' +
+            '<style>' + bodyStyle(bg) + '</style>' +
             '<chart></chart>' +
             '<scr' + 'ipt>' + opts.script + '</scr' + 'ipt>'
 
@@ -257,7 +257,7 @@ module.exports = function (stacks, opts, next, done) {
   zoomin.style.right = '5%'
   zoomin.style.marginRight = '138px'
 
-  style.innerHTML = bodyStyle()
+  style.innerHTML = bodyStyle(bg)
 
   doc.body.style.transition = 'background 500ms ease-in-out'
   doc.body.style.background = bg
@@ -339,6 +339,53 @@ module.exports = function (stacks, opts, next, done) {
   doc.body.appendChild(zoomout)
   doc.body.appendChild(zoomin)
   doc.body.appendChild(controlPanel)
+
+  {
+    var coldHot = document.createElement('div')
+    coldHot.style = 'position:absolute;top:.5em; right: 22%; heigh: 20px;'
+
+    coldHot.appendChild(genLabel('cold'))
+
+    coldHot.appendChild(genBox({
+      top: 0,
+      name: '?'
+    }))
+
+    coldHot.appendChild(genBox({
+      top: 1,
+      name: '?'
+    }))
+
+    coldHot.appendChild(genBox({
+      top: 3,
+      name: '?'
+    }))
+
+    coldHot.appendChild(genBox({
+      top: 10,
+      name: '?'
+    }))
+
+    coldHot.appendChild(genLabel('hot'))
+
+    function genBox (d) {
+      var box = document.createElement('div')
+      var style = 'background: ' + flamer.colorHash(d, 1, 100) + ';'
+      style += 'height: 20px; width: 20px; display: block; float: left; margin-right: 5px;'
+      box.style = style
+      return box
+    }
+
+    function genLabel (name) {
+      var box = document.createElement('div')
+      box.innerHTML = name
+      var style = 'display: block; float: left; margin-right: 5px;'
+      box.style = style
+      return box
+    }
+
+    doc.body.appendChild(coldHot)
+  }
 
   var types = doc.createElement('div')
   types.style = 'position: absolute; bottom: 0; right: 5%; color: ' + (bg === 'black' ? 'white' : 'black') + '; min-height: 5%'
