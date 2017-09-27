@@ -28,34 +28,23 @@ function cmd () {
     argv.splice(stacksOnlyIx + 1, 1)
   }
 
-  // get the position of node binary in argv; else stay -1
-  var ix = -1
-  var bin = ''
-  argv.forEach((el, index) => {
-    if (path.basename(el) === 'node') {
-      ix = index
-      bin = argv[index]
-      return
+  var args = require('minimist')(argv, {
+    number: ['delay'],
+    boolean: ['open'],
+    alias: {
+      open: 'o',
+      delay: 'd',
+      'output-dir': 'D'
+    },
+    default: {
+      node: false,
+      delay: 300
     }
   })
 
-  if (ix === -1) {
-    var c = argv.length
-    while (c--) {
-      if (argv[c][0] !== '-') break
-    }
-    argv.splice(c, 0, 'node')
-    ix = c
-  }
+  args.script = args._[0]
 
-  var args = require('minimist')(argv.slice(0, ix))
-  args.node = argv.slice(ix + 1)
-
-  args.delay = typeof args.delay === 'number' ? args.delay : args.d
-  if (typeof args.delay !== 'number') args.delay = 300
-  args['output-dir'] = typeof args['output-dir'] === 'string' ? args['output-dir'] : args.o
-  // also pass binary, if provided. Fallback to simple 'node'
-  require('./')(args, bin ? bin : 'node')
+  require('./')(args, args.node)
 }
 
 function banner() {

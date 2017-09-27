@@ -1,18 +1,22 @@
 
   0x [flags] file.js
-  0x [flags] node [node-flags] file.js
 
+  -o                      Automatically open after finishing
+                          Default: false
+
+  --node=PATH             Path to the node executable to use
+                          Default: false
 
   --delay | -d            Delay before tracing begins, allows us to ignore
                           initialisation stacks (e.g. module loading).
                           Milliseconds
                           Default: 300
 
-  --output-dir | -o       Specify artifact output directory
+  --output-dir | -D       Specify artifact output directory
                           Default: '${process.cwd()}/profile-${PID}(-${Date.now()})?'
 
-  --svg                   Generates an `flamegraph.svg` file in the artifact 
-                          output directory, in addition to the `flamegraph.html` file. 
+  --svg                   Generates an `flamegraph.svg` file in the artifact
+                          output directory, in addition to the `flamegraph.html` file.
 
   --preview | -p          Generates an SVG file, prerenders SVG inside HTML
                           and outputs a PNG to the terminal (if possible)
@@ -37,7 +41,7 @@
   --include               Include tiers, Overwrites exclude
 
   --theme                 Dark or Light theme
-                          Default: Dark
+                          Default: light
 
   --stacks-only           Don't generate the flamegraph, only create the stacks
                           output.

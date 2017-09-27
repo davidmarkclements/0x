@@ -13,6 +13,7 @@ var concat = require('concat-stream')
 var gen = require('./gen.js')
 var debug = require('debug')('0x')
 var status = require('single-line-log').stderr
+var open = require('open')
 
 function log () { process.stderr.write.apply(process.stderr, arguments) }
 
@@ -78,7 +79,7 @@ function sun (args, sudo, binary) {
   args = Object.assign([
     '--perf-basic-prof',
     '-r', path.join(__dirname, 'soft-exit')
-  ].concat(args.node), args)
+  ].concat(args.script), args)
 
   var proc = spawn(node, args, {
     stdio: 'inherit'
@@ -241,7 +242,7 @@ function linux (args, sudo, binary) {
     node,
     '--perf-basic-prof',
     '-r', path.join(__dirname, 'soft-exit')
-  ].filter(Boolean).concat(args.node), {
+  ].filter(Boolean).concat(args.script), {
     stdio: 'inherit'
   }).on('exit', function (code) {
     if (code !== 0 && code !== 143 && code !== 130) {
@@ -389,11 +390,20 @@ function sink (args, pid, folder) {
       gen(json, opts, function () {
         status('')
       }, function () {
-        debug('flamegraph generated')
         tidy(args)
-        log('file://' + folder + '/flamegraph.html\n\n')
+        // Linux does not handle three slashes
+        // only add one
+        if (folder.indexOf('/') !== 0 || process.platform !== 'linux') {
+          folder = '/' + folder
+        }
+        var file = 'file:/' + folder + '/flamegraph.html'
+        log('flamegraph generated in\n')
+        log(file + '\n')
         debug('exiting')
         debug('done rendering')
+        if (args.open) {
+          open(file)
+        }
         process.exit()
       })
     }
