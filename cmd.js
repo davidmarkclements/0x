@@ -6,11 +6,28 @@ cmd()
 function cmd () {
   var argv = process.argv.slice(2)
 
-  if (~argv.indexOf('--cmd') || ~argv.indexOf('-c')) {
-    return require('./command')(argv)
+  var args = require('minimist')(argv, {
+    number: ['delay'],
+    boolean: ['open', 'version', 'help', 'cmd'],
+    alias: {
+      open: 'o',
+      delay: 'd',
+      'output-dir': 'D',
+      version: 'v',
+      help: 'h',
+      cmd: 'c'
+    },
+    default: {
+      node: false,
+      delay: 300
+    }
+  })
+
+  if (args.version) {
+    return banner()
   }
 
-  if (!argv.length || ~argv.indexOf('-h') || ~argv.indexOf('--help')) {
+  if (args.help) {
     process.stdout.write('\n')
     banner()
     return require('fs')
@@ -18,29 +35,9 @@ function cmd () {
       .pipe(process.stdout)
   }
 
-  if (~argv.indexOf('-v') || ~argv.indexOf('--version')) {
-    return banner()
+  if (args.cmd) {
+    return require('./command')(argv)
   }
-
-  var stacksOnlyIx = argv.indexOf('--stacks-only')
-  if (argv[stacksOnlyIx + 1] === '-') {
-    argv[stacksOnlyIx] = '--stacks-only=-'
-    argv.splice(stacksOnlyIx + 1, 1)
-  }
-
-  var args = require('minimist')(argv, {
-    number: ['delay'],
-    boolean: ['open'],
-    alias: {
-      open: 'o',
-      delay: 'd',
-      'output-dir': 'D'
-    },
-    default: {
-      node: false,
-      delay: 300
-    }
-  })
 
   args.script = args._[0]
 
