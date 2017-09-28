@@ -29,6 +29,7 @@
     "jsdom": "^8.0.4",
     "minimist": "^1.2.0",
     "multistream": "^2.1.0",
+    "open": "0.0.5",
     "perf-sym": "^2.0.0",
     "pump": "^1.0.1",
     "single-line-log": "^1.0.1",

@@ -1,6 +1,20 @@
 /* global d3 */
 var hsl = require('hsl-to-rgb-for-reals')
 
+var diffScale = d3.scale.linear().range([0, 0.2])
+var colors = {
+  v8: {h: 67, s: 81, l: 65},
+  regexp: {h: 310, s: 86, l: 18},
+  nativeC: {h: 0, s: 50, l: 50},
+  nativeJS: {h: 122, s: 50, l: 45},
+  core: {h: 10, s: 66, l: 80},
+  deps: {h: 244, s: 50, l: 65},
+  app: {h: 200, s: 50, l: 45}
+}
+colors.def = colors.core
+colors.js = colors.core
+colors.c = colors.deps
+
 function flameGraph () {
   var w = 960 // graph width
   var h = 1024 // graph height
@@ -37,25 +51,6 @@ function flameGraph () {
     return name
   }
 
-  function stackTop (d) {
-    if (!d.children) return d.top
-    var top = d.top
-
-    d.children
-      .forEach(function (child) {
-        if (
-            !child.children ||
-            child.children.filter(function (c) { return c.hide }).length
-        ) {
-          if (child.hide) {
-            top += stackTop(child)
-          }
-        }
-      })
-
-    return top
-  }
-
   function titleLabel (d) {
     var top = stackTop(d)
     return d.name + '\n' + (top
@@ -88,62 +83,6 @@ function flameGraph () {
       case !/node_modules/.test(name): return {type: 'app', lang: 'js'}
       default: return {type: 'deps', lang: 'js'}
     }
-  }
-
-  var colors = {
-    v8: {h: 67, s: 81, l: 65},
-    regexp: {h: 310, s: 86, l: 18},
-    nativeC: {h: 0, s: 50, l: 50},
-    nativeJS: {h: 122, s: 50, l: 45},
-    core: {h: 23, s: 66, l: 45},
-    deps: {h: 244, s: 50, l: 65},
-    app: {h: 200, s: 50, l: 45}
-  }
-  colors.def = colors.core
-  colors.js = colors.core
-  colors.c = colors.deps
-
-  var diffScale = d3.scale.linear().range([0, 0.2])
-
-  function colorHash (d, perc) {
-    if (!d.name) {
-      return perc ? 'rgb(127, 127, 127)' : 'rgba(0, 0, 0, 0)'
-    }
-
-    perc = perc || 1
-    var type = d.type || 'def'
-    var lang = d.lang || 'js'
-
-    var key
-
-    if (!langs && !tiers) key = colors.def
-
-    if (langs) key = colors[lang]
-    if (tiers) key = colors[type]
-
-    var h = key.h
-    var s = key.s
-    var l = key.l
-    var top = stackTop(d)
-    var vector = ((top / allSamples) * 100) + 1
-    s *= vector
-    l += (vector * 2)
-
-    s /= 100
-    l /= 100
-
-    s *= perc
-    l *= perc
-
-    var a = 0.8
-    if (l > .8) {
-      a += diffScale(l - 0.8)
-      l = .8
-    }
-
-    var rgb = hsl(h, s, l)
-    
-    return 'rgba(' + rgb + ', ' + a + ')'
   }
 
   function filter (data) {
@@ -353,7 +292,7 @@ function flameGraph () {
           .attr('height', function (d) { return d.hide ? 0 : c })
           .style('cursor', 'pointer')
           .style('stroke', function (d) {
-            return colorHash(d, 1.1)
+            return colorHash(d, 1.1, allSamples, langs, tiers)
           })
           .attr('fill', function (d) {
             var highlightColor = '#E600E6'
@@ -361,7 +300,7 @@ function flameGraph () {
             if (typeof d.highlight === 'string') {
               highlightColor = d.highlight
             }
-            return d.highlight ? highlightColor : colorHash(d)
+            return d.highlight ? highlightColor : colorHash(d, undefined, allSamples, langs, tiers)
           })
           .style('visibility', function (d) { return d.dummy ? 'hidden' : 'visible' })
 
@@ -514,4 +453,68 @@ function flameGraph () {
   return chart
 }
 
+function colorHash (d, perc, allSamples, langs, tiers) {
+  if (!d.name) {
+    return perc ? 'rgb(127, 127, 127)' : 'rgba(0, 0, 0, 0)'
+  }
+
+  perc = perc || 1
+  var type = d.type || 'def'
+  var lang = d.lang || 'js'
+
+  var key
+
+  if (!langs && !tiers) key = colors.def
+
+  if (langs) key = colors[lang]
+  if (tiers) key = colors[type]
+
+  var h = key.h
+  var s = key.s
+  var l = key.l
+  var top = stackTop(d)
+  var vector = ((top / allSamples) * 100) + 1
+
+  s *= vector
+  l += (vector * 2)
+
+  s /= 100
+  l /= 100
+
+  s *= perc
+  l *= perc
+
+  var a = 0.8
+  if (l > .8) {
+    a += diffScale(l - 0.8)
+    l = .8
+  }
+
+  var rgb = hsl(h, s, l)
+  var res = 'rgba(' + rgb + ', ' + a + ')'
+
+  return res
+}
+
+function stackTop (d) {
+  if (!d.children) return d.top
+  var top = d.top
+
+  d.children
+    .forEach(function (child) {
+      if (
+          !child.children ||
+          child.children.filter(function (c) { return c.hide }).length
+      ) {
+        if (child.hide) {
+          top += stackTop(child)
+        }
+      }
+    })
+
+  return top
+}
+
 module.exports = flameGraph
+module.exports.colors = colors
+module.exports.colorHash = colorHash

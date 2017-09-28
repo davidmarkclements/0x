@@ -6,11 +6,28 @@ cmd()
 function cmd () {
   var argv = process.argv.slice(2)
 
-  if (~argv.indexOf('--cmd') || ~argv.indexOf('-c')) {
-    return require('./command')(argv)
+  var args = require('minimist')(argv, {
+    number: ['delay'],
+    boolean: ['open', 'version', 'help', 'cmd'],
+    alias: {
+      open: 'o',
+      delay: 'd',
+      'output-dir': 'D',
+      version: 'v',
+      help: 'h',
+      cmd: 'c'
+    },
+    default: {
+      node: false,
+      delay: 300
+    }
+  })
+
+  if (args.version) {
+    return banner()
   }
 
-  if (!argv.length || ~argv.indexOf('-h') || ~argv.indexOf('--help')) {
+  if (args.help) {
     process.stdout.write('\n')
     banner()
     return require('fs')
@@ -18,44 +35,13 @@ function cmd () {
       .pipe(process.stdout)
   }
 
-  if (~argv.indexOf('-v') || ~argv.indexOf('--version')) {
-    return banner()
+  if (args.cmd) {
+    return require('./command')(argv)
   }
 
-  var stacksOnlyIx = argv.indexOf('--stacks-only')
-  if (argv[stacksOnlyIx + 1] === '-') {
-    argv[stacksOnlyIx] = '--stacks-only=-'
-    argv.splice(stacksOnlyIx + 1, 1)
-  }
+  args.script = args._[0]
 
-  // get the position of node binary in argv; else stay -1
-  var ix = -1
-  var bin = ''
-  argv.forEach((el, index) => {
-    if (path.basename(el) === 'node') {
-      ix = index
-      bin = argv[index]
-      return
-    }
-  })
-
-  if (ix === -1) {
-    var c = argv.length
-    while (c--) {
-      if (argv[c][0] !== '-') break
-    }
-    argv.splice(c, 0, 'node')
-    ix = c
-  }
-
-  var args = require('minimist')(argv.slice(0, ix))
-  args.node = argv.slice(ix + 1)
-
-  args.delay = typeof args.delay === 'number' ? args.delay : args.d
-  if (typeof args.delay !== 'number') args.delay = 300
-  args['output-dir'] = typeof args['output-dir'] === 'string' ? args['output-dir'] : args.o
-  // also pass binary, if provided. Fallback to simple 'node'
-  require('./')(args, bin ? bin : 'node')
+  require('./')(args, args.node)
 }
 
 function banner() {
