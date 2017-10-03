@@ -81,8 +81,6 @@ function sun (args, sudo, binary) {
     '-r', path.join(__dirname, 'soft-exit')
   ]).concat(args.script), args)
 
-  console.log(args)
-
   var proc = spawn(node, args, {
     stdio: 'inherit'
   }).on('exit', function (code) {
