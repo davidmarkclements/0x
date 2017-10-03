@@ -76,10 +76,12 @@ function sun (args, sudo, binary) {
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
 
-  args = Object.assign([
+  args = Object.assign(args.nodeOptions.concat([
     '--perf-basic-prof',
     '-r', path.join(__dirname, 'soft-exit')
-  ].concat(args.script), args)
+  ]).concat(args.script), args)
+
+  console.log(args)
 
   var proc = spawn(node, args, {
     stdio: 'inherit'
@@ -393,12 +395,7 @@ function sink (args, pid, folder) {
         status('')
       }, function () {
         tidy(args)
-        // Linux does not handle three slashes
-        // only add one
-        if (folder.indexOf('/') !== 0 || process.platform !== 'linux') {
-          folder = '/' + folder
-        }
-        var file = 'file:/' + folder + '/flamegraph.html'
+        var file = 'file://' + folder + '/flamegraph.html'
         log('flamegraph generated in\n')
         log(file + '\n')
         debug('exiting')

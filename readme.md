@@ -41,27 +41,25 @@ npm install -g 0x
 Prefix the usual command for starting a process with 0x:
 
 ```sh
-0x node my-app.js
-```
-
-All node args are supported, for instance:
-
-```sh
-0x node --trace-opt my-app.js
-```
-
-When node flags aren't required, we can use the shorthand form:
-
-```sh
 0x my-app.js
 ```
 
-If we want to test against a local `node` binary, simply reference the binary directly.
-
-For example if the `node` binary is the current working directory:
+You can make the flamegraph automatically open in your browser with:
 
 ```sh
-0x ./node my-app.js
+0x -o my-app.js
+```
+
+Use a custom Node.js executable:
+
+```sh
+0x --node=/path/to/node my-app.js
+```
+
+You can pass custom arguments to node, for instance:
+
+```sh
+0x --node-options="--trace-opt" my-app.js
 ```
 
 ## Generating
@@ -145,16 +143,28 @@ sudo 0x my-app.js
 
 Print usage info
 
-### --output-dir | -o      
+### --open | -o
+
+Open the flamegraph on your browser using `open` or `xdg-open` (see
+https://www.npmjs.com/package/open for details).
+
+### --node
+
+Set a custom node executable
+
+### --node-options
+
+Pass in custom options to `node`
+
+### --output-dir | -D
 
 Specify artifact output directory
 Default: '${process.cwd()}/profile-${PID}(-${Date.now()})?'
 
-
 ### --svg
 
 Generates an `flamegraph.svg` file in the artifact output directory,
-in addition to the `flamegraph.html` file. 
+in addition to the `flamegraph.html` file.
 
 ### --preview
 
