@@ -7,6 +7,8 @@
   --node=PATH             Path to the node executable to use
                           Default: false
 
+  --node-options=ARGS     List of options to pass to Node
+
   --delay | -d            Delay before tracing begins, allows us to ignore
                           initialisation stacks (e.g. module loading).
                           Milliseconds

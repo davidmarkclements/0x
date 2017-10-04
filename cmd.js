@@ -14,17 +14,23 @@ function cmd () {
       delay: 'd',
       'output-dir': 'D',
       version: 'v',
+      nodeOptions: 'node-options',
       help: 'h',
       cmd: 'c'
     },
     default: {
       node: false,
+      nodeOptions: [],
       delay: 300
     }
   })
 
   if (args.version) {
     return banner()
+  }
+
+  if (!Array.isArray(args.nodeOptions)) {
+    args.nodeOptions = args.nodeOptions.split(' ')
   }
 
   if (args.help) {
