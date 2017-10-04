@@ -30,7 +30,7 @@ function cmd () {
   }
 
   if (!Array.isArray(args.nodeOptions)) {
-    args.nodeOptions = [args.nodeOptions]
+    args.nodeOptions = args.nodeOptions.split(' ')
   }
 
   if (args.help) {

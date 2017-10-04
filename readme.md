@@ -59,7 +59,7 @@ Use a custom Node.js executable:
 You can pass custom arguments to node, for instance:
 
 ```sh
-0x --node-options="--trace-opt" my-app.js
+0x --node-options="--trace-opt --trace-deopt" my-app.js
 ```
 
 ## Generating
