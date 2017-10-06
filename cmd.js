@@ -46,6 +46,7 @@ function cmd () {
   }
 
   args.script = args._[0]
+  args.script_args = args._.slice(1);
 
   require('./')(args, args.node)
 }
