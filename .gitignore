@@ -3,3 +3,4 @@ node_modules
 profile-*
 .__browserify_string_empty.js
 win
+package-lock.json

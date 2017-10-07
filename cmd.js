@@ -45,8 +45,7 @@ function cmd () {
     return require('./command')(argv)
   }
 
-  args.script = args._[0]
-  args.script_args = args._.slice(1);
+  args.script = args._
 
   require('./')(args, args.node)
 }

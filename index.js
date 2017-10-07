@@ -79,7 +79,7 @@ function sun (args, sudo, binary) {
   args = Object.assign(args.nodeOptions.concat([
     '--perf-basic-prof',
     '-r', path.join(__dirname, 'soft-exit')
-  ]).concat(args.script).concat(args.script_args), args)
+  ]).concat(args.script), args)
 
   var proc = spawn(node, args, {
     stdio: 'inherit'
