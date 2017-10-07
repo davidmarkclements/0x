@@ -341,7 +341,7 @@ module.exports = function (stacks, opts, next, done) {
   doc.body.appendChild(controlPanel)
 
   {
-    var coldHot = document.createElement('div')
+    var coldHot = doc.createElement('div')
     coldHot.style = 'position:absolute;top:.5em; right: 22%; heigh: 20px;'
 
     coldHot.appendChild(genLabel('cold'))
@@ -369,7 +369,7 @@ module.exports = function (stacks, opts, next, done) {
     coldHot.appendChild(genLabel('hot'))
 
     function genBox (d) {
-      var box = document.createElement('div')
+      var box = doc.createElement('div')
       var style = 'background: ' + flamer.colorHash(d, 1, 100) + ';'
       style += 'height: 20px; width: 20px; display: block; float: left; margin-right: 5px;'
       box.style = style
@@ -377,7 +377,7 @@ module.exports = function (stacks, opts, next, done) {
     }
 
     function genLabel (name) {
-      var box = document.createElement('div')
+      var box = doc.createElement('div')
       box.innerHTML = name
       var style = 'display: block; float: left; margin-right: 5px;'
       box.style = style
