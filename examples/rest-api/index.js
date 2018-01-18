@@ -5,8 +5,6 @@ var restify = require('restify')
 var server = restify.createServer()
 var count = 1
 
-console.log(process.argv)
-
 server.get('/a', function (req, res, next) {
   var tag = etag(pkg + ++count)
 

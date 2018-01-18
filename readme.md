@@ -1,4 +1,4 @@
-# <img alt=0x src=0x-logo.png width=350>
+# <img alt=0x src=assets/0x-logo.png width=350>
 
 
 🔥 single-command flamegraph profiling 🔥
@@ -11,12 +11,9 @@ Discover the bottlenecks and hot paths in your code, with flamegraphs.
 
 ## Demo
 
-![](demo.gif)
+![](assets/demo.gif)
 
 An example interactive flamegraph can be viewed at <http://davidmarkclements.github.io/0x-demo/>
-
-This demo shows a terminal preview, the default behaviour
-is *not* to show a preview, you can use `-p` to turn it on.
 
 ## Support
 
@@ -161,21 +158,15 @@ Pass in custom options to `node`
 Specify artifact output directory
 Default: '${process.cwd()}/profile-${PID}(-${Date.now()})?'
 
+### --gen | -g
+
+Generate the flamegraph from a specified stacks.out file.
+The `--tiers` and `--langs` flags can also be combined with this flag.
+
 ### --svg
 
 Generates an `flamegraph.svg` file in the artifact output directory,
 in addition to the `flamegraph.html` file.
-
-### --preview
-
-Generates an SVG file, prerenders SVG inside HTML
-and outputs a PNG to the terminal (if possible)
-Depends on imagemagick (brew install imagemagick)
-If using iTerm 2.9+ image will be output to terminal
-Warning - depending on the amount of stacks this
-option can take tens of seconds
-
-Default: false
 
 ### --delay | -d
 
@@ -290,7 +281,6 @@ By default, a profile folder will be created and named after the PID, e.g.
 
 The Profile Folder can contain the following files
 
-* flamegraph-small.png - the preview image output to terminal
 * flamegraph.svg - an SVG rendering of the flamegraph
 * stacks.3866.out - the traced stacks (run through [perf-sym](http://npmjs.com/perf-sym) on OS X)
 * flamegraph.html - the interactive flamegraph

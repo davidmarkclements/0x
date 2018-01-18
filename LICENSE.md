@@ -1,4 +1,4 @@
-All code other than flamer.js and stack-convert.js is licensed thusly:
+All code other than ui.js and stack-convert.js is licensed thusly:
 
   The MIT License (MIT)
   Copyright (c) 2016 David Mark Clements
@@ -10,7 +10,7 @@ All code other than flamer.js and stack-convert.js is licensed thusly:
 
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-flamer.js and stack-convert.js are derivative works, which are licensed thusly:
+ui.js and .js are derivative works, which are licensed thusly:
 
 
   Copyright 2016 David Mark Clements
