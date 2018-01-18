@@ -1,5 +1,6 @@
 # 3.0.0
 
+* node 4 support dropped, node 6+ supported
 * changelog.md added
 * refactor
 * programmatic API (`require('0x')`)
