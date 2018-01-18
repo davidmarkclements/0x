@@ -1,6 +1,7 @@
 'use strict'
 
 const { sun, linux, windows } = require('./platform')
+const { execSync } = require('child_process') 
 const { EventEmitter } = require('events')
 const once = require('once')
 

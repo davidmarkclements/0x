@@ -45,7 +45,7 @@ function sun (args, sudo, binary) {
   }).on('exit', function (code) {
     if (code !== 0) {
       tidy(args)
-      const err = Error('target subprocess error, code: ' + code)
+      const err = Error('0x Target subprocess error, code: ' + code)
       err.code = code
       ee.emit('error', err, code)
       return
@@ -104,7 +104,7 @@ function sun (args, sudo, binary) {
       debug('Profiling not begun')
       log('No stacks, profiling had not begun\n')
       tidy(args)
-      ee.emit('error', Error('Profiling not begun'))
+      ee.emit('error', Error('0x: Profiling not begun'))
       return 
     }
 
@@ -129,7 +129,7 @@ function sun (args, sudo, binary) {
           status('Unable to find map file!\n')
           debug('Unable to find map file after multiple attempts')
           tidy(args)
-          ee.emit('error', Error('Unable to find map file'))
+          ee.emit('error', Error('0x: Unable to find map file'))
           return
         }
         return
@@ -148,7 +148,7 @@ function sun (args, sudo, binary) {
         status('Unable to find map file!\n')
         debug('Unable to find map file after multiple attempts')
         tidy(args)
-        ee.emit('error', Error('Unable to find map file'))
+        ee.emit('error', Error('0x: Unable to find map file'))
         return
       }
       pump(

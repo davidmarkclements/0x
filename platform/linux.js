@@ -58,7 +58,7 @@ function linux (args, sudo, binary) {
   }).on('exit', function (code) {
     if (code !== null && code !== 0 && code !== 143 && code !== 130) {
       tidy(args)
-      const err = Error('tracing subprocess error, code: ' + code)
+      const err = Error('0x: Tracing subprocess error, code: ' + code)
       err.code = code
       ee.emit('error', err, code)
       return

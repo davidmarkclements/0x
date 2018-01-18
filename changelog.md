@@ -10,3 +10,5 @@
 * added `--silent` flag
 * added `--name` flag
 * added `--log-output` flag 
+* `--node` flag renamed to `--node-path`
+* added double dash syntax for nesting flags, e.g.: `0x -- node --zero-fill-buffers script.js`

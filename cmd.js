@@ -2,14 +2,17 @@
 
 const fs = require('fs')
 const minimist = require('minimist')
-const zeroEks = require('./')
 const { join } = require('path')
+const zeroEks = require('./')
+const { pathTo } = require('./lib/util')
 const { version } = require('./package.json')
 
 cmd(process.argv.slice(2))
 
 function cmd (argv) {
   var args = minimist(argv, {
+    stopEarly: true,
+    '--': true,
     number: ['delay'],
     boolean: ['open', 'version', 'help', 'quiet', 'silent'],
     alias: {
@@ -20,13 +23,14 @@ function cmd (argv) {
       'output-dir': 'D',
       version: 'v',
       nodeOptions: 'node-options',
+      nodePath: 'node-path',
       help: 'h',
       gen: 'g',
       jsonStacks: 'json-stacks',
       logOutput: 'log-output'
     },
     default: {
-      node: false,
+      nodePath: false,
       name: 'flamegraph',
       nodeOptions: [],
       delay: 300
@@ -39,21 +43,14 @@ function cmd (argv) {
     args.nodeOptions = args.nodeOptions.split(' ')
   }
 
-  const nodeFlagsPresent = (args._[0][0] === '-')
-  if (nodeFlagsPresent) {
-    const scriptIx = args._.findIndex(([c0]) => c0 !== '-')
-
-    args.nodeOptions = [
-      ...args.nodeOptions, 
-      ...args._.splice(0, scriptIx)
-    ]
-  }
-   
-
   if (args.help) {
     console.log('\n')
     console.log('0x ' + version)
     return fs.createReadStream(join(__dirname, 'usage.txt')).pipe(process.stdout)
+  }
+
+  if (args.logOutput && args.logOutput.toLowerCase() === 'stdout') {
+    args.io = { logStream: process.stdout }
   }
 
   if (args.gen) return zeroEks.stacksToFlamegraph(args, (err) => {
@@ -61,14 +58,36 @@ function cmd (argv) {
       process.exit()
   })
 
-  args.script = args._
-
-  if (args.logOutput && args.logOutput.toLowerCase() === 'stdout') {
-    args.io = { logStream: process.stdout }
+  const dashDash = args['--']
+  if (dashDash[0] && dashDash[0][0] === '-') {
+    console.error('0x: The node binary must immediately follow double dash (--)')
+    console.error('    e.g. 0x -- node script.js')
+    process.exit(1)
   }
 
-  zeroEks(args, args.node, (err) => {
-    if (err) throw err 
+  if (dashDash[0] && dashDash[0][0] !== 'node' && args.nodePath === false) {
+    args.nodePath = dashDash[0]
+  }
+  dashDash.shift() // rm node path now
+
+  const nodeFlagsPresent = dashDash.length > 0
+
+  if (nodeFlagsPresent) {
+    const scriptIx = dashDash.findIndex(([c0]) => c0 !== '-')
+    args.nodeOptions = [
+      ...args.nodeOptions, 
+      ...dashDash.splice(0, scriptIx)
+    ]
+    args.script = dashDash  
+  } else {
+    args.script = args._
+  }
+
+  zeroEks(args, args.nodePath, (err) => {
+    if (err) {
+      console.error('0x: FATAL', err.stack)
+      process.exit(err.code || 1)
+    } 
     process.exit()
   })
 }

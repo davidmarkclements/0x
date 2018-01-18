@@ -1,5 +1,5 @@
 
-  0x [flags] -- [nodeFlags] file.js -- [scriptFlags]  
+  0x [flags] -- (node) [nodeFlags] file.js -- [scriptFlags]
 
   --name                  The name of the HTML file, without the .html extension
                           Can be set to - to write HTML to STDOUT
@@ -8,10 +8,10 @@
   -o                      Automatically open after finishing
                           Default: false
 
-  --node=PATH             Path to the node executable to use
+  --node-path             Path to the node executable to use
                           Default: false
 
-  --node-options=ARGS     List of flags to pass to Node, can be used
+  --node-options          List of flags to pass to Node, can be used
                           instead of the double dash suffix (--)
 
   --delay | -d            Delay before tracing begins, allows us to ignore
