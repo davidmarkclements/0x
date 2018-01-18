@@ -7,7 +7,7 @@ const zeroEks = require('./')
 const { pathTo } = require('./lib/util')
 const { version } = require('./package.json')
 
-cmd(process.argv.slice(2))
+if (module.parent === null) cmd(process.argv.slice(2))
 
 function cmd (argv) {
   var args = minimist(argv, {
@@ -61,27 +61,21 @@ function cmd (argv) {
   const dashDash = args['--']
   if (dashDash[0] && dashDash[0][0] === '-') {
     console.error('0x: The node binary must immediately follow double dash (--)')
-    console.error('    e.g. 0x -- node script.js')
+    console.error('    0x [flags] -- node [nodeFlags] script.js [scriptFlags]')
     process.exit(1)
   }
 
-  if (dashDash[0] && dashDash[0][0] !== 'node' && args.nodePath === false) {
-    args.nodePath = dashDash[0]
-  }
-  dashDash.shift() // rm node path now
-
-  const nodeFlagsPresent = dashDash.length > 0
-
-  if (nodeFlagsPresent) {
-    const scriptIx = dashDash.findIndex(([c0]) => c0 !== '-')
-    args.nodeOptions = [
-      ...args.nodeOptions, 
-      ...dashDash.splice(0, scriptIx)
-    ]
-    args.script = dashDash  
+  if (dashDash[0]) {
+    if (dashDash[0][0] !== 'node' && args.nodePath === false) {
+      args.nodePath = dashDash[0]
+    }
+    dashDash.shift()
+    args.script = dashDash
   } else {
     args.script = args._
   }
+
+  // console.log(args)
 
   zeroEks(args, args.nodePath, (err) => {
     if (err) {
