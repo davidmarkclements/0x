@@ -8,6 +8,7 @@ const { pathTo } = require('./lib/util')
 const { version } = require('./package.json')
 
 if (module.parent === null) cmd(process.argv.slice(2))
+else module.exports = cmd 
 
 function cmd (argv) {
   var args = minimist(argv, {
