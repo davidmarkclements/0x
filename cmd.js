@@ -1,56 +1,160 @@
 #!/usr/bin/env node
-const path = require('path')
 
-cmd()
+const fs = require('fs')
+const minimist = require('minimist')
+const { join, isAbsolute, relative } = require('path')
+const zeroEks = require('./')
+const ajv = require('ajv')()
+const { pathTo } = require('./lib/util')
+const { version } = require('./package.json')
+const schema = require('./cli-schema.json')
+const validate = ajv.compile(schema)
 
-function cmd () {
-  var argv = process.argv.slice(2)
+const defaultBanner = `
+  0x ${version}
+  
+  0x [flags] -- node [nodeFlags] script.js [scriptFlags]
 
-  var args = require('minimist')(argv, {
+`
+
+if (module.parent === null) cmd(process.argv.slice(2))
+else module.exports = cmd 
+
+function cmd (argv, banner = defaultBanner) {
+  var args = minimist(argv, {
+    stopEarly: true,
+    '--': true,
     number: ['delay'],
-    boolean: ['open', 'version', 'help', 'cmd'],
+    boolean: [
+      'open', 'version', 'help', 'quiet', 
+      'silent', 'jsonStacks', 'svg', 'traceInfo',
+      'collectOnly', 'timestampProfiles'
+    ],
     alias: {
+      silent: 's',
+      quiet: 'q',
       open: 'o',
       delay: 'd',
       'output-dir': 'D',
+      outputDir: 'output-dir',
       version: 'v',
-      nodeOptions: 'node-options',
       help: 'h',
-      cmd: 'c'
+      gen: 'g',
+      langs: 'l',
+      tiers: 't',
+      timestampProfiles: 'timestamp-profiles',
+      traceInfo: 'trace-info',
+      jsonStacks: 'json-stacks',
+      logOutput: 'log-output',
+      visualizeOnly: 'visualize-only',
+      collectOnly: 'collect-only'
     },
     default: {
-      node: false,
-      nodeOptions: [],
       delay: 300
     }
   })
 
-  if (args.version) {
-    return banner()
+  args.name = args.name || (args.gen ? '-' : 'flamegraph')
+
+  if (ajv.validate(schema, args) === false) {
+    const [{keyword, dataPath, params, message}] = ajv.errors
+    if (keyword === 'type') {
+
+      const flag = dataPath.substr(
+        1, 
+        dataPath[dataPath.length -1] === ']' ? 
+          dataPath.length - 2 : 
+          dataPath.length -1 
+      )
+      const dashPrefix = flag.length === 1 ? '-' : '--'
+      console.error(`\n  0x: the ${dashPrefix}${flag} option ${message}\n`)
+    }
+    if (keyword === 'additionalProperties') {
+      const flag = params.additionalProperty
+      const dashPrefix = flag.length === 1 ? '-' : '--'
+      console.error(`\n  0x: ${dashPrefix}${flag} is not a recognized flag\n`)
+    }
+    process.exit(1)
   }
 
-  if (!Array.isArray(args.nodeOptions)) {
-    args.nodeOptions = args.nodeOptions.split(' ')
+  if (args.collectOnly && args.visualizeOnly) {
+    console.error('\n 0x: --collect-only and --visualize-only cannot be used together')
+    process.exit(1)
   }
 
-  if (args.help) {
-    process.stdout.write('\n')
-    banner()
-    return require('fs')
-      .createReadStream(__dirname + '/usage.txt')
-      .pipe(process.stdout)
+  if (args.gen && args.visualizeOnly) {
+    console.error('\n 0x: --gen and --visualize-only cannot be used together')
+    process.exit(1)
+  }
+  
+  args.workingDir = process.cwd()
+
+  if (args.version) return console.log('0x ' + version)
+
+  if (args.help || argv.length === 0) {
+    process.stdout.write(banner)
+
+    return fs.createReadStream(join(__dirname, 'usage.txt')).pipe(process.stdout)
   }
 
-  if (args.cmd) {
-    return require('./command')(argv)
+  if (args.logOutput && args.logOutput.toLowerCase() === 'stdout') {
+    args.io = { logStream: process.stdout }
   }
 
-  args.script = args._
+  if (args.visualizeOnly) {
+    try { 
+      const { visualizeOnly } = args
+      const dir = isAbsolute(visualizeOnly) ? 
+        relative(args.workingDir, visualizeOnly) :
+        visualizeOnly
+      const ls = fs.readdirSync(dir)
+      const rx = /^stacks\.(.*)\.out/
+      const stacks = ls.find((f) => rx.test(f))
+      if (!stacks) {
+        console.error('\n  0x: Invalid data path provided to --visualize-only (no stacks file)')
+        process.exit(1)
+      }
+      args.gen = join(dir, stacks)
+      args.name = join(dir, 'flamegraph')
+    } catch (e) {
+      if (e.code === 'ENOENT') {
+        console.error('\n  0x: Invalid data path provided to --visualize-only (unable to access/does not exist)')
+        process.exit(1)
+      } else if (e.code === 'ENOTIDR') {
+        console.error('\n  0x: Invalid data path provided to --visualize-only (not a directory)')
+        process.exit(1)
+      } else throw e
+    }
+  }
 
-  require('./')(args, args.node)
-}
+  if (args.gen) return zeroEks.stacksToFlamegraph(args, (err) => {
+      if (err) throw err
+      process.exit()
+  })
 
-function banner() {
-  var version = require('./package.json').version
-  process.stdout.write('0x ' + version + '\n')
+  const dashDash = args['--']
+  if (dashDash[0] && dashDash[0][0] === '-') {
+    console.error('0x: The node binary must immediately follow double dash (--)')
+    console.error('    0x [flags] -- node [nodeFlags] script.js [scriptFlags]')
+    process.exit(1)
+  }
+
+  var binary = false
+  if (dashDash[0]) {
+    if (dashDash[0][0] !== 'node') binary = dashDash[0]
+    dashDash.shift()
+    args.argv = dashDash
+  } else {
+    args.argv = args._
+  }
+
+  args.title = args.title || 'node ' + args.argv.join(' ')
+
+  zeroEks(args, binary, (err) => {
+    if (err) {
+      console.error('0x: FATAL', err.stack)
+      process.exit(err.code || 1)
+    } 
+    process.exit()
+  })
 }

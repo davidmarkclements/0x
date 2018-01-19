@@ -1,13 +1,12 @@
+  --name                  The name of the HTML file, without the .html extension
+                          Can be set to - to write HTML to STDOUT
+                          Default: flamegraph
 
-  0x [flags] file.js
+  --title                 Set the title to display in the flamegraph UI
+                          Default: node [nodeFlags] script.js
 
-  -o                      Automatically open after finishing
+  --open | -o             Automatically open after finishing
                           Default: false
-
-  --node=PATH             Path to the node executable to use
-                          Default: false
-
-  --node-options=ARGS     List of options to pass to Node
 
   --delay | -d            Delay before tracing begins, allows us to ignore
                           initialisation stacks (e.g. module loading).
@@ -19,14 +18,6 @@
 
   --svg                   Generates an `flamegraph.svg` file in the artifact
                           output directory, in addition to the `flamegraph.html` file.
-
-  --preview | -p          Generates an SVG file, prerenders SVG inside HTML
-                          and outputs a PNG to the terminal (if possible)
-                          Depends on imagemagick (brew install imagemagick)
-                          If using iTerm 2.9+ image will be output to terminal
-                          Warning - depending on the amount of stacks this
-                          option can take tens of seconds
-                          Default: false
 
   --langs | -l            Coarser form of tiers, colour code by JS or C
                           Default: false
@@ -40,26 +31,35 @@
                           Langs: js, c
                           Default: v8
 
-  --include               Include tiers, Overwrites exclude
+  --include               Include tiers or langs. Overwrites exclude
 
   --theme                 Dark or Light theme
                           Default: light
 
-  --stacks-only           Don't generate the flamegraph, only create the stacks
-                          output.
-                          If assigned to '-' stacks output will come through stdout
-                          Default: false
-
   --trace-info            Show output from dtrace or perf tools
                           Default: false
 
-  -q                      Only output flamegraph URI
+  -q | --quiet            Only output flamegraph URI, and fatal errors.
                           Default: false
 
-  --cmd | -c              Command Mode - A tool set for processing data in
-                          the profile folder.
-
-                          Run 0x --cmd help for a list of commands
+  -s | --silent           Complete silence, 0x will not output anything,
+                          other than fatal errors.
+                          Default: false
 
   --timestamp-profiles    Add timestamp to you profile folder's name
 
+  --gen [flags] <file> |  Generate the flamegraph from a stacks.out file. 
+  -g [flags] <file> |     Possible flags include --tiers and --langs and --name
+                          Outputs HTML to STDOUT by default, unless --name is set.       
+                          
+  --json-stacks           Output a JSON file of stacks as stacks.<pid>.json
+
+
+  --log-output            The logging output stream. Can be stdout or stderr
+                          Default: stderr
+
+  --collect-only          Do not process captured stacks into a flamegraph
+
+  --visualize-only <folder> Build or rebuild visualization from original stacks, 
+                            similar to --gen flag, except specify containing folder
+                            instead of stacks file.  

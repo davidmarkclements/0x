@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 profile-*
+*.flamegraph
 .__browserify_string_empty.js
 win
 package-lock.json
