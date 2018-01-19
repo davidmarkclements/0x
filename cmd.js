@@ -47,10 +47,12 @@ function cmd (argv, banner = defaultBanner) {
       collectOnly: 'collect-only'
     },
     default: {
-      name: '-',
+      name: false,
       delay: 300
     }
   })
+
+  args.name = args.name || (args.gen ? '-' : 'flamegraph') 
 
   if (ajv.validate(schema, args) === false) {
     const [{keyword, dataPath, params, message}] = ajv.errors
