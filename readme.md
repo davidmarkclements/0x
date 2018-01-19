@@ -17,7 +17,7 @@ An example interactive flamegraph can be viewed at <http://davidmarkclements.git
 
 ## Support
 
-* Node v4+
+* Node v6+
 
 * OS
   * Linux
@@ -47,16 +47,16 @@ You can make the flamegraph automatically open in your browser with:
 0x -o my-app.js
 ```
 
-Use a custom Node.js executable:
+Using a custom Node.js executable:
 
 ```sh
-0x --node=/path/to/node my-app.js
+0x -- /path/to/node my-app.js
 ```
 
-You can pass custom arguments to node, for instance:
+Passing custom arguments to node:
 
 ```sh
-0x --node-options="--trace-opt --trace-deopt" my-app.js
+0x -- node --trace-opt --trace-deopt my-app.js
 ```
 
 ## Generating
@@ -66,7 +66,7 @@ Once we're ready to generate a flamegraph we send a SIGINT.
 The simplest way to do this is pressing CTRL+C.
 
 When `0x` catches the SIGINT, it process the stacks and
-generates a profile folder, containing flamegraph.html
+generates a profile folder (`<pid>.flamegraph`), containing `flamegraph.html`
 
 
 ## Docker
@@ -91,10 +91,10 @@ Generating a flamegraph can be quite intense on CPU and memory,
 if we have restricted resources we should generate the flamegraph
 in two pieces.
 
-First we can use the `--stacks-only` flag to purely capture stacks.
+First we can use the `--collect-only` flag to purely capture stacks.
 
 ```sh
-0x --stacks-only my-app.js  #0x on the server
+0x --collect-only my-app.js  #0x on the server
 ```
 
 Press ctrl+c when ready, this will create the usual profile folder,
@@ -106,10 +106,17 @@ to our local dev machine.
 Let's say the pid was 7777, we can generate the flamegraph locally with
 
 ```sh
-0x -c gen stacks.7777.out # 0x locally
+0x --gen stacks.7777.out # 0x locally
 ```
 
 Now the hard work is done away from production, ensuring we avoid any service-level problems.
+
+Alternatively if we transfer the entire folder (containing the stacks file),
+we can pass the folder to `--visualize-only`:
+
+```sh
+0x --visualize-only 7777.flamegraph # create a flamegraph.html in 7777.flamegraph
+```
 
 ## Memory Issues
 
@@ -134,6 +141,20 @@ If you are getting empty output stacks, you may have to run with `sudo`:
 sudo 0x my-app.js
 ```
 
+## Command nesting
+
+Use `--` to set the `node` executable and/or set node flags
+
+```sh
+0x [0xFlags] -- node [nodeFlags] script.js [scriptFlags]
+```
+
+For instance
+
+```sh
+0x --open -- node --zero-fill-buffers script.js --my-own-arg
+```
+
 ## 0x Flags
 
 ### --help | -h
@@ -145,13 +166,14 @@ Print usage info
 Open the flamegraph on your browser using `open` or `xdg-open` (see
 https://www.npmjs.com/package/open for details).
 
-### --node
+### --name
 
-Set a custom node executable
+The name of the HTML file, without the .html extension
+Can be set to - to write HTML to STDOUT
 
-### --node-options
+### ---title 
 
-Pass in custom options to `node`
+Set the title to display in the flamegraph UI.
 
 ### --output-dir | -D
 
@@ -162,6 +184,8 @@ Default: '${process.cwd()}/profile-${PID}(-${Date.now()})?'
 
 Generate the flamegraph from a specified stacks.out file.
 The `--tiers` and `--langs` flags can also be combined with this flag.
+Outputs to STDOUT unless the `--name` flag is set, in which case 
+outputs to a file `{name}.html` in the current folder.
 
 ### --svg
 
@@ -228,22 +252,45 @@ Example: `0x --theme light my-app.js`
 
 Default: dark
 
-### --stacks-only
+### --quiet | -q 
 
-Don't generate the flamegraph, only create the stacks
-output. If assigned to '-' stacks output will come through
-stdout. Use this in combination with the `-c gen` argument
-to generate the flamegraph from raw stacks.
-
-Options: false | true | -
-
-Examples:
-
-`0x --stacks-only my-app.js`
-
-`0x --stacks-only=- my-app.js`
+Limit output, the only output will be fatal errors or 
+the path to the `flamegraph.html` upon successful generation.
 
 Default: false
+
+### --silent | -s
+
+Suppress all output, except fatal errors.
+
+Default: false
+
+### --json-stacks
+
+Save the intermediate JSON tree representation of the stacks.
+
+Default: false
+
+### --collect-only
+
+Don't generate the flamegraph, only create the stacks
+output. 
+
+Default: false
+
+### --visualize-only 
+
+Supply a path to a profile folder to build or rebuild visualization 
+from original stacks. Similar to --gen flag, except specify containing folder
+instead of stacks file.
+
+Default: ''  
+
+### --log-output 
+
+Specify `stdout` or `stderr` as 0x's output stream.
+
+Default: stderr
 
 ### --trace-info
 
@@ -251,40 +298,24 @@ Show output from dtrace or perf tools
 
 Default: false
 
-### --cmd | -c
+#### --timestamp-profiles
 
-Run a "0x command", possible commands are `help` and `gen`.
+Prefixes the current timestamp to the Profile Folder's name minimizing collisions
+in containerized environments
 
-#### `0x -c help`
-outputs advanced usage (i.e. the commands).
-
-#### `0x -c gen`
-
-The gen command will generate the flamegraph from
-a stacks.out file.
-
-Example: `0x -c gen [flags] profile-$PID/stacks.$PID.out > flamegraph.html`
-
-Flags include all the flags that can be passed to 0x
-
-#### `--timestamp-profiles`
-
-Adds the current timestamp to the Profile Folder's name minimizing collisions
-for in containerized environments
-
-Example: `profile-3866-`
+Example: `1516395452110-3866.flamegraph`
 
 ## The Profile Folder
 
 By default, a profile folder will be created and named after the PID, e.g.
-`profile-3866` (we can set this name manually using the `--output-dir` flag).
+`3866.flamegraph` (we can set this name manually using the `--output-dir` flag).
 
 The Profile Folder can contain the following files
 
 * flamegraph.svg - an SVG rendering of the flamegraph
 * stacks.3866.out - the traced stacks (run through [perf-sym](http://npmjs.com/perf-sym) on OS X)
 * flamegraph.html - the interactive flamegraph
-* stacks.3866.json - a JSON tree generated from the stacks, this tree is rendered by d3.js in the flamegraph.html
+* stacks.3866.json - a JSON tree generated from the stacks, enabled with `--json-stacks`
 
 The is helpful, because there's other things you can do with
 stacks output. For instance, checkout [cpuprofilify](http://npmjs.com/cpuprofilify) and [traceviewify](http://npmjs.com/traceviewify).
