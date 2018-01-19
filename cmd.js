@@ -10,10 +10,17 @@ const { version } = require('./package.json')
 const schema = require('./cli-schema.json')
 const validate = ajv.compile(schema)
 
+const defaultBanner = `
+  0x ${version}
+  
+  0x [flags] -- node [nodeFlags] script.js [scriptFlags]
+
+`
+
 if (module.parent === null) cmd(process.argv.slice(2))
 else module.exports = cmd 
 
-function cmd (argv) {
+function cmd (argv, banner = defaultBanner) {
   var args = minimist(argv, {
     stopEarly: true,
     '--': true,
@@ -39,7 +46,6 @@ function cmd (argv) {
     }
   })
 
-  console.log(args)
   if (ajv.validate(schema, args) === false) {
     const [{keyword, dataPath, params, message}] = ajv.errors
     if (keyword === 'type') {
@@ -60,8 +66,8 @@ function cmd (argv) {
   if (args.version) return console.log('0x ' + version)
 
   if (args.help || argv.length === 0) {
-    console.log('')
-    console.log('  0x ' + version)
+    process.stdout.write(banner)
+
     return fs.createReadStream(join(__dirname, 'usage.txt')).pipe(process.stdout)
   }
 

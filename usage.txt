@@ -1,6 +1,3 @@
-
-  0x [flags] -- node [nodeFlags] script.js [scriptFlags]
-
   --name                  The name of the HTML file, without the .html extension
                           Can be set to - to write HTML to STDOUT
                           Default: flamegraph
