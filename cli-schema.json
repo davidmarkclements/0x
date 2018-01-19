@@ -1,0 +1,115 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "_": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "open": {
+      "type": "boolean"
+    },
+    "o": {
+      "type": "boolean"
+    },
+    "version": {
+      "type": "boolean"
+    },
+    "v": {
+      "type": "boolean"
+    },
+    "help": {
+      "type": "boolean"
+    },
+    "h": {
+      "type": "boolean"
+    },
+    "quiet": {
+      "type": "boolean"
+    },
+    "q": {
+      "type": "boolean"
+    },
+    "silent": {
+      "type": "boolean"
+    },
+    "s": {
+      "type": "boolean"
+    },
+    "jsonStacks": {
+      "type": "boolean"
+    },
+    "json-stacks": {
+      "type": "boolean"
+    },
+    "svg": {
+      "type": "boolean"
+    },
+    "log-output": {
+      "type": "boolean"
+    },
+    "logOutput": {
+      "type": "boolean"
+    },
+    "timestamp-profiles": {
+      "type": "boolean"
+    },
+    "trace-info": {
+      "type": "boolean"
+    },
+    "theme": {
+      "type": "string"
+    },
+    "include": {
+      "type": "string"
+    },
+    "exclude": {
+      "type": "string"
+    },
+    "l": {
+      "type": "string"
+    },
+    "langs": {
+      "type": "string"
+    },
+    "t": {
+      "type": "string"
+    },
+    "tiers": {
+      "type": "string"
+    },
+    "g": {
+      "type": "string"
+    },
+    "gen": {
+      "type": "string"
+    },
+    "D": {
+      "type": "string"
+    },
+    "output-dir": {
+      "type": "string"
+    },
+    "stacks-only": {
+      "type": "boolean"
+    },
+    "title": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "delay": {
+      "type": "number"
+    },
+    "d": {
+      "type": "number"
+    },
+    "--": {
+      "type": "array",
+      "items": {}
+    }
+  }
+}

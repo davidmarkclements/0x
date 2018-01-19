@@ -5,14 +5,11 @@
                           Can be set to - to write HTML to STDOUT
                           Default: flamegraph
 
-  -o                      Automatically open after finishing
-                          Default: false
+  --title                 Set the title to display in the flamegraph ui
+                          Default: node [nodeFlags] script.js
 
-  --node-path             Path to the node executable to use
+  --open | -o             Automatically open after finishing
                           Default: false
-
-  --node-options          List of flags to pass to Node, can be used
-                          instead of the double dash suffix (--)
 
   --delay | -d            Delay before tracing begins, allows us to ignore
                           initialisation stacks (e.g. module loading).
@@ -37,7 +34,7 @@
                           Langs: js, c
                           Default: v8
 
-  --include               Include tiers, Overwrites exclude
+  --include               Include tiers or langs. Overwrites exclude
 
   --theme                 Dark or Light theme
                           Default: light
@@ -67,3 +64,4 @@
 
   --log-output            The logging output stream. Can be stdout or stderr
                           Default: stderr
+

@@ -4,8 +4,11 @@ const fs = require('fs')
 const minimist = require('minimist')
 const { join } = require('path')
 const zeroEks = require('./')
+const ajv = require('ajv')()
 const { pathTo } = require('./lib/util')
 const { version } = require('./package.json')
+const schema = require('./cli-schema.json')
+const validate = ajv.compile(schema)
 
 if (module.parent === null) cmd(process.argv.slice(2))
 else module.exports = cmd 
@@ -15,7 +18,7 @@ function cmd (argv) {
     stopEarly: true,
     '--': true,
     number: ['delay'],
-    boolean: ['open', 'version', 'help', 'quiet', 'silent'],
+    boolean: ['open', 'version', 'help', 'quiet', 'silent', 'jsonStacks', 'svg'],
     alias: {
       silent: 's',
       quiet: 'q',
@@ -23,30 +26,42 @@ function cmd (argv) {
       delay: 'd',
       'output-dir': 'D',
       version: 'v',
-      nodeOptions: 'node-options',
-      nodePath: 'node-path',
       help: 'h',
       gen: 'g',
+      langs: 'l',
+      tiers: 't',
       jsonStacks: 'json-stacks',
       logOutput: 'log-output'
     },
     default: {
-      nodePath: false,
       name: 'flamegraph',
-      nodeOptions: [],
       delay: 300
     }
   })
 
-  if (args.version) return console.log('0x ' + version)
-
-  if (!Array.isArray(args.nodeOptions)) {
-    args.nodeOptions = args.nodeOptions.split(' ')
+  console.log(args)
+  if (ajv.validate(schema, args) === false) {
+    const [{keyword, dataPath, params, message}] = ajv.errors
+    if (keyword === 'type') {
+      const flag = dataPath.substr(1)
+      const dashPrefix = flag.length === 1 ? '-' : '--'
+      console.error(`\n  0x: the ${dashPrefix}${flag} option ${message}\n`)
+    }
+    if (keyword === 'additionalProperties') {
+      const flag = params.additionalProperty
+      const dashPrefix = flag.length === 1 ? '-' : '--'
+      console.error(`\n  0x: ${dashPrefix}${flag} is not a recognized flag\n`)
+    }
+    process.exit(1)
   }
 
-  if (args.help) {
-    console.log('\n')
-    console.log('0x ' + version)
+  var binary = false
+
+  if (args.version) return console.log('0x ' + version)
+
+  if (args.help || argv.length === 0) {
+    console.log('')
+    console.log('  0x ' + version)
     return fs.createReadStream(join(__dirname, 'usage.txt')).pipe(process.stdout)
   }
 
@@ -66,19 +81,18 @@ function cmd (argv) {
     process.exit(1)
   }
 
+
   if (dashDash[0]) {
-    if (dashDash[0][0] !== 'node' && args.nodePath === false) {
-      args.nodePath = dashDash[0]
-    }
+    if (dashDash[0][0] !== 'node') binary = dashDash[0]
     dashDash.shift()
     args.script = dashDash
   } else {
     args.script = args._
   }
 
-  // console.log(args)
+  args.title = args.title || 'node ' + args.script.join(' ')
 
-  zeroEks(args, args.nodePath, (err) => {
+  zeroEks(args, binary, (err) => {
     if (err) {
       console.error('0x: FATAL', err.stack)
       process.exit(err.code || 1)

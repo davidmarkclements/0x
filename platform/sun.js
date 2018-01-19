@@ -35,10 +35,10 @@ function sun (args, sudo, binary) {
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
 
-  args = Object.assign(args.nodeOptions.concat([
+  args = Object.assign([
     '--perf-basic-prof',
     '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
-  ]).concat(args.script), args)
+  ].concat(args.script), args)
 
   var proc = spawn(node, args, {
     stdio: 'inherit'
