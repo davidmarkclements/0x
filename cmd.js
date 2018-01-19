@@ -59,7 +59,13 @@ function cmd (argv, banner = defaultBanner) {
   if (ajv.validate(schema, args) === false) {
     const [{keyword, dataPath, params, message}] = ajv.errors
     if (keyword === 'type') {
-      const flag = dataPath.substr(1)
+
+      const flag = dataPath.substr(
+        1, 
+        dataPath[dataPath.length -1] === ']' ? 
+          dataPath.length - 2 : 
+          dataPath.length -1 
+      )
       const dashPrefix = flag.length === 1 ? '-' : '--'
       console.error(`\n  0x: the ${dashPrefix}${flag} option ${message}\n`)
     }
@@ -99,7 +105,7 @@ function cmd (argv, banner = defaultBanner) {
     try { 
       const { visualizeOnly } = args
       const dir = isAbsolute(visualizeOnly) ? 
-        relative( args.workingDir, visualizeOnly) :
+        relative(args.workingDir, visualizeOnly) :
         visualizeOnly
       const ls = fs.readdirSync(dir)
       const rx = /^stacks\.(.*)\.out/

@@ -116,6 +116,9 @@
     "visualize-only": {
       "type": "string"
     },
+    "visualizeOnly": {
+      "type": "string"
+    },
     "collect-only": {
       "type": "boolean"
     },
