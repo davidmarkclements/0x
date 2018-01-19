@@ -29,7 +29,7 @@ function sun (args, sudo, binary) {
       .on('exit', function () { sun(args, true, binary) })
   }
   var node = !binary || binary === 'node' ? pathTo(args, 'node') : binary
-  var traceInfo = args['trace-info']
+  var traceInfo = args.traceInfo
   var delay = args.delay || args.d
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
@@ -37,7 +37,7 @@ function sun (args, sudo, binary) {
   args = Object.assign([
     '--perf-basic-prof',
     '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
-  ].concat(args.script), args)
+  ].concat(args.argv), args)
 
   var proc = spawn(node, args, {
     stdio: 'inherit'

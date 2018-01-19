@@ -9,13 +9,16 @@ const {
   isSudo,
   silence,
   stacksToFlamegraph,
-  stacksToFlamegraphStream,
   createLoggers,
   noop
 } = require('./lib/util')
 
 // for thus is how it is pronounced:
 function zeroEks (args, binary, cb) {
+  if (!Array.isArray(args.argv)) {
+    throw Error('0x: argv option is required')
+  }
+  args.name = args.name || 'flamegraph'
   const { log, status } = createLoggers(args)
   args.log = log 
   args.status = status
@@ -43,18 +46,6 @@ zeroEks.stacksToFlamegraph = (args, cb) => {
   args.status = status
   args.ee = new EventEmitter()
   stacksToFlamegraph(args)
-  if (typeof cb !== 'function') return
-  args.ee.on('done', cb)
-  args.ee.on('error', cb)
-}
-
-zeroEks.stacksToFlamegraphStream = (args, cb) => {
-  if (cb) cb = once(cb)
-  const { log, status } = createLoggers(args)
-  args.log = log 
-  args.status = status
-  args.ee = new EventEmitter()
-  stacksToFlamegraphStream(args)
   if (typeof cb !== 'function') return
   args.ee.on('done', cb)
   args.ee.on('error', cb)

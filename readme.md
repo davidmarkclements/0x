@@ -178,7 +178,7 @@ Set the title to display in the flamegraph UI.
 ### --output-dir | -D
 
 Specify artifact output directory
-Default: '${process.cwd()}/profile-${PID}(-${Date.now()})?'
+Default: `${process.cwd()}/{PID}.flamegraph(-${Date.now()})?`
 
 ### --gen | -g
 
@@ -348,6 +348,136 @@ Babel (ES6 Transpile) Examples
 -------
 
 See `./examples/babel` for an example. Note the babel require hook is not currently supported. Notes on using the babel-cli instead can be found in the babel example readme.
+
+## Programattic API 
+
+0x can also be required as a Node module and scripted:
+
+```js
+const zeroEks = require('0x')
+const path = require('path')
+zeroEks({
+  argv: [path.join(__dirname, 'my-app.js'), '--my-flag', '"value for my flag"'],
+  workingDir: __dirname
+})
+```
+
+### `require('0x')(opts, binary, cb)`
+
+The `cb` option is a error first callback which is invoked after a 
+profile folder has been created and populated.
+
+The `binary` option can be `false` (to default to the `node` executed resolved
+according to environment `PATH`) or a string holding the path to any 
+node binary executable.
+
+The `opts` argument is an object, with the following properties:
+
+#### `argv` (array) – required
+
+Pass the arguments that the spawned Node process should receive. 
+
+#### `workingDir` (string)
+
+The base directory where profile folders will be placed. 
+
+Default: process.cwd()
+
+#### `name` (string) 
+
+The name of the flamegraph HTML output file, without the extension.
+
+Default: flamegraph 
+
+#### `open` (boolean)
+
+See [`--open`](#--open---o)
+
+#### `quiet` (boolean)
+
+See [`--quiet`](#--quiet---q)
+
+#### `silent` (boolean)
+
+See [`--silent`](#--silent---s)
+
+#### `jsonStacks` (boolean)
+
+See [`--json-stacks`](#--json-stacks)
+
+#### `svg` (boolean)
+
+See [`--svg`](#--svg)
+
+#### `logOutput` (boolean)
+
+See [`--log-output`](#--log-output)
+
+#### `timestampProfiles` (boolean)
+
+See [`--timestamp-profiles`](#--timestamp-profiles)
+
+#### `traceInfo` (boolean)
+
+See [`--trace-info`](#--trace-info)
+
+#### `theme` (string)
+
+See [`--theme`](#--theme)
+
+#### `include` (string)
+
+See [`--include`](#--include)
+
+#### `exclude` (string)
+
+See [`--exlude`](#--exlude---x)
+
+#### `langs` (string)
+
+See [`--langs`](#--langs---l)
+
+#### `tiers` (string)
+
+See [`--tiers`](#--tiers---t)
+
+#### `gen` (string)
+
+See [`--gen`](#--gen---g)
+
+#### `output-dir` (string)
+
+See [`outputDir`](#--output-dir---d)
+
+#### `title` (string)
+
+See [`--title`](#--title)
+
+#### `delay` (number)
+
+See [`--delay`](#--delay---d)
+
+#### `visualizeOnly` (string)
+
+See [`--visualize-only`](#--visualize-only)
+
+#### `collectOnly` (boolean)
+
+See [`--collect-only`](#--collect-only)
+
+### `require('0x').stacksToFlamegraph(opts, binary, cb)`
+
+This method will take a captured stacks input file 
+and generate a flamegraph HTML file.
+
+It takes the same arguments as the main function, but the 
+`gen` argument (which should hold a path to the source 
+stacks file) and the `name` argument (which should specify a
+destination out file) is required. 
+
+## v2
+
+If you still need support for Node v4, use [0x v2.x.x](https://github.com/davidmarkclements/0x/tree/v2)
 
 ## v1
 

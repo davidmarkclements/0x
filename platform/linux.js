@@ -32,7 +32,7 @@ function linux (args, sudo, binary) {
   var node = !binary || binary === 'node' ? pathTo(args, 'node') : binary
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
-  var traceInfo = args['trace-info']
+  var traceInfo = args.traceInfo
   var delay = args.delay || args.d
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
@@ -52,7 +52,7 @@ function linux (args, sudo, binary) {
     node,
     '--perf-basic-prof',
     '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
-  ].filter(Boolean).concat(args.script), {
+  ].filter(Boolean).concat(args.argv), {
     stdio: 'inherit'
   }).on('exit', function (code) {
     if (code !== null && code !== 0 && code !== 143 && code !== 130) {

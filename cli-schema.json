@@ -56,7 +56,13 @@
     "timestamp-profiles": {
       "type": "boolean"
     },
+    "timestampProfiles": {
+      "type": "boolean"
+    },
     "trace-info": {
+      "type": "boolean"
+    },
+    "traceInfo": {
       "type": "boolean"
     },
     "theme": {
@@ -108,9 +114,6 @@
       "type": "number"
     },
     "visualize-only": {
-      "type": "string"
-    },
-    "visualizeOnly": {
       "type": "string"
     },
     "collect-only": {

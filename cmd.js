@@ -27,8 +27,8 @@ function cmd (argv, banner = defaultBanner) {
     number: ['delay'],
     boolean: [
       'open', 'version', 'help', 'quiet', 
-      'silent', 'jsonStacks', 'svg', 
-      'collectOnly'
+      'silent', 'jsonStacks', 'svg', 'traceInfo',
+      'collectOnly', 'timestampProfiles'
     ],
     alias: {
       silent: 's',
@@ -36,23 +36,25 @@ function cmd (argv, banner = defaultBanner) {
       open: 'o',
       delay: 'd',
       'output-dir': 'D',
+      outputDir: 'output-dir',
       version: 'v',
       help: 'h',
       gen: 'g',
       langs: 'l',
       tiers: 't',
+      timestampProfiles: 'timestamp-profiles',
+      traceInfo: 'trace-info',
       jsonStacks: 'json-stacks',
       logOutput: 'log-output',
       visualizeOnly: 'visualize-only',
       collectOnly: 'collect-only'
     },
     default: {
-      name: false,
       delay: 300
     }
   })
 
-  args.name = args.name || (args.gen ? '-' : 'flamegraph') 
+  args.name = args.name || (args.gen ? '-' : 'flamegraph')
 
   if (ajv.validate(schema, args) === false) {
     const [{keyword, dataPath, params, message}] = ajv.errors
@@ -78,7 +80,8 @@ function cmd (argv, banner = defaultBanner) {
     console.error('\n 0x: --gen and --visualize-only cannot be used together')
     process.exit(1)
   }
-  var binary = false
+  
+  args.workingDir = process.cwd()
 
   if (args.version) return console.log('0x ' + version)
 
@@ -95,9 +98,8 @@ function cmd (argv, banner = defaultBanner) {
   if (args.visualizeOnly) {
     try { 
       const { visualizeOnly } = args
-      const cwd = process.cwd()
       const dir = isAbsolute(visualizeOnly) ? 
-        relative(cwd, visualizeOnly) :
+        relative( args.workingDir, visualizeOnly) :
         visualizeOnly
       const ls = fs.readdirSync(dir)
       const rx = /^stacks\.(.*)\.out/
@@ -108,7 +110,6 @@ function cmd (argv, banner = defaultBanner) {
       }
       args.gen = join(dir, stacks)
       args.name = join(dir, 'flamegraph')
-      args.cwd = cwd
     } catch (e) {
       if (e.code === 'ENOENT') {
         console.error('\n  0x: Invalid data path provided to --visualize-only (unable to access/does not exist)')
@@ -132,16 +133,16 @@ function cmd (argv, banner = defaultBanner) {
     process.exit(1)
   }
 
-
+  var binary = false
   if (dashDash[0]) {
     if (dashDash[0][0] !== 'node') binary = dashDash[0]
     dashDash.shift()
-    args.script = dashDash
+    args.argv = dashDash
   } else {
-    args.script = args._
+    args.argv = args._
   }
 
-  args.title = args.title || 'node ' + args.script.join(' ')
+  args.title = args.title || 'node ' + args.argv.join(' ')
 
   zeroEks(args, binary, (err) => {
     if (err) {
