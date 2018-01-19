@@ -107,6 +107,18 @@
     "d": {
       "type": "number"
     },
+    "visualize-only": {
+      "type": "string"
+    },
+    "visualizeOnly": {
+      "type": "string"
+    },
+    "collect-only": {
+      "type": "boolean"
+    },
+    "collectOnly": {
+      "type": "boolean"
+    },
     "--": {
       "type": "array",
       "items": {}

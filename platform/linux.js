@@ -33,7 +33,6 @@ function linux (args, sudo, binary) {
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
   var traceInfo = args['trace-info']
-  var stacksOnly = args['stacks-only']
   var delay = args.delay || args.d
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
@@ -94,18 +93,8 @@ function linux (args, sudo, binary) {
       var stacksOut = stackLine(stacks, delay)
       pump(
         stacksOut,
-        stacksOnly === '-'
-          ? process.stdout
-          : fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
+        fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
       )
-      if (stacksOnly) {
-        return stacks.on('exit', function () {
-          log('\u001b[K\n')
-          log('\n')
-          tidy(args)
-          ee.emit('done')
-        })
-      }
       stacks.on('exit', function () {
         pump(
           fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),

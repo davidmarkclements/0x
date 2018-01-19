@@ -38,6 +38,9 @@ function zeroEks (args, binary, cb) {
 
 zeroEks.stacksToFlamegraph = (args, cb) => {
   if (cb) cb = once(cb)
+  const { log, status } = createLoggers(args)
+  args.log = log 
+  args.status = status
   args.ee = new EventEmitter()
   stacksToFlamegraph(args)
   if (typeof cb !== 'function') return
@@ -47,6 +50,9 @@ zeroEks.stacksToFlamegraph = (args, cb) => {
 
 zeroEks.stacksToFlamegraphStream = (args, cb) => {
   if (cb) cb = once(cb)
+  const { log, status } = createLoggers(args)
+  args.log = log 
+  args.status = status
   args.ee = new EventEmitter()
   stacksToFlamegraphStream(args)
   if (typeof cb !== 'function') return

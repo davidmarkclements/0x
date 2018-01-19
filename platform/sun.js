@@ -30,7 +30,6 @@ function sun (args, sudo, binary) {
   }
   var node = !binary || binary === 'node' ? pathTo(args, 'node') : binary
   var traceInfo = args['trace-info']
-  var stacksOnly = args['stacks-only']
   var delay = args.delay || args.d
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
@@ -154,17 +153,8 @@ function sun (args, sudo, binary) {
       pump(
         fs.createReadStream(folder + '/.stacks.' + proc.pid + '.out'),
         translate,
-        stacksOnly === '-'
-          ? process.stdout
-          : fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
+        fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
       )
-      if (stacksOnly) {
-        return translate.on('end', function () {
-          log('\u001b[K\n\n')
-          tidy(args)
-          ee.emit('done')
-        })
-      }
       pump(
         translate,
         stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))

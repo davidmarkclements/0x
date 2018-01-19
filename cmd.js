@@ -2,7 +2,7 @@
 
 const fs = require('fs')
 const minimist = require('minimist')
-const { join } = require('path')
+const { join, isAbsolute, relative } = require('path')
 const zeroEks = require('./')
 const ajv = require('ajv')()
 const { pathTo } = require('./lib/util')
@@ -25,7 +25,11 @@ function cmd (argv, banner = defaultBanner) {
     stopEarly: true,
     '--': true,
     number: ['delay'],
-    boolean: ['open', 'version', 'help', 'quiet', 'silent', 'jsonStacks', 'svg'],
+    boolean: [
+      'open', 'version', 'help', 'quiet', 
+      'silent', 'jsonStacks', 'svg', 
+      'collectOnly'
+    ],
     alias: {
       silent: 's',
       quiet: 'q',
@@ -38,10 +42,12 @@ function cmd (argv, banner = defaultBanner) {
       langs: 'l',
       tiers: 't',
       jsonStacks: 'json-stacks',
-      logOutput: 'log-output'
+      logOutput: 'log-output',
+      visualizeOnly: 'visualize-only',
+      collectOnly: 'collect-only'
     },
     default: {
-      name: 'flamegraph',
+      name: '-',
       delay: 300
     }
   })
@@ -61,6 +67,15 @@ function cmd (argv, banner = defaultBanner) {
     process.exit(1)
   }
 
+  if (args.collectOnly && args.visualizeOnly) {
+    console.error('\n 0x: --collect-only and --visualize-only cannot be used together')
+    process.exit(1)
+  }
+
+  if (args.gen && args.visualizeOnly) {
+    console.error('\n 0x: --gen and --visualize-only cannot be used together')
+    process.exit(1)
+  }
   var binary = false
 
   if (args.version) return console.log('0x ' + version)
@@ -73,6 +88,34 @@ function cmd (argv, banner = defaultBanner) {
 
   if (args.logOutput && args.logOutput.toLowerCase() === 'stdout') {
     args.io = { logStream: process.stdout }
+  }
+
+  if (args.visualizeOnly) {
+    try { 
+      const { visualizeOnly } = args
+      const cwd = process.cwd()
+      const dir = isAbsolute(visualizeOnly) ? 
+        relative(cwd, visualizeOnly) :
+        visualizeOnly
+      const ls = fs.readdirSync(dir)
+      const rx = /^stacks\.(.*)\.out/
+      const stacks = ls.find((f) => rx.test(f))
+      if (!stacks) {
+        console.error('\n  0x: Invalid data path provided to --visualize-only (no stacks file)')
+        process.exit(1)
+      }
+      args.gen = join(dir, stacks)
+      args.name = join(dir, 'flamegraph')
+      args.cwd = cwd
+    } catch (e) {
+      if (e.code === 'ENOENT') {
+        console.error('\n  0x: Invalid data path provided to --visualize-only (unable to access/does not exist)')
+        process.exit(1)
+      } else if (e.code === 'ENOTIDR') {
+        console.error('\n  0x: Invalid data path provided to --visualize-only (not a directory)')
+        process.exit(1)
+      } else throw e
+    }
   }
 
   if (args.gen) return zeroEks.stacksToFlamegraph(args, (err) => {
