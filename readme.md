@@ -349,7 +349,7 @@ Babel (ES6 Transpile) Examples
 
 See `./examples/babel` for an example. Note the babel require hook is not currently supported. Notes on using the babel-cli instead can be found in the babel example readme.
 
-## Programattic API 
+## Programmatic API 
 
 0x can also be required as a Node module and scripted:
 
