@@ -1,4 +1,8 @@
-# 3.0.0
+# v3.0.1
+
+* fix auto open functionality for linux (doesn't close browser on process exit)
+
+# v3.0.0
 
 * node 4 support dropped, node 6+ supported
 * changelog.md added
