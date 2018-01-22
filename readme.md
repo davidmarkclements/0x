@@ -177,8 +177,10 @@ Set the title to display in the flamegraph UI.
 
 ### --output-dir | -D
 
-Specify artifact output directory
-Default: `${process.cwd()}/{PID}.flamegraph(-${Date.now()})?`
+Specify artifact output directory. This can be specified in template
+form with possible variables being `{pid}` and `{timestamp}`.
+
+Default: `{pid}.flamegraph`
 
 ### --gen | -g
 

@@ -98,6 +98,9 @@
     "output-dir": {
       "type": "string"
     },
+    "outputDir": {
+      "type": "string"
+    },
     "stacks-only": {
       "type": "boolean"
     },
