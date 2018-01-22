@@ -1,3 +1,11 @@
+# v3.1.0
+
+* enhance `--output-dir` option with interpolation feature
+
+# v3.0.2
+
+* missing dep
+
 # v3.0.1
 
 * fix auto open functionality for linux (doesn't close browser on process exit)
