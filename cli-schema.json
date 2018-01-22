@@ -101,6 +101,15 @@
     "outputDir": {
       "type": "string"
     },
+    "output-html": {
+      "type": "string"
+    },
+    "outputHtml": {
+      "type": "string"
+    },
+    "F": {
+      "type": "string"
+    },
     "stacks-only": {
       "type": "boolean"
     },

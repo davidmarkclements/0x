@@ -42,6 +42,7 @@ function zeroEks (args, binary, cb) {
 zeroEks.stacksToFlamegraph = (args, cb) => {
   if (cb) cb = once(cb)
   const { log, status } = createLoggers(args)
+  args.name = args.name || 'flamegraph'
   args.log = log 
   args.status = status
   args.ee = new EventEmitter()

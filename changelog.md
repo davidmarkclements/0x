@@ -1,6 +1,7 @@
 # v3.1.0
 
 * enhance `--output-dir` option with interpolation feature
+* add `--output-html` option 
 
 # v3.0.2
 

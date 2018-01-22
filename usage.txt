@@ -1,5 +1,11 @@
   --name                  The name of the HTML file, without the .html extension
-                          Can be set to - to write HTML to STDOUT
+                          Can be set to - to write HTML to STDOUT (note
+                          due to the nature of CLI argument parsing, this must 
+                          be set using =, e.g. --name=-)
+
+                          If either this flag or --output-html-file is set to - 
+                          then the HTML will go to STDOUT.
+
                           Default: flamegraph
 
   --title                 Set the title to display in the flamegraph UI
@@ -13,8 +19,25 @@
                           Milliseconds
                           Default: 300
 
-  --output-dir | -D       Specify artifact output directory
-                          Default: '${process.cwd()}/profile-${PID}(-${Date.now()})?'
+  --output-dir | -D       Specify artifact output directory.
+                          Template variables {outputDir}, {pid}, {timestamp}, {cwd}
+                          (current working directory) and {name} 
+                          (based on the --name flag) are supported.
+
+                          Default: '{pid}.flamegraph'
+
+  --output-html | -F      Specify destination path for the flamegraph HTML file.
+                          Template variables {outputDir}, {pid}, {timestamp}, {cwd}
+                          (current working directory) and {name} 
+                          (based on the --name flag) are supported. 
+                          May also be set to - to send HTML file to STDOUT (note
+                          due to the nature of CLI argument parsing, this must be 
+                          set using =, e.g. --output-html=-).
+
+                          If either this flag or --name is set to - then the HTML 
+                          will go to STDOUT. 
+                           
+                          Default: '{outputDir}/{name}.html'
 
   --svg                   Generates an `flamegraph.svg` file in the artifact
                           output directory, in addition to the `flamegraph.html` file.

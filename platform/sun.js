@@ -8,7 +8,7 @@ const sym = require('perf-sym')
 const debug = require('debug')('0x')
 
 const {
-  getProfileFolderName,
+  determineOutputDir,
   ensureDirExists,
   stacksToFlamegraphStream,
   tidy,
@@ -60,7 +60,7 @@ function sun (args, sudo, binary) {
 
     if (traceInfo) { prof.stderr.pipe(process.stderr) }
 
-    folder = getProfileFolderName(args, proc)
+    folder = determineOutputDir(args, proc)
     ensureDirExists(folder)
 
     prof.on('exit', function (code) {

@@ -35,8 +35,10 @@ function cmd (argv, banner = defaultBanner) {
       quiet: 'q',
       open: 'o',
       delay: 'd',
-      'output-dir': 'D',
-      outputDir: 'output-dir',
+      'output-dir': 'outputDir',
+      D: 'outputDir',
+      'output-html': 'outputHtml',
+      F: 'outputHtml', 
       version: 'v',
       help: 'h',
       gen: 'g',
@@ -114,8 +116,8 @@ function cmd (argv, banner = defaultBanner) {
         console.error('\n  0x: Invalid data path provided to --visualize-only (no stacks file)')
         process.exit(1)
       }
+      args.pid = rx.exec(stacks)[1] 
       args.gen = join(dir, stacks)
-      args.name = join(dir, 'flamegraph')
     } catch (e) {
       if (e.code === 'ENOENT') {
         console.error('\n  0x: Invalid data path provided to --visualize-only (unable to access/does not exist)')

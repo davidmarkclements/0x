@@ -169,7 +169,14 @@ https://www.npmjs.com/package/open for details).
 ### --name
 
 The name of the HTML file, without the .html extension
-Can be set to - to write HTML to STDOUT
+Can be set to - to write HTML to STDOUT (note
+due to the nature of CLI argument parsing, this must be set using `=`, 
+e.g. `--name=-`).
+
+If either this flag or `--output-html-file` is set to `-` 
+then the HTML will go to STDOUT.
+
+Default: flamegraph
 
 ### ---title 
 
@@ -178,9 +185,28 @@ Set the title to display in the flamegraph UI.
 ### --output-dir | -D
 
 Specify artifact output directory. This can be specified in template
-form with possible variables being `{pid}` and `{timestamp}`.
+form with possible variables being `{pid}`, `{timestamp}`, `{name}` 
+(based on the `--name` flag) and `{outputDir}`(variables
+must be specified without whitespace, e.g. `{ pid }` is not supported).
 
 Default: `{pid}.flamegraph`
+
+### --output-html | -F
+
+Specify destination of the generated flamegraph HTML file. 
+This can be specified in template form with possible variables 
+being `{pid}`, `{timestamp}`, `{name}` (based on the `--name` flag) and 
+`{outputDir}` (variables must be specified without whitespace, 
+e.g. `{ pid }` is not supported). It can also be set to `-` to 
+send the HTML output to STDOUT (note
+due to the nature of CLI argument parsing, this must be set using `=`, 
+e.g. `--output-html=-`).
+
+If either this flag or --name is set to - 
+then the HTML will go to STDOUT.
+
+Default: `{outputDir}/{name}.html`
+
 
 ### --gen | -g
 
@@ -447,9 +473,13 @@ See [`--tiers`](#--tiers---t)
 
 See [`--gen`](#--gen---g)
 
-#### `output-dir` (string)
+#### `outputDir` (string)
 
-See [`outputDir`](#--output-dir---d)
+See [`--output-dir`](#--output-dir---d)
+
+#### `outputHtml` (string)
+
+See [`--output-html`](#--output-html---f)
 
 #### `title` (string)
 

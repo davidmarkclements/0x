@@ -7,7 +7,7 @@ const split = require('split2')
 const debug = require('debug')('0x')
 
 const {
-  getProfileFolderName,
+  determineOutputDir,
   ensureDirExists,
   stackLine,
   stacksToFlamegraphStream,
@@ -65,7 +65,7 @@ function linux (args, sudo, binary) {
     analyze(true)
   })
 
-  var folder = getProfileFolderName(args, proc)
+  var folder = determineOutputDir(args, proc)
   ensureDirExists(folder)
 
   setTimeout(status, delay || 100, 'Profiling')
