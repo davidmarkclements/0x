@@ -24,7 +24,7 @@ function cmd (argv, banner = defaultBanner) {
   var args = minimist(argv, {
     stopEarly: true,
     '--': true,
-    number: ['delay'],
+    number: ['delay', 'phase'],
     boolean: [
       'open', 'version', 'help', 'quiet', 
       'silent', 'jsonStacks', 'svg', 'traceInfo',
@@ -52,7 +52,8 @@ function cmd (argv, banner = defaultBanner) {
       collectOnly: 'collect-only'
     },
     default: {
-      delay: 300
+      delay: 0,
+      phase: 2
     }
   })
 

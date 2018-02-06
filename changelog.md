@@ -1,3 +1,9 @@
+# v3.2.0
+* introduce `--phase` option
+* change `--delay` from `300` to `0` - not a breaking change 
+because `--phase` provides the same result (stripping module loading stacks) 
+far more reliably.
+
 # v3.1.0
 
 * enhance `--output-dir` option with interpolation feature
