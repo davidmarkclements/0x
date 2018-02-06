@@ -10,7 +10,8 @@ const {
   silence,
   stacksToFlamegraph,
   createLoggers,
-  noop
+  noop,
+  phases
 } = require('./lib/util')
 
 // for thus is how it is pronounced:
@@ -24,6 +25,9 @@ function zeroEks (args, binary, cb) {
   args.status = status
   args.ee = new EventEmitter()
   if (cb) cb = once(cb)
+
+  args.mapFrames = args.mapFrames || phases[args.phase]
+
   isSudo(function (sudo) {
     switch (process.platform) {
       case 'linux':
@@ -46,6 +50,7 @@ zeroEks.stacksToFlamegraph = (args, cb) => {
   args.log = log 
   args.status = status
   args.ee = new EventEmitter()
+  args.mapFrames = args.mapFrames || phases[args.phase]
   stacksToFlamegraph(args)
   if (typeof cb !== 'function') return
   args.ee.on('done', cb)

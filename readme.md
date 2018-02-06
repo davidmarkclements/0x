@@ -220,6 +220,21 @@ outputs to a file `{name}.html` in the current folder.
 Generates an `flamegraph.svg` file in the artifact output directory,
 in addition to the `flamegraph.html` file.
 
+### --phase
+
+Stage in initialization to begin aggregating stacks. 
+
+**Phase 0** visualizes from the very start, this includes bootstrapping 
+stacks and loading the application module tree (these can dominate the flamegraph). 
+
+**Phase 1** excludes core bootstrapping stacks, except the end of the boostrapping process 
+where the application module tree is loaded from the entry point. 
+
+**Phase 2** excludes all initialization, this renders the most pragmatic flamegraph for most 
+use cases.
+
+Default: 2
+
 ### --delay | -d
 
 Milliseconds. Delay before tracing begins (or before stacks are processed in the Linux case), allows us to ignore
@@ -227,7 +242,7 @@ initialisation stacks (e.g. module loading).
 
 Example: `0x -d 2000 my-app.js`
 
-Default: 300
+Default: 0
 
 ### --langs | -l
 
@@ -484,6 +499,19 @@ See [`--output-html`](#--output-html---f)
 #### `title` (string)
 
 See [`--title`](#--title)
+
+#### `phase` (number)
+
+See [`--phase`](#--phase)
+
+#### `mapFrames` (function)
+
+Will override phase. A custom mapping function that receives 
+an array of frames and an instance of the Profiler (see `stack-convert.js`).
+
+Takes the form `(frames, profiler) => Array|false`. Return false to remove 
+the whole stack from the output, or return a modified array to change 
+the output. 
 
 #### `delay` (number)
 

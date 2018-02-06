@@ -14,10 +14,22 @@
   --open | -o             Automatically open after finishing
                           Default: false
 
+  --phase                 Stage in initialization to begin aggregating
+                          stacks. Phase 0 visualizes from the very start,
+                          this includes bootstrapping stacks and loading 
+                          the application module tree (these can dominate
+                          the flamegraph). Phase 1 excludes core bootstrapping
+                          stacks, except the end of the boostrapping process 
+                          where the application module tree is loaded from 
+                          the entry point. Phase 2 excludes all initialization, 
+                          this renders the most pragmatic flamegraph for most 
+                          use cases.
+                          Default: 2
+
   --delay | -d            Delay before tracing begins, allows us to ignore
                           initialisation stacks (e.g. module loading).
                           Milliseconds
-                          Default: 300
+                          Default: 0
 
   --output-dir | -D       Specify artifact output directory.
                           Template variables {outputDir}, {pid}, {timestamp}, {cwd}
