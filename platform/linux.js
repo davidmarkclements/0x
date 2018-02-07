@@ -4,16 +4,17 @@ const path = require('path')
 const spawn = require('child_process').spawn
 const pump = require('pump')
 const split = require('split2')
+const through = require('through2')
 const debug = require('debug')('0x')
 
 const {
   determineOutputDir,
   ensureDirExists,
-  stackLine,
   stacksToFlamegraphStream,
   tidy,
   pathTo,
-  notFound
+  notFound,
+  extraProfFlamegraph
 } = require('../lib/util')
 
 module.exports = linux
@@ -54,7 +55,7 @@ function linux (args, sudo, binary) {
     '--perf-basic-prof',
     '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
   ].filter(Boolean).concat(args.argv), {
-    stdio: 'inherit'
+    stdio: ['ignore', 'inherit', 'inherit']
   }).on('exit', function (code) {
     if (code !== null && code !== 0 && code !== 143 && code !== 130) {
       tidy(args)
@@ -84,28 +85,71 @@ function linux (args, sudo, binary) {
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      status('Caught SIGINT, generating flamegraph ')
+      status('Caught SIGINT, generating flamegraph')
+      proc.on('exit', generate)
+    } else {
+      debug('Process exited, generating flamegraph')
+      status('Process exited, genering flamegraph')
+      generate()
     }
 
-    proc.on('exit', function () {
-      var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat])
+    function generate () {
+      if (args.profViz) extraProfFlamegraph(arg, {pid: proc.pid, folder}, next)
+      else next()
 
-      if (traceInfo) { stacks.stderr.pipe(process.stderr) }
-      var stacksOut = stackLine(stacks, delay)
-      pump(
-        stacksOut,
-        fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
-      )
-      stacks.on('exit', function () {
-        pump(
-          fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-          stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
-        )
-      })
-    })
+      function next() {
+        
+        var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat], {
+          stdio: [
+            'ignore', 
+            fs.openSync(folder + '/stacks.' + proc.pid + '.out', 'w'),
+            traceInfo ? process.stderr : 'ignore'
+          ]
+        })
+
+        stacks.on('exit', function () {
+          if (delay > 0) {
+            pump(
+              fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
+              filterBeforeDelay(delay),
+              stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
+            )
+          } else {
+            pump(
+              fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
+              stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
+            )
+          }
+        })
+      }
+    }
 
     spawn('sudo', ['kill', '-SIGINT', '' + proc.pid], {
       stdio: 'inherit'
     })
   }
+}
+
+
+function filterBeforeDelay (delay) {
+  var start
+  var pastDelay
+
+  return through(function (line, enc, cb) {
+    var diff
+    line += ''
+    if (/cpu-clock:/.test(line)) {
+      if (!start) {
+        start = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10)
+      } else {
+        diff = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10) - start
+        pastDelay = (diff > delay)
+      }
+    }
+    if (pastDelay) {
+      cb(null, line + '\n')
+    } else {
+      cb()
+    }
+  })
 }

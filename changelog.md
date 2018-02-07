@@ -1,5 +1,6 @@
 # v3.3.0
 * introduce experimental `--prof-viz` flag, generates additional flamegraph based on internal v8 profiling data
+* linux fixes & tidy up
 
 # v3.2.0
 * introduce `--phase` option
