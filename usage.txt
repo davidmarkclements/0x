@@ -14,6 +14,13 @@
   --open | -o             Automatically open after finishing
                           Default: false
 
+  --prof-viz              Experimental. Create an additional flame graph using
+                          log output when from the V8 --prof. This will create 
+                          an additional flamegraph named according to the 
+                          --name flag, prefixed with v8-prof-. If --name 
+                          is set to - then flamegraph HTML will be streamed
+                          to STDOUT. 
+
   --phase                 Stage in initialization to begin aggregating
                           stacks. Phase 0 visualizes from the very start,
                           this includes bootstrapping stacks and loading 

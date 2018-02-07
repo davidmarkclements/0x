@@ -1,3 +1,6 @@
+# v3.3.0
+* introduce experimental `--prof-viz` flag, generates additional flamegraph based on internal v8 profiling data
+
 # v3.2.0
 * introduce `--phase` option
 * change `--delay` from `300` to `0` - not a breaking change 

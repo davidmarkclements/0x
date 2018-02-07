@@ -220,6 +220,16 @@ outputs to a file `{name}.html` in the current folder.
 Generates an `flamegraph.svg` file in the artifact output directory,
 in addition to the `flamegraph.html` file.
 
+### --prof-viz
+
+Experimental. Create an additional flame graph using
+log output when from the V8 `--prof`. This will create 
+an additional flamegraph named according to the 
+`--name` flag, prefixed with `v8-prof-`. If `--name` 
+is set to - then flamegraph HTML will be streamed to STDOUT.
+
+Default: false 
+
 ### --phase
 
 Stage in initialization to begin aggregating stacks. 
@@ -359,6 +369,11 @@ The Profile Folder can contain the following files
 * stacks.3866.out - the traced stacks (run through [perf-sym](http://npmjs.com/perf-sym) on OS X)
 * flamegraph.html - the interactive flamegraph
 * stacks.3866.json - a JSON tree generated from the stacks, enabled with `--json-stacks`
+* isolate-0x103000600-3866-v8.log - a v8 profiling log file, only included when `--prof-viz` is enabled 
+* isolate-0x103000600-3866-v8.log.json - v8 profiling log file processed into JSON using v8s internal tick processor, only included when `--prof-viz` is enabled
+* v8-prof-stacks.77801.out - a generated stacks file based on v8 profiling data, only included when `--prof-viz` is enabled
+* v8-prof-flamegraph.html - an alternartive flamegraph that only shows JS stacks based on v8's profiling data, only included when `--prof-viz` is enabled 
+
 
 The is helpful, because there's other things you can do with
 stacks output. For instance, checkout [cpuprofilify](http://npmjs.com/cpuprofilify) and [traceviewify](http://npmjs.com/traceviewify).
@@ -499,6 +514,10 @@ See [`--output-html`](#--output-html---f)
 #### `title` (string)
 
 See [`--title`](#--title)
+
+### `profViz`
+
+See [`--prof-viz`](#--prof-viz)
 
 #### `phase` (number)
 

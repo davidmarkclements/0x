@@ -50,6 +50,7 @@ function linux (args, sudo, binary) {
     perfdat,
     '--',
     node,
+    ...(args.profViz ? ['--prof', '--logfile=%p-v8.log'] : []),
     '--perf-basic-prof',
     '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
   ].filter(Boolean).concat(args.argv), {

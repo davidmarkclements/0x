@@ -28,7 +28,7 @@ function cmd (argv, banner = defaultBanner) {
     boolean: [
       'open', 'version', 'help', 'quiet', 
       'silent', 'jsonStacks', 'svg', 'traceInfo',
-      'collectOnly', 'timestampProfiles'
+      'collectOnly', 'timestampProfiles', 'profViz'
     ],
     alias: {
       silent: 's',
@@ -49,7 +49,8 @@ function cmd (argv, banner = defaultBanner) {
       jsonStacks: 'json-stacks',
       logOutput: 'log-output',
       visualizeOnly: 'visualize-only',
-      collectOnly: 'collect-only'
+      collectOnly: 'collect-only',
+      profViz: 'prof-viz'
     },
     default: {
       delay: 0,

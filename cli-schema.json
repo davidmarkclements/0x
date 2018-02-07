@@ -140,6 +140,12 @@
     "collectOnly": {
       "type": "boolean"
     },
+    "prof-viz": {
+      "type": "boolean"
+    },
+    "profViz": {
+      "type": "boolean"
+    },
     "--": {
       "type": "array",
       "items": {}
