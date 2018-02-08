@@ -58,6 +58,11 @@ function cmd (argv, banner = defaultBanner) {
     }
   })
 
+  if (args.profViz && process.version.substr(0, 3) === 'v6.') {
+    console.error('0x: The --prof-viz flag is only supported in Node 8 and above')
+    process.exit(1)
+  }
+
   args.name = args.name || (args.gen ? '-' : 'flamegraph')
 
   if (ajv.validate(schema, args) === false) {

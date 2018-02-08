@@ -14,10 +14,10 @@
   --open | -o             Automatically open after finishing
                           Default: false
 
-  --prof-viz              Experimental. Create an additional flame graph using
-                          log output when from the V8 --prof. This will create 
-                          an additional flamegraph named according to the 
-                          --name flag, prefixed with v8-prof-. If --name 
+  --prof-viz              Experimental. Node 8+ only. Create an additional 
+                          flamegraph using log output when from the V8 --prof.
+                          This will create an additional flamegraph named according 
+                          to the --name flag, prefixed with v8-prof-. If --name 
                           is set to - then flamegraph HTML will be streamed
                           to STDOUT. 
 

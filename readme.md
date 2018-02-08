@@ -222,7 +222,7 @@ in addition to the `flamegraph.html` file.
 
 ### --prof-viz
 
-Experimental. Create an additional flame graph using
+Experimental. **Node 8+ only**. Create an additional flame graph using
 log output when from the V8 `--prof`. This will create 
 an additional flamegraph named according to the 
 `--name` flag, prefixed with `v8-prof-`. If `--name` 
