@@ -371,7 +371,7 @@ The Profile Folder can contain the following files
 * stacks.3866.json - a JSON tree generated from the stacks, enabled with `--json-stacks`
 * isolate-0x103000600-3866-v8.log - a v8 profiling log file, only included when `--prof-viz` is enabled 
 * isolate-0x103000600-3866-v8.log.json - v8 profiling log file processed into JSON using v8s internal tick processor, only included when `--prof-viz` is enabled
-* v8-prof-stacks.77801.out - a generated stacks file based on v8 profiling data, only included when `--prof-viz` is enabled
+* v8-prof-stacks.3866.out - a generated stacks file based on v8 profiling data, only included when `--prof-viz` is enabled (on linux the file name will have a generated uid instead of the PID in it)
 * v8-prof-flamegraph.html - an alternartive flamegraph that only shows JS stacks based on v8's profiling data, only included when `--prof-viz` is enabled 
 
 
