@@ -139,7 +139,7 @@ function sun (args, sudo, binary) {
         }
         return
       }
-      if (args.profViz) v8ProfFlamegraph({folder, pid: proc.pid}, args, next)
+      if (args.profViz) v8ProfFlamegraph(args, {folder, pid: proc.pid}, next)
       else next()
       function next () { 
         var translate = sym({silent: true, pid: proc.pid})
