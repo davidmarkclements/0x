@@ -51,7 +51,7 @@ function linux (args, sudo, binary) {
     perfdat,
     '--',
     node,
-    ...(args.profViz ? ['--prof', '--logfile=%p-v8.log'] : []),
+    ...(args.profViz ? ['--prof', `--logfile=${uid}-v8.log`] : []),
     '--perf-basic-prof',
     '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
   ].filter(Boolean).concat(args.argv), {
@@ -89,12 +89,12 @@ function linux (args, sudo, binary) {
       proc.on('exit', generate)
     } else {
       debug('Process exited, generating flamegraph')
-      status('Process exited, genering flamegraph')
+      status('Process exited, generating flamegraph')
       generate()
     }
 
     function generate () {
-      if (args.profViz) v8ProfFlamegraph(args, {pid: proc.pid, folder}, next)
+      if (args.profViz) v8ProfFlamegraph(args, {pid: uid, folder}, next)
       else next()
 
       function next() {
