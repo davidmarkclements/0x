@@ -14,7 +14,7 @@ const {
   tidy,
   pathTo,
   notFound,
-  extraProfFlamegraph
+  v8ProfFlamegraph
 } = require('../lib/util')
 
 module.exports = sun
@@ -139,7 +139,7 @@ function sun (args, sudo, binary) {
         }
         return
       }
-      if (args.profViz) extraProfFlamegraph({folder, pid: proc.pid}, args, next)
+      if (args.profViz) v8ProfFlamegraph({folder, pid: proc.pid}, args, next)
       else next()
       function next () { 
         var translate = sym({silent: true, pid: proc.pid})

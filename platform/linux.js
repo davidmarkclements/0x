@@ -14,7 +14,7 @@ const {
   tidy,
   pathTo,
   notFound,
-  extraProfFlamegraph
+  v8ProfFlamegraph
 } = require('../lib/util')
 
 module.exports = linux
@@ -94,7 +94,7 @@ function linux (args, sudo, binary) {
     }
 
     function generate () {
-      if (args.profViz) extraProfFlamegraph(arg, {pid: proc.pid, folder}, next)
+      if (args.profViz) v8ProfFlamegraph(args, {pid: proc.pid, folder}, next)
       else next()
 
       function next() {
