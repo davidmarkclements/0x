@@ -21,6 +21,8 @@
                           is set to - then flamegraph HTML will be streamed
                           to STDOUT. 
 
+  --prof-only             Experimental. Only create the prof-viz flamegraph 
+
   --phase                 Stage in initialization to begin aggregating
                           stacks. Phase 0 visualizes from the very start,
                           this includes bootstrapping stacks and loading 
