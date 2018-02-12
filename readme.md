@@ -230,6 +230,12 @@ is set to - then flamegraph HTML will be streamed to STDOUT.
 
 Default: false 
 
+### --prof-only
+  
+Experimental. Only create the prof-viz flamegraph.
+
+Default: false 
+
 ### --phase
 
 Stage in initialization to begin aggregating stacks. 
@@ -518,6 +524,10 @@ See [`--title`](#--title)
 ### `profViz`
 
 See [`--prof-viz`](#--prof-viz)
+
+### `profOnly`
+
+See [`--prof-only`](#--prof-only)
 
 #### `phase` (number)
 

@@ -146,6 +146,12 @@
     "profViz": {
       "type": "boolean"
     },
+    "prof-only": {
+      "type": "boolean"
+    },
+    "profOnly": {
+      "type": "boolean"
+    },
     "--": {
       "type": "array",
       "items": {}

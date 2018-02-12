@@ -1,6 +1,6 @@
 'use strict'
 
-const { sun, linux, windows } = require('./platform')
+const { sun, linux, windows, v8 } = require('./platform')
 const { execSync } = require('child_process') 
 const { EventEmitter } = require('events')
 const once = require('once')
@@ -27,17 +27,19 @@ function zeroEks (args, binary, cb) {
   if (cb) cb = once(cb)
 
   args.mapFrames = args.mapFrames || phases[args.phase]
+  
+  const platform = args.profOnly ? 'v8' : process.platform
 
-  isSudo(function (sudo) {
-    switch (process.platform) {
-      case 'linux':
-        return linux(args, sudo, binary)
-      case 'win32':
-        return windows(args, sudo, binary)
-      default:
-        return sun(args, sudo, binary)
-    }
-  })
+  switch (platform) {
+    case 'v8': 
+      return v8(args, binary)
+    case 'linux':
+      return isSudo((sudo) => linux(args, sudo, binary))
+    case 'win32':
+      return windows(args, sudo, binary)
+    default:
+      return isSudo((sudo) => sun(args, sudo, binary))
+  }
   if (typeof cb !== 'function') return
   args.ee.on('done', cb)
   args.ee.on('error', cb)

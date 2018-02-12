@@ -28,7 +28,7 @@ function cmd (argv, banner = defaultBanner) {
     boolean: [
       'open', 'version', 'help', 'quiet', 
       'silent', 'jsonStacks', 'svg', 'traceInfo',
-      'collectOnly', 'timestampProfiles', 'profViz'
+      'collectOnly', 'timestampProfiles', 'profViz', 'profOnly'
     ],
     alias: {
       silent: 's',
@@ -50,7 +50,8 @@ function cmd (argv, banner = defaultBanner) {
       logOutput: 'log-output',
       visualizeOnly: 'visualize-only',
       collectOnly: 'collect-only',
-      profViz: 'prof-viz'
+      profViz: 'prof-viz',
+      profOnly: 'prof-only'
     },
     default: {
       delay: 0,
@@ -58,8 +59,13 @@ function cmd (argv, banner = defaultBanner) {
     }
   })
 
-  if (args.profViz && process.version.substr(0, 3) === 'v6.') {
-    console.error('0x: The --prof-viz flag is only supported in Node 8 and above')
+  if ((args.profViz || args.profOnly) && process.version.substr(0, 3) === 'v6.') {
+    console.error('0x: The --prof-viz/--prof-only flag is only supported in Node 8 and above')
+    process.exit(1)
+  }
+
+  if (args.profViz && args.profOnly) {
+    console.error('\n 0x: --prof-viz and --prof-only cannot be used together')
     process.exit(1)
   }
 
