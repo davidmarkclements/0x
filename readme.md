@@ -536,7 +536,7 @@ See [`--phase`](#--phase)
 #### `mapFrames` (function)
 
 Will override phase. A custom mapping function that receives 
-an array of frames and an instance of the Profiler (see `stack-convert.js`).
+an array of frames and an instance of the Profiler (see [stacks-to-json-stack-tree](http://github.com/davidmarkclements/stacks-to-json-stack-tree)).
 
 Takes the form `(frames, profiler) => Array|false`. Return false to remove 
 the whole stack from the output, or return a modified array to change 
@@ -589,11 +589,11 @@ Yes please!
 
 ## Acknowledgements
 
-0x is generously sponsored by [nearForm](http://nearform.com)
+Sponsored by [nearForm](http://nearform.com)
 
-This tool is essentially a mashup from various info and code
-sources, and therefore would have taken much longer without
-the following people and their Open Source/Info Sharing efforts
+This tool is inspired from various info and code sources
+and would have taken much longer without the following people and 
+their Open Source/Info Sharing efforts:
 
 * Thorsten Lorenz (<http://thlorenz.com/>)
 * Dave Pacheco (<http://dtrace.org/blogs/dap/about/>)
@@ -602,4 +602,4 @@ the following people and their Open Source/Info Sharing efforts
 
 ## License
 
-MIT and Apache (depending on the code, see LICENSE.md)
+MIT
