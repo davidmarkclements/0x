@@ -13,8 +13,7 @@ const {
   stacksToFlamegraphStream,
   tidy,
   pathTo,
-  notFound,
-  v8ProfFlamegraph
+  notFound
 } = require('../lib/util')
 
 module.exports = sun
@@ -39,11 +38,6 @@ function sun (args, sudo, binary) {
     '--perf-basic-prof',
     '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
   ].concat(args.argv), args)
-
-  if (args.profViz) {
-    args.unshift('--prof')
-    args.unshift('--logfile=%p-v8.log')    
-  }
 
   var proc = spawn(node, args, {
     stdio: 'inherit'
@@ -139,37 +133,33 @@ function sun (args, sudo, binary) {
         }
         return
       }
-      if (args.profViz) v8ProfFlamegraph(args, {folder, pid: proc.pid}, next)
-      else next()
-      function next () { 
-        var translate = sym({silent: true, pid: proc.pid})
+      var translate = sym({silent: true, pid: proc.pid})
 
-        if (!translate) {
-          debug('unable to find map file')
-          if (attempts) {
-            status('Unable to find map file - waiting 300ms and retrying\n')
-            debug('retrying')
-            setTimeout(capture, 300, attempts--)
-            return
-          }
-          status('Unable to find map file!\n')
-          debug('Unable to find map file after multiple attempts')
-          tidy(args)
-          ee.emit('error', Error('0x: Unable to find map file'))
+      if (!translate) {
+        debug('unable to find map file')
+        if (attempts) {
+          status('Unable to find map file - waiting 300ms and retrying\n')
+          debug('retrying')
+          setTimeout(capture, 300, attempts--)
           return
         }
-        pump(
-          fs.createReadStream(folder + '/.stacks.' + proc.pid + '.out'),
-          translate,
-          fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
-        )
-        pump(
-          translate,
-          stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => {
-            status('')
-          })
-        )
+        status('Unable to find map file!\n')
+        debug('Unable to find map file after multiple attempts')
+        tidy(args)
+        ee.emit('error', Error('0x: Unable to find map file'))
+        return
       }
+      pump(
+        fs.createReadStream(folder + '/.stacks.' + proc.pid + '.out'),
+        translate,
+        fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
+      )
+      pump(
+        translate,
+        stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => {
+          status('')
+        })
+      )
     }
   }
 }

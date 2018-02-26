@@ -13,8 +13,7 @@ const {
   stacksToFlamegraphStream,
   tidy,
   pathTo,
-  notFound,
-  v8ProfFlamegraph
+  notFound
 } = require('../lib/util')
 
 module.exports = linux
@@ -51,7 +50,6 @@ function linux (args, sudo, binary) {
     perfdat,
     '--',
     node,
-    ...(args.profViz ? ['--prof', `--logfile=${uid}-v8.log`] : []),
     '--perf-basic-prof',
     '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
   ].filter(Boolean).concat(args.argv), {
@@ -94,34 +92,28 @@ function linux (args, sudo, binary) {
     }
 
     function generate () {
-      if (args.profViz) v8ProfFlamegraph(args, {pid: uid, folder}, next)
-      else next()
+      var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat], {
+        stdio: [
+          'ignore', 
+          fs.openSync(folder + '/stacks.' + proc.pid + '.out', 'w'),
+          traceInfo ? process.stderr : 'ignore'
+        ]
+      })
 
-      function next() {
-        
-        var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat], {
-          stdio: [
-            'ignore', 
-            fs.openSync(folder + '/stacks.' + proc.pid + '.out', 'w'),
-            traceInfo ? process.stderr : 'ignore'
-          ]
-        })
-
-        stacks.on('exit', function () {
-          if (delay > 0) {
-            pump(
-              fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-              filterBeforeDelay(delay),
-              stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
-            )
-          } else {
-            pump(
-              fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-              stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
-            )
-          }
-        })
-      }
+      stacks.on('exit', function () {
+        if (delay > 0) {
+          pump(
+            fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
+            filterBeforeDelay(delay),
+            stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
+          )
+        } else {
+          pump(
+            fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
+            stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
+          )
+        }
+      })
     }
 
     spawn('sudo', ['kill', '-SIGINT', '' + proc.pid], {

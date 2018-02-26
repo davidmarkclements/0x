@@ -14,14 +14,10 @@
   --open | -o             Automatically open after finishing
                           Default: false
 
-  --prof-viz              Experimental. Node 8+ only. Create an additional 
-                          flamegraph using log output when from the V8 --prof.
-                          This will create an additional flamegraph named according 
-                          to the --name flag, prefixed with v8-prof-. If --name 
-                          is set to - then flamegraph HTML will be streamed
-                          to STDOUT. 
-
-  --prof-only             Experimental. Only create the prof-viz flamegraph 
+  --kernel-tracing        Use an OS kernel tracing tool (perf on Linux or 
+                          dtrace on macOs and Solaris). This will capture 
+                          native stack frames (C++ modules and Libuv I/O), 
+                          but may result in missing stacks on Node 8.
 
   --phase                 Stage in initialization to begin aggregating
                           stacks. Phase 0 visualizes from the very start,

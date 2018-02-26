@@ -28,7 +28,7 @@ function zeroEks (args, binary, cb) {
 
   args.mapFrames = args.mapFrames || phases[args.phase]
   
-  const platform = args.profOnly ? 'v8' : process.platform
+  const platform = args.kernelTracing ? process.platform : 'v8'
 
   switch (platform) {
     case 'v8': 

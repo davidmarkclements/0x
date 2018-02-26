@@ -140,16 +140,10 @@
     "collectOnly": {
       "type": "boolean"
     },
-    "prof-viz": {
+    "kernelTracing": {
       "type": "boolean"
     },
-    "profViz": {
-      "type": "boolean"
-    },
-    "prof-only": {
-      "type": "boolean"
-    },
-    "profOnly": {
+    "kernel-tracing": {
       "type": "boolean"
     },
     "--": {

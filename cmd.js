@@ -3,6 +3,7 @@
 const fs = require('fs')
 const minimist = require('minimist')
 const { join, isAbsolute, relative } = require('path')
+const semver = require('semver')
 const zeroEks = require('./')
 const ajv = require('ajv')()
 const { pathTo } = require('./lib/util')
@@ -28,7 +29,7 @@ function cmd (argv, banner = defaultBanner) {
     boolean: [
       'open', 'version', 'help', 'quiet', 
       'silent', 'jsonStacks', 'svg', 'traceInfo',
-      'collectOnly', 'timestampProfiles', 'profViz', 'profOnly'
+      'collectOnly', 'timestampProfiles', 'kernelTracing'
     ],
     alias: {
       silent: 's',
@@ -50,8 +51,7 @@ function cmd (argv, banner = defaultBanner) {
       logOutput: 'log-output',
       visualizeOnly: 'visualize-only',
       collectOnly: 'collect-only',
-      profViz: 'prof-viz',
-      profOnly: 'prof-only'
+      kernelTracing: 'kernel-tracing'
     },
     default: {
       delay: 0,
@@ -59,13 +59,10 @@ function cmd (argv, banner = defaultBanner) {
     }
   })
 
-  if ((args.profViz || args.profOnly) && process.version.substr(0, 3) === 'v6.') {
-    console.error('0x: The --prof-viz/--prof-only flag is only supported in Node 8 and above')
-    process.exit(1)
-  }
-
-  if (args.profViz && args.profOnly) {
-    console.error('\n 0x: --prof-viz and --prof-only cannot be used together')
+  if (semver.lt(process.version, '8.5.0') === true) {
+    console.error('0x v4 supports Node 8.5.0 and above, current Node version is ' + process.version)
+    console.error('On Linux, macOS or Solaris the --kernel-tracing flag\nmay be able to generate a flamegraph with the current Node version')
+    console.error('See 0x --help for more info')
     process.exit(1)
   }
 

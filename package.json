@@ -39,6 +39,7 @@
     "perf-sym": "^2.0.0",
     "pump": "^1.0.1",
     "pumpify": "^1.4.0",
+    "semver": "^5.5.0",
     "single-line-log": "^1.0.1",
     "split2": "^2.0.1",
     "stacks-to-json-stack-tree": "^1.0.2",

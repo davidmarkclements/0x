@@ -220,19 +220,23 @@ outputs to a file `{name}.html` in the current folder.
 Generates an `flamegraph.svg` file in the artifact output directory,
 in addition to the `flamegraph.html` file.
 
-### --prof-viz
+### --kernel-tracing
 
-Experimental. **Node 8+ only**. Create an additional flame graph using
-log output when from the V8 `--prof`. This will create 
-an additional flamegraph named according to the 
-`--name` flag, prefixed with `v8-prof-`. If `--name` 
-is set to - then flamegraph HTML will be streamed to STDOUT.
+Use an OS kernel tracing tool (perf on Linux or 
+dtrace on macOs and Solaris). This will capture 
+native stack frames (C++ modules and Libuv I/O), 
+but may result in missing stacks on Node 8.
 
-Default: false 
-
-### --prof-only
-  
-Experimental. Only create the prof-viz flamegraph.
+This is due to the version of V8 used in the Node 8+
+which does not expose unoptimized call frames to 
+kernel tracing tools (hence these functions will not
+appear in the flamegraph). It's possible to cause
+all functions to appear in the flamegraph with the `--kernel-tracing`
+flag when the `--always-opt` flag is passed to the `node` binary 
+(e.g. `0x --kernel-tracing node --always-opt app.js`). This can be
+useful, but it's important to bear in mind this will change
+the performance characterstics of the process so may lead to false
+positives when it comes to identifying bottlenecks.
 
 Default: false 
 
@@ -372,14 +376,11 @@ By default, a profile folder will be created and named after the PID, e.g.
 The Profile Folder can contain the following files
 
 * flamegraph.svg - an SVG rendering of the flamegraph
-* stacks.3866.out - the traced stacks (run through [perf-sym](http://npmjs.com/perf-sym) on OS X)
+* stacks.3866.out - the traced stacks
 * flamegraph.html - the interactive flamegraph
-* stacks.3866.json - a JSON tree generated from the stacks, enabled with `--json-stacks`
-* isolate-0x103000600-3866-v8.log - a v8 profiling log file, only included when `--prof-viz` is enabled 
-* isolate-0x103000600-3866-v8.log.json - v8 profiling log file processed into JSON using v8s internal tick processor, only included when `--prof-viz` is enabled
-* v8-prof-stacks.3866.out - a generated stacks file based on v8 profiling data, only included when `--prof-viz` is enabled (on linux the file name will have a generated uid instead of the PID in it)
-* v8-prof-flamegraph.html - an alternartive flamegraph that only shows JS stacks based on v8's profiling data, only included when `--prof-viz` is enabled 
-
+* stacks.3866.json - a JSON tree generated from the stacks, not present by default, enable with `--json-stacks`
+* isolate-0x103000600-3866-v8.log - a v8 profiling log file 
+* isolate-0x103000600-3866-v8.log.json - v8 profiling log file processed into JSON using v8s internal tick processor
 
 The is helpful, because there's other things you can do with
 stacks output. For instance, checkout [cpuprofilify](http://npmjs.com/cpuprofilify) and [traceviewify](http://npmjs.com/traceviewify).
@@ -521,13 +522,9 @@ See [`--output-html`](#--output-html---f)
 
 See [`--title`](#--title)
 
-### `profViz`
+### `kernelTracing`
 
-See [`--prof-viz`](#--prof-viz)
-
-### `profOnly`
-
-See [`--prof-only`](#--prof-only)
+See [`--kernel-tracing`](#--kernel-tracing)
 
 #### `phase` (number)
 
