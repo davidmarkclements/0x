@@ -1,3 +1,7 @@
+# v3.4.1
+
+* break out the ui and stack converter portions into separate modules: d3-fg and stacks-to-json-tree.
+
 # v3.4.0
 * introduce experimental `--prof-only` flag, generates flamegraph based on internal v8 profiling data, without performing kernel tracing at the same time (as `--prof-viz` does)
 
