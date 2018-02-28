@@ -112,6 +112,10 @@
     "--": {
       "type": "array",
       "items": {}
+    },
+    "argv": {
+      "type": "array",
+      "items": {}
     }
   }
 }

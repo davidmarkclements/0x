@@ -100,15 +100,13 @@ module.exports = zeroEks
 
 function validate (args) {
   const privateProps = {
-    workingDir: {type: 'string'},
-    argv: {type: 'array'} 
+    workingDir: {type: 'string'}
   }
   const valid = ajv.compile({
       ...schema, 
       properties: {...schema.properties, ...privateProps}
     }
   )
-
   if (valid(args)) return
 
   const [{keyword, dataPath, params, message}] = ajv.errors
