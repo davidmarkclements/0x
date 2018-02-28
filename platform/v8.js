@@ -14,7 +14,6 @@ const {
   stacksToFlamegraphStream,
   tidy,
   pathTo,
-  notFound,
   v8ProfFlamegraph
 } = require('../lib/util')
 

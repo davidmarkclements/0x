@@ -1,5 +1,5 @@
 # v4.0.0
-* code refactor
+* internal refactor
 * v8 prof is now the default method of stack collection
 * add `--kernel-tracing` option
 * removed `--svg` flag

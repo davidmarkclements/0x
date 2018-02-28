@@ -6,33 +6,32 @@ const pump = require('pump')
 const split = require('split2')
 const through = require('through2')
 const debug = require('debug')('0x')
+const { promisify } = require('util')
 
 const {
   determineOutputDir,
   ensureDirExists,
   stacksToFlamegraphStream,
   tidy,
-  pathTo,
-  notFound
+  pathTo
 } = require('../lib/util')
 
-module.exports = linux
+module.exports = promisify(linux)
 
-function linux (args, sudo, binary) {
-  const { log, status, ee } = args
-  var perf = pathTo(args, 'perf')
-  if (!perf) return notFound(args, 'perf')
-
+function linux (args, sudo, binary, cb) {
+  const { status } = args
+  var perf = pathTo('perf')
+  if (!perf) return void cb(Error('0x: Unable to locate dtrace - make sure it\'s in your PATH'))
   if (!sudo) {
-    log('0x captures stacks using perf, which requires sudo access\n')
+    status('0x captures stacks using perf, which requires sudo access\n')
     return spawn('sudo', ['true'])
-      .on('exit', function () { linux(args, true, binary) })
+      .on('exit', function () { linux(args, true, binary, cb) })
   }
 
-  var node = !binary || binary === 'node' ? pathTo(args, 'node') : binary
+  var node = !binary || binary === 'node' ? pathTo('node') : binary
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
-  var traceInfo = args.traceInfo
+  var kernelTracingDebug = args.kernelTracingDebug
   var delay = args.delay || args.d
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
@@ -41,7 +40,7 @@ function linux (args, sudo, binary) {
     '-E',
     'perf',
     'record',
-    !traceInfo ? '-q' : '',
+    !kernelTracingDebug ? '-q' : '',
     '-e',
     'cpu-clock',
     '-F 1000', // 1000 samples per sec === 1ms profiling like dtrace
@@ -57,9 +56,9 @@ function linux (args, sudo, binary) {
   }).on('exit', function (code) {
     if (code !== null && code !== 0 && code !== 143 && code !== 130) {
       tidy(args)
-      const err = Error('0x: Tracing subprocess error, code: ' + code)
+      const err = Error('Tracing subprocess error, code: ' + code)
       err.code = code
-      ee.emit('error', err, code)
+      cb(Error(err))
       return
     }
     analyze(true)
@@ -72,7 +71,7 @@ function linux (args, sudo, binary) {
 
   if (process.stdin.isPaused()) {
     process.stdin.resume()
-    log('\u001b[?25l')
+    process.stdout.write('\u001b[?25l')
   }
 
   process.once('SIGINT', analyze)
@@ -96,23 +95,22 @@ function linux (args, sudo, binary) {
         stdio: [
           'ignore', 
           fs.openSync(folder + '/stacks.' + proc.pid + '.out', 'w'),
-          traceInfo ? process.stderr : 'ignore'
+          kernelTracingDebug ? process.stderr : 'ignore'
         ]
       })
 
       stacks.on('exit', function () {
-        if (delay > 0) {
-          pump(
+        cb(null, {
+          stream : (delay > 0) ? 
+            pumpify(
+              fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
+              split(),
+              filterBeforeDelay(delay),
+            ) : 
             fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-            filterBeforeDelay(delay),
-            stacksToFlamegraphStream(args, {pid: proc.pid, folder, clear: () => status('')}, null)
-          )
-        } else {
-          pump(
-            fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-            stacksToFlamegraphStream(args, {pid: proc.pid, folder, clear: () => status('')}, null)
-          )
-        }
+          pid: proc.pid,
+          folder: folder
+        })
       })
     }
 

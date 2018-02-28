@@ -46,15 +46,9 @@ async function startProcessAndCollectTraceData (args, binary) {
 
   switch (platform) {
     case 'v8': return v8(args, binary)
-    case 'linux': {
-      const sudo = await isSudo()
-      return linux(args, sudo, binary)
-    }
+    case 'linux': return linux(args, await isSudo(), binary)
     case 'win32': return windows()
-    default: {
-      const sudo = await isSudo()
-      return sun(args, sudo, binary)
-    }
+    default: return sun(args, await isSudo(), binary)
   }
 }
 
@@ -94,7 +88,6 @@ async function zeroEks (args, binary) {
 }
 
 zeroEks.stacksToFlamegraph = stacksToFlamegraph 
-zeroEks.stacksToJson = stacksToJson
 
 module.exports = zeroEks
 

@@ -6,30 +6,28 @@ const pump = require('pump')
 const split = require('split2')
 const sym = require('perf-sym')
 const debug = require('debug')('0x')
-
+const { promisify } = require('util')
 const {
   determineOutputDir,
   ensureDirExists,
-  stacksToFlamegraphStream,
   tidy,
-  pathTo,
-  notFound
+  pathTo
 } = require('../lib/util')
 
-module.exports = sun
+module.exports = promisify(sun)
 
-function sun (args, sudo, binary) {
-  const { status, log, ee } = args
-  var dtrace = pathTo(args, 'dtrace')
+function sun (args, sudo, binary, cb) {
+  const { status } = args
+  var dtrace = pathTo('dtrace')
   var profile = require.resolve('perf-sym/profile_1ms.d')
-  if (!dtrace) return notFound(args, 'dtrace')
+  if (!dtrace) return void cb(Error('0x: Unable to locate dtrace - make sure it\'s in your PATH'))
   if (!sudo) {
-    log('0x captures stacks using dtrace, which requires sudo access\n')
+    status('0x captures stacks using dtrace, which requires sudo access\n')
     return spawn('sudo', ['true'])
-      .on('exit', function () { sun(args, true, binary) })
+      .on('exit', function () { sun(args, true, binary, cb) })
   }
-  var node = !binary || binary === 'node' ? pathTo(args, 'node') : binary
-  var traceInfo = args.traceInfo
+  var node = !binary || binary === 'node' ? pathTo('node') : binary
+  var kernelTracingDebug = args.kernelTracingDebug
   var delay = args.delay || args.d
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
@@ -46,7 +44,7 @@ function sun (args, sudo, binary) {
       tidy(args)
       const err = Error('0x Target subprocess error, code: ' + code)
       err.code = code
-      ee.emit('error', err, code)
+      cb(err)
       return
     }
     analyze(true)
@@ -58,7 +56,7 @@ function sun (args, sudo, binary) {
   function start () {
     prof = spawn('sudo', [profile, '-p', proc.pid])
 
-    if (traceInfo) { prof.stderr.pipe(process.stderr) }
+    if (kernelTracingDebug) { prof.stderr.pipe(process.stderr) }
 
     folder = determineOutputDir(args, proc)
     ensureDirExists(folder)
@@ -72,8 +70,7 @@ function sun (args, sudo, binary) {
       fs.createWriteStream(path.join(folder, '.stacks.' + proc.pid + '.out')),
       function (err) {
         if (err) {
-          status(err.message)
-          ee.emit('error', err)
+          cb(err)
           return
         }
         debug('dtrace out closed')
@@ -83,7 +80,7 @@ function sun (args, sudo, binary) {
 
     if (process.stdin.isPaused()) {
       process.stdin.resume()
-      log('\u001b[?25l')
+      process.stdout.write('\u001b[?25l')
     }
   }
 
@@ -101,9 +98,9 @@ function sun (args, sudo, binary) {
 
     if (!prof) {
       debug('Profiling not begun')
-      log('No stacks, profiling had not begun\n')
+      status('No stacks, profiling had not begun\n')
       tidy(args)
-      ee.emit('error', Error('0x: Profiling not begun'))
+      cb(Error('0x: Profiling not begun'))
       return 
     }
 
@@ -128,7 +125,7 @@ function sun (args, sudo, binary) {
           status('Unable to find map file!\n')
           debug('Unable to find map file after multiple attempts')
           tidy(args)
-          ee.emit('error', Error('0x: Unable to find map file'))
+          cb(Error('0x: Unable to find map file'))
           return
         }
         return
@@ -143,10 +140,9 @@ function sun (args, sudo, binary) {
           setTimeout(capture, 300, attempts--)
           return
         }
-        status('Unable to find map file!\n')
         debug('Unable to find map file after multiple attempts')
         tidy(args)
-        ee.emit('error', Error('0x: Unable to find map file'))
+        cb(Error('Unable to find map file'))
         return
       }
       pump(
@@ -154,10 +150,11 @@ function sun (args, sudo, binary) {
         translate,
         fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
       )
-      pump(
-        translate,
-        stacksToFlamegraphStream(args, {pid: proc.pid, folder, clear: () => status('')}, null)
-      )
+      cb(null, {
+        stream: translate,
+        pid: proc.pid, 
+        folder: folder
+      })
     }
   }
 }
