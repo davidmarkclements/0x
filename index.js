@@ -2,7 +2,6 @@
 
 const { sun, linux, windows, v8 } = require('./platform')
 const { execSync } = require('child_process') 
-const { EventEmitter } = require('events')
 const debug = require('debug')('0x')
 const launch = require('opn')
 const { join, isAbsolute, relative, dirname } = require('path')
@@ -42,9 +41,7 @@ async function startProcessAndCollectTraceData (args, binary) {
   }
   args.name = args.name || 'flamegraph'
   
-  const platform = args.kernelTracing ? process.platform : 'v8'
-
-  switch (platform) {
+  switch (args.kernelTracing ? platform : 'v8') {
     case 'v8': return v8(args, binary)
     case 'linux': return linux(args, await isSudo(), binary)
     case 'win32': return windows()
