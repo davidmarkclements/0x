@@ -34,7 +34,6 @@
     "jsdom": "^8.0.4",
     "minimist": "^1.2.0",
     "multistream": "^2.1.0",
-    "once": "^1.4.0",
     "opn": "^5.2.0",
     "perf-sym": "^2.0.0",
     "pump": "^1.0.1",
@@ -47,7 +46,6 @@
     "which": "^1.2.4"
   },
   "devDependencies": {
-    "deep-diff": "^0.3.3",
     "standard": "^6.0.7"
   },
   "browserify-shim": {}
