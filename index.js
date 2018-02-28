@@ -58,16 +58,16 @@ async function startProcessAndCollectTraceData (args, binary) {
   }
 }
 
-async function zeroEks (args) {
+async function zeroEks (args, binary) {
   args.name = args.name || 'flamegraph'
+  args.log = args.log || noop
+  args.status = args.status || noop
   validate(args)
   if (args.collectOnly && args.visualizeOnly) {
     throw Error('--collect-only and --visualize-only cannot be used together')
   }
 
   if (args.visualizeOnly) return visualize(args)
-  
-  const binary = resolveCommand(args)
 
   args.title = args.title || 'node ' + args.argv.join(' ')
 
@@ -99,7 +99,10 @@ zeroEks.stacksToJson = stacksToJson
 module.exports = zeroEks
 
 function validate (args) {
-  const privateProps = {workingDir: {type: 'string'}}
+  const privateProps = {
+    workingDir: {type: 'string'},
+    argv: {type: 'array'} 
+  }
   const valid = ajv.compile({
       ...schema, 
       properties: {...schema.properties, ...privateProps}
@@ -167,22 +170,4 @@ function visualize (args) {
       throw Error('Invalid data path provided to --visualize-only (not a directory)')
     } else throw e
   }
-}
-
-function resolveCommand (args) {
-  const dashDash = args['--']
-  if (dashDash[0] && dashDash[0][0] === '-') {
-    throw Error(`The node binary must immediately follow double dash (--)
-      0x [flags] -- node [nodeFlags] script.js [scriptFlags]
-    `)
-  }
-  var binary = false
-  if (dashDash[0]) {
-    if (dashDash[0][0] !== 'node') binary = dashDash[0]
-    dashDash.shift()
-    args.argv = dashDash
-  } else {
-    args.argv = args._
-  }
-  return binary
 }

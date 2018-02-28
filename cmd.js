@@ -74,10 +74,28 @@ function cmd (argv, banner = defaultBanner) {
   args.workingDir = process.cwd()
   args.log = createLogger(args)
   args.status = createStatus(args)
+  const { pathToNodeBinary, subprocessArgv } = parseSubprocessCommand(args)
+  args.argv = subprocessArgv
 
-  return zeroEks(args)  
+  return zeroEks(args, pathToNodeBinary)  
 }
 
+function parseSubprocessCommand (args) {
+  const dashDash = args['--']
+  if (dashDash[0] && dashDash[0][0] === '-') {
+    throw Error(`The node binary must immediately follow double dash (--)
+      0x [flags] -- node [nodeFlags] script.js [scriptFlags]
+    `)
+  }
+  var pathToNodeBinary = false
+  var subprocessArgv = args._
+  if (dashDash[0]) {
+    if (dashDash[0][0] !== 'node') pathToNodeBinary = dashDash[0]
+    dashDash.shift()
+    subprocessArgv = dashDash
+  }
+  return { pathToNodeBinary, subprocessArgv }
+}
 
 function createLogger ({silent, quiet}) {
   const logStream = process.stderr
