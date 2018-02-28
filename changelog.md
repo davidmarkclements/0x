@@ -1,3 +1,20 @@
+# v4.0.0
+* code refactor
+* v8 prof is now the default method of stack collection
+* add `--kernel-tracing` option
+* removed `--svg` flag
+* removed `--gen` flag
+* removed `--timestamp-profiles`
+* removed `--theme`
+* removed `--include`
+* removed `--exclude | -x`
+* removed `--tiers | -t`
+* removed `--langs | -l`
+* renamed `--trace-info` to `--kernel-tracing-debug`
+* removed `--log-output` 
+* removed `--stacks-only`
+* profile folders renamed to `{outputDir}/{name}.0x`
+
 # v3.4.1
 * break out the ui and stack converter portions into separate modules: d3-fg and stacks-to-json-tree.
 

@@ -44,53 +44,11 @@
     "json-stacks": {
       "type": "boolean"
     },
-    "svg": {
+    "logging-output": {
       "type": "boolean"
     },
-    "log-output": {
+    "loggingOutput": {
       "type": "boolean"
-    },
-    "logOutput": {
-      "type": "boolean"
-    },
-    "timestamp-profiles": {
-      "type": "boolean"
-    },
-    "timestampProfiles": {
-      "type": "boolean"
-    },
-    "trace-info": {
-      "type": "boolean"
-    },
-    "traceInfo": {
-      "type": "boolean"
-    },
-    "theme": {
-      "type": "string"
-    },
-    "include": {
-      "type": "string"
-    },
-    "exclude": {
-      "type": "string"
-    },
-    "l": {
-      "type": "string"
-    },
-    "langs": {
-      "type": "string"
-    },
-    "t": {
-      "type": "string"
-    },
-    "tiers": {
-      "type": "string"
-    },
-    "g": {
-      "type": "string"
-    },
-    "gen": {
-      "type": "string"
     },
     "D": {
       "type": "string"
@@ -109,9 +67,6 @@
     },
     "F": {
       "type": "string"
-    },
-    "stacks-only": {
-      "type": "boolean"
     },
     "title": {
       "type": "string"
@@ -144,6 +99,12 @@
       "type": "boolean"
     },
     "kernel-tracing": {
+      "type": "boolean"
+    },
+    "kernelTracingDebug": {
+      "type": "boolean"
+    },
+    "kernel-tracing-debug": {
       "type": "boolean"
     },
     "--": {

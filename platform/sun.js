@@ -156,9 +156,7 @@ function sun (args, sudo, binary) {
       )
       pump(
         translate,
-        stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => {
-          status('')
-        })
+        stacksToFlamegraphStream(args, {pid: proc.pid, folder, clear: () => status('')}, null)
       )
     }
   }

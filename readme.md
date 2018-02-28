@@ -215,11 +215,6 @@ The `--tiers` and `--langs` flags can also be combined with this flag.
 Outputs to STDOUT unless the `--name` flag is set, in which case 
 outputs to a file `{name}.html` in the current folder.
 
-### --svg
-
-Generates an `flamegraph.svg` file in the artifact output directory,
-in addition to the `flamegraph.html` file.
-
 ### --kernel-tracing
 
 Use an OS kernel tracing tool (perf on Linux or 
@@ -349,7 +344,7 @@ instead of stacks file.
 
 Default: ''  
 
-### --log-output 
+### --logging-output 
 
 Specify `stdout` or `stderr` as 0x's output stream.
 
@@ -375,7 +370,6 @@ By default, a profile folder will be created and named after the PID, e.g.
 
 The Profile Folder can contain the following files
 
-* flamegraph.svg - an SVG rendering of the flamegraph
 * stacks.3866.out - the traced stacks
 * flamegraph.html - the interactive flamegraph
 * stacks.3866.json - a JSON tree generated from the stacks, not present by default, enable with `--json-stacks`
@@ -470,13 +464,9 @@ See [`--silent`](#--silent---s)
 
 See [`--json-stacks`](#--json-stacks)
 
-#### `svg` (boolean)
+#### `loggingOutput` (boolean)
 
-See [`--svg`](#--svg)
-
-#### `logOutput` (boolean)
-
-See [`--log-output`](#--log-output)
+See [`--logging-output`](#--logging-output)
 
 #### `timestampProfiles` (boolean)
 

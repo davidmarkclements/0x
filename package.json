@@ -16,7 +16,7 @@
   "author": "David Mark Clements",
   "license": "MIT",
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "bugs": {
     "url": "https://github.com/davidmarkclements/0x/issues"

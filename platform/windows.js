@@ -1,9 +1,7 @@
 'use strict'
 
-const { unsupported } = require('../lib/util')
-
 module.exports = windows 
 
-function windows (args, sudo, binary) {
-  unsupported(args, 'Windows')
+async function windows () {
+  throw Error(`0x: Windows kernel tracing is not currently supported`)
 }

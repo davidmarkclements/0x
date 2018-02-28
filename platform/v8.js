@@ -2,9 +2,10 @@
 const fs = require('fs')
 const path = require('path')
 const spawn = require('child_process').spawn
-const pump = require('pump')
+const pumpify = require('pumpify')
 const split = require('split2')
 const through = require('through2')
+const { promisify } = require('util')
 const debug = require('debug')('0x')
 
 const {
@@ -19,10 +20,10 @@ const {
 
 module.exports = v8
 
-function v8 (args, binary) {
-  const { log, status, ee } = args
+async function v8 (args, binary) {
+  const { status } = args
 
-  var node = !binary || binary === 'node' ? pathTo(args, 'node') : binary
+  var node = !binary || binary === 'node' ? await pathTo('node') : binary
   var delay = args.delay
   delay = parseInt(delay, 10)
   if (isNaN(delay)) { delay = 0 }
@@ -33,64 +34,49 @@ function v8 (args, binary) {
     '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
   ].filter(Boolean).concat(args.argv), {
     stdio: ['ignore', 'inherit', 'inherit']
-  }).on('exit', function (code) {
-    if (code !== 0) {
-      tidy(args)
-      const err = Error('0x Target subprocess error, code: ' + code)
-      err.code = code
-      ee.emit('error', err, code)
-      return
-    }
-    analyze(true)
   })
+  // timeout merely for effect
+  setTimeout(status, delay || 0, 'Profiling')
+  
+  const { code, manual } = await Promise.race([
+    new Promise((resolve) => process.once('SIGINT', () => resolve({code: 0, manual: true}))),
+    new Promise((resolve) => proc.once('exit', (code) => resolve({code, manual: false})))
+  ])
+
+  if (code !== 0) {
+    tidy(args)
+    const err = Error('0x Target subprocess error, code: ' + code)
+    err.code = code
+    throw err
+  }
 
   var folder = determineOutputDir(args, proc)
   ensureDirExists(folder)
 
-  setTimeout(status, delay || 0, 'Profiling')
-
   if (process.stdin.isPaused()) {
     process.stdin.resume()
-    log('\u001b[?25l')
+    process.stdin.write('\u001b[?25l')
   }
 
-  process.once('SIGINT', analyze)
-
-  function analyze (manual) {
-    if (analyze.called) { return }
-    analyze.called = true
-
-    if (!manual) {
-      debug('Caught SIGINT, generating flamegraph')
-      status('Caught SIGINT, generating flamegraph')
-      proc.on('exit', generate)
-    } else {
-      debug('Process exited, generating flamegraph')
-      status('Process exited, generating flamegraph')
-      generate()
-    }
-
+  if (!manual) {
+    status('Caught SIGINT, generating flamegraph')
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
+    await new Promise((resolve) => proc.on('exit', resolve))
+  } else {
+    status('Process exited, generating flamegraph')
+  }
+  await v8ProfFlamegraph(args, {pid: proc.pid, folder})
 
-    function generate () {
-      v8ProfFlamegraph(args, {pid: proc.pid, folder}, next)
-
-      function next() {
-        if (delay > 0) {
-          pump(
-            fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-            split(),
-            filterBeforeDelay(delay),
-            stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
-          )
-        } else {
-          pump(
-            fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-            stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
-          )
-        }
-      }
-    }
+  return {
+    stream : (delay > 0) ? 
+      pumpify(
+        fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
+        split(),
+        filterBeforeDelay(delay),
+      ) : 
+      fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
+    pid: proc.pid,
+    folder: folder
   }
 }
 

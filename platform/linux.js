@@ -105,12 +105,12 @@ function linux (args, sudo, binary) {
           pump(
             fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
             filterBeforeDelay(delay),
-            stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
+            stacksToFlamegraphStream(args, {pid: proc.pid, folder, clear: () => status('')}, null)
           )
         } else {
           pump(
             fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-            stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
+            stacksToFlamegraphStream(args, {pid: proc.pid, folder, clear: () => status('')}, null)
           )
         }
       })
