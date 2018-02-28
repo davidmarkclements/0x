@@ -107,6 +107,8 @@
     "kernel-tracing-debug": {
       "type": "boolean"
     },
+    "status": {},
+    "log": {},
     "--": {
       "type": "array",
       "items": {}

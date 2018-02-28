@@ -7,6 +7,7 @@ const semver = require('semver')
 const zeroEks = require('./')
 const { version } = require('./package.json')
 const debug = require('debug')('0x')
+const sll = require('single-line-log')
 
 const defaultBanner = `
   0x ${version}
@@ -71,5 +72,25 @@ function cmd (argv, banner = defaultBanner) {
 
   if (args.version) return console.log('0x ' + version)
   args.workingDir = process.cwd()
+  args.log = createLogger(args)
+  args.status = createStatus(args)
+
   return zeroEks(args)  
+}
+
+
+function createLogger ({silent, quiet}) {
+  const logStream = process.stderr
+  return function log (msg, force) {
+    if (silent) return
+    if (!force && quiet) return 
+    logStream.write(msg) 
+  }
+}
+
+function createStatus ({silent, quiet}) {
+  const statusStream = process.stderr 
+  return quiet || silent
+    ? () => {}
+    : sll(statusStream)
 }

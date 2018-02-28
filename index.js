@@ -17,14 +17,13 @@ const {
   render,
   stacksToJson,
   createBundle,
-  createLoggers,
   tidy,
   noop,
   phases
 } = require('./lib/util')
 
+
 async function stacksToFlamegraph (stackStream, args) {
-  const { log } = createLoggers(args)
   args.name = args.name || 'flamegraph'
   args.mapFrames = args.mapFrames || phases[args.phase]
   args.name = args.name || '-'
@@ -73,8 +72,6 @@ async function zeroEks (args) {
   args.title = args.title || 'node ' + args.argv.join(' ')
 
   const { collectOnly, jsonStacks } = args
-  const { status } = createLoggers(args)
-  args.status = status
   
   args.mapFrames = args.mapFrames || phases[args.phase]
 
@@ -84,6 +81,7 @@ async function zeroEks (args) {
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(json, 0, 2))
   }
   if (collectOnly === true) {
+    const log = args.log
     debug('--collect-only flag, bailing on rendering')
     tidy(args)
     log(`\n\n  stats collected in file://${folder}\n`, true)
@@ -130,9 +128,9 @@ function validate (args) {
 }
 
 async function generateFlamegraph (args, opts) {
-  const { log } = createLoggers(args)
   try  { 
     const file = await render(args, opts)
+    const log = args.log
     log('flamegraph generated in\n')
     log(file + '\n', true)
     tidy(args)
