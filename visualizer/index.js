@@ -1,8 +1,8 @@
 /* global innerWidth d3*/
 global.d3 = require('d3')
-const hsl = require('hsl-to-rgb-for-reals')
 const fg = require('d3-fg')
 const bel = require('bel')
+const morphdom = require('morphdom')
 const createActions = require('./actions')
 const graph = require('./cmp/graph')(bel)
 const title = require('./cmp/title')(bel)
@@ -29,7 +29,7 @@ module.exports = function (stacks, opts, done) {
   const svg = chart.querySelector('svg')
   svg.style.transition = 'transform 200ms ease-in-out'
 
-  const initialState = {
+  const state = {
     key: {
       colors: [
         fg.colorHash({top: 0, name: '?'}, 1, 100),
@@ -39,19 +39,31 @@ module.exports = function (stacks, opts, done) {
       ]
     },
     control: {
-      states: {
-        tiers: false,
-        optimized: false,
-        notOptimized: false
-      }
+      tiers: false,
+      optimized: false,
+      notOptimized: false
     },
-    typeFilters: { bg, exclude }
+    typeFilters: {
+      bgs: {
+        app: '#fff',
+        deps: '#fff',
+        core: '#fff',
+        nativeJS: '#fff',
+        nativeC: '#fff',
+        regexp: '#fff',
+        v8: '#fff'
+      }, 
+      exclude 
+    }
   }
-
-  const actions = createActions({flamegraph, svg})
+  
+  const actions = createActions({flamegraph, svg, state}, (state) => {
+    morphdom(iface, ui({state, actions}))
+  })
+  var iface = ui({state, actions})
   document.body.appendChild(title(opts))
   document.body.appendChild(chart)
-  document.body.appendChild(ui({initialState, actions}))
+  document.body.appendChild(iface)
 
 }
 

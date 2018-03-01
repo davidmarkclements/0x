@@ -6,7 +6,7 @@ const controlsCmp = require('./controls')
 const zoomCmp = require('./zoom')
 const searchCmp = require('./search')
 
-module.exports = (render) => ({initialState, actions}) => {
+module.exports = (render) => ({state, actions}) => {
   const typeFilters = typeFiltersCmp(render) 
   const key = keyCmp(render) 
   const controls = controlsCmp(render) 
@@ -17,9 +17,9 @@ module.exports = (render) => ({initialState, actions}) => {
     <div>
       ${search(actions.search())}
       ${zoom(actions.zoom())}
-      ${controls(initialState.control, actions.control())}
-      ${key(initialState.key)}
-      ${typeFilters(initialState.typeFilters, actions.typeFilters())}
+      ${controls(state.control, actions.control())}
+      ${key(state.key)}
+      ${typeFilters(state.typeFilters, actions.typeFilters())}
     </div>
   `
 }
