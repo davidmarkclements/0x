@@ -21,7 +21,6 @@ const {
   phases
 } = require('./lib/util')
 
-
 async function stacksToFlamegraph (stackStream, args) {
   args.name = args.name || 'flamegraph'
   args.mapFrames = args.mapFrames || phases[args.phase]
@@ -29,7 +28,7 @@ async function stacksToFlamegraph (stackStream, args) {
   args.title = args.title || ''
   const opts = {
     pid: args.pid, 
-    folder: path.join(args.workingDir, path.dirname(args.src)),
+    folder: join(args.workingDir, dirname(args.src)),
     json: await stacksToJson(stackStream, args.mapFrames)
   }
   await generateFlamegraph(args, opts)
@@ -71,6 +70,8 @@ async function zeroEks (args, binary) {
   if (jsonStacks === true) {
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(json, 0, 2))
   }
+
+  fs.writeFileSync(`${folder}/meta.json`, JSON.stringify(args, 0, 2))
   if (collectOnly === true) {
     const log = args.log
     debug('--collect-only flag, bailing on rendering')
@@ -146,6 +147,15 @@ function visualize (args) {
     }
     args.pid = rx.exec(stacks)[1] 
     args.src = join(dir, stacks)
+    
+    if (!args.title) {
+      try {
+        const { title } = JSON.parse(fs.readFileSync(join(dir, 'meta.json')))
+        args.title = title
+      } catch (e) {
+        debug(e)
+      }
+    }
 
     return stacksToFlamegraph(
       fs.createReadStream(args.src),

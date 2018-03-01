@@ -14,6 +14,9 @@
 * removed `--log-output` 
 * removed `--stacks-only`
 * profile folders renamed to `{outputDir}/{name}.0x`
+* ui: removed langs button
+* ui: removed theme button
+
 
 # v3.4.1
 * break out the ui and stack converter portions into separate modules: d3-fg and stacks-to-json-tree.

@@ -24,6 +24,7 @@
   "homepage": "https://github.com/davidmarkclements/0x#readme",
   "dependencies": {
     "ajv": "^6.0.1",
+    "bel": "^5.1.7",
     "browserify": "^13.0.0",
     "concat-stream": "^1.5.2",
     "d3": "^3.5.16",
@@ -41,6 +42,7 @@
     "single-line-log": "^1.0.1",
     "split2": "^2.0.1",
     "stacks-to-json-stack-tree": "^1.0.2",
+    "tachyons": "^4.9.1",
     "through2": "^2.0.1",
     "which": "^1.2.4"
   },
