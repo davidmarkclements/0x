@@ -28,7 +28,7 @@ function cmd (argv, banner = defaultBanner) {
   var args = minimist(argv, {
     stopEarly: true,
     '--': true,
-    number: ['delay', 'phase'],
+    number: ['phase'],
     boolean: [
       'open', 'version', 'help', 'quiet', 
       'silent', 'jsonStacks', 'kernelTracingDebug',
@@ -38,7 +38,6 @@ function cmd (argv, banner = defaultBanner) {
       silent: 's',
       quiet: 'q',
       open: 'o',
-      delay: 'd',
       'output-dir': 'outputDir',
       D: 'outputDir',
       'output-html': 'outputHtml',
@@ -53,7 +52,6 @@ function cmd (argv, banner = defaultBanner) {
       kernelTracingDebug: 'kernel-tracing-debug',
     },
     default: {
-      delay: 0,
       phase: 2
     }
   })

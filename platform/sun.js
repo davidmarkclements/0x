@@ -6,6 +6,7 @@ const pump = require('pump')
 const split = require('split2')
 const sym = require('perf-sym')
 const debug = require('debug')('0x')
+const traceStacksToTickStacks = require('../lib/trace-stacks-to-tick-stacks')
 const { promisify } = require('util')
 const {
   determineOutputDir,
@@ -28,9 +29,6 @@ function sun (args, sudo, binary, cb) {
   }
   var node = !binary || binary === 'node' ? pathTo('node') : binary
   var kernelTracingDebug = args.kernelTracingDebug
-  var delay = args.delay || args.d
-  delay = parseInt(delay, 10)
-  if (isNaN(delay)) { delay = 0 }
 
   args = Object.assign([
     '--perf-basic-prof',
@@ -84,11 +82,7 @@ function sun (args, sudo, binary, cb) {
     }
   }
 
-  if (delay) {
-    setTimeout(start, delay)
-  } else {
-    start()
-  }
+  start()
 
   process.once('SIGINT', analyze)
 
@@ -106,7 +100,7 @@ function sun (args, sudo, binary, cb) {
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      status('Caught SIGINT, generating flamegraph ')
+      status('Caught SIGINT, generating flamegraph\n ')
     }
 
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
@@ -148,13 +142,17 @@ function sun (args, sudo, binary, cb) {
       pump(
         fs.createReadStream(folder + '/.stacks.' + proc.pid + '.out'),
         translate,
-        fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
+        fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out'),
+        (err) => {
+          if (err) return void cb(err)
+          cb(null, {
+            stacks: traceStacksToTickStacks(folder + '/stacks.' + proc.pid + '.out'),
+            pid: proc.pid, 
+            folder: folder
+          })
+        }
       )
-      cb(null, {
-        stream: translate,
-        pid: proc.pid, 
-        folder: folder
-      })
+
     }
   }
 }

@@ -9,7 +9,7 @@ const stdoutWrite = promisify(process.stdout.write.bind(process.stdout))
 
 module.exports = html
 
-function html (stacks, opts) {
+function html (opts) {
   const { title, htmlPath, script } = opts
   const stdout = (opts.htmlPath === '-' || !opts.htmlPath)
 

@@ -13,9 +13,12 @@
 * renamed `--trace-info` to `--kernel-tracing-debug`
 * removed `--log-output` 
 * removed `--stacks-only`
+* removed `-d | --delay`
 * profile folders renamed to `{outputDir}/{name}.0x`
 * ui: removed langs button
 * ui: removed theme button
+* ui: style changes (adopted tachyons css)
+
 
 
 # v3.4.1

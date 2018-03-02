@@ -8,31 +8,20 @@ const { join, isAbsolute, relative, dirname } = require('path')
 const fs = require('fs')
 const pump = require('pump')
 const ajv = require('ajv')()
+const traceStacksToTickStacks = require('./lib/trace-stacks-to-tick-stacks')
+const v8LogToTickStacks = require('./lib/v8-log-to-tick-stacks')
+const tickStacksToTree = require('./lib/tick-stacks-to-tree')
 const schema = require('./schema.json')
 const platform = process.platform
 const {
   isSudo,
   silence,
   render,
-  stacksToJson,
   createBundle,
   tidy,
   noop,
   phases
 } = require('./lib/util')
-
-async function stacksToFlamegraph (stackStream, args) {
-  args.name = args.name || 'flamegraph'
-  args.mapFrames = args.mapFrames || phases[args.phase]
-  args.name = args.name || '-'
-  args.title = args.title || ''
-  const opts = {
-    pid: args.pid, 
-    folder: join(args.workingDir, dirname(args.src)),
-    json: await stacksToJson(stackStream, args.mapFrames)
-  }
-  await generateFlamegraph(args, opts)
-}
 
 async function startProcessAndCollectTraceData (args, binary) {
   if (!Array.isArray(args.argv)) {
@@ -65,10 +54,13 @@ async function zeroEks (args, binary) {
   
   args.mapFrames = args.mapFrames || phases[args.phase]
 
-  const { stream, pid, folder } = await startProcessAndCollectTraceData(args, binary)
-  const json = await stacksToJson(stream, args.mapFrames)
+  // kernel tracing returns a stream, default mode supplies json directly
+  var { stacks, pid, folder } = await startProcessAndCollectTraceData(args, binary)
+
+  const tree = tickStacksToTree(stacks, args.mapFrames)
+
   if (jsonStacks === true) {
-    fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(json, 0, 2))
+    fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
   }
 
   fs.writeFileSync(`${folder}/meta.json`, JSON.stringify(args, 0, 2))
@@ -82,10 +74,8 @@ async function zeroEks (args, binary) {
     return
   }
 
-  await generateFlamegraph(args, {json, pid, folder})
+  await generateFlamegraph(args, {tree, pid, folder})
 }
-
-zeroEks.stacksToFlamegraph = stacksToFlamegraph 
 
 module.exports = zeroEks
 
@@ -133,38 +123,48 @@ async function generateFlamegraph (args, opts) {
   }
 }
 
-function visualize (args) {
+async function visualize (args) {
   try { 
     const { visualizeOnly } = args
-    const dir = isAbsolute(visualizeOnly) ? 
+    const folder = isAbsolute(visualizeOnly) ? 
       relative(args.workingDir, visualizeOnly) :
       visualizeOnly
-    const ls = fs.readdirSync(dir)
-    const rx = /^stacks\.(.*)\.out/
-    const stacks = ls.find((f) => rx.test(f))
+    const ls = fs.readdirSync(folder)
+    const traceFile = /^stacks\.(.*)\.out$/    
+    const isolateLog = /^isolate-(0x[0-9A-Fa-f]{2,12})-(.*)-v8.log$/
+    const stacks = ls.find((f) => isolateLog.test(f) || traceFile.test(f))
     if (!stacks) {
-      throw Error('Invalid data path provided to --visualize-only (no stacks file)')
+      throw Error('Invalid data path provided to --visualize-only (no stacks or v8 log file found)')
     }
-    args.pid = rx.exec(stacks)[1] 
-    args.src = join(dir, stacks)
-    
+
+    const srcType = isolateLog.test(stacks) ? 'v8' : 'kernel-tracing'
+    const rx = (srcType === 'v8') ? isolateLog : traceFile
+    const pid = rx.exec(stacks)[1] 
+    args.src = join(folder, stacks)
+
+
     if (!args.title) {
       try {
-        const { title } = JSON.parse(fs.readFileSync(join(dir, 'meta.json')))
+        const { title } = JSON.parse(fs.readFileSync(join(folder, 'meta.json')))
         args.title = title
       } catch (e) {
         debug(e)
       }
     }
 
-    return stacksToFlamegraph(
-      fs.createReadStream(args.src),
-      args
-    )
+    args.mapFrames = args.mapFrames || phases[args.phase]
+    const tickStacks = (srcType === 'v8') ? 
+      v8LogToTickStacks(args.src) :
+      traceStacksToTickStacks(args.src)
+
+    const tree = tickStacksToTree(tickStacks, args.mapFrames)
+
+    await generateFlamegraph(args, {tree, pid, folder})
+
   } catch (e) {
     if (e.code === 'ENOENT') {
       throw Error('Invalid data path provided to --visualize-only (unable to access/does not exist)')
-    } else if (e.code === 'ENOTIDR') {
+    } else if (e.code === 'ENOTDIR') {
       throw Error('Invalid data path provided to --visualize-only (not a directory)')
     } else throw e
   }

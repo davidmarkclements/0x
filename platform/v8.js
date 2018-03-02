@@ -7,14 +7,14 @@ const split = require('split2')
 const through = require('through2')
 const { promisify } = require('util')
 const debug = require('debug')('0x')
+const v8LogToTickStacks = require('../lib/v8-log-to-tick-stacks')
 
 const {
   determineOutputDir,
   ensureDirExists,
   stacksToFlamegraphStream,
   tidy,
-  pathTo,
-  v8ProfFlamegraph
+  pathTo
 } = require('../lib/util')
 
 module.exports = v8
@@ -58,47 +58,27 @@ async function v8 (args, binary) {
   }
 
   if (!manual) {
-    status('Caught SIGINT, generating flamegraph')
+    status('Caught SIGINT, generating flamegraph\n')
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
     await new Promise((resolve) => proc.on('exit', resolve))
   } else {
-    status('Process exited, generating flamegraph')
+    status('Process exited, generating flamegraph\n')
   }
-  await v8ProfFlamegraph(args, {pid: proc.pid, folder})
+
+  debug('moving isolate file into folder')
+  const isolateLog = fs.readdirSync(args.workingDir).find(function (f) {
+    return new RegExp(`isolate-(0x[0-9A-Fa-f]{2,12})-${proc.pid}-v8.log`).test(f)
+  })
+
+  if (!isolateLog) throw Error('no isolate logfile found')
+
+  const isolateLogPath = path.join(folder, isolateLog)
+
+  fs.renameSync(path.join(args.workingDir, isolateLog), isolateLogPath)
 
   return {
-    stream : (delay > 0) ? 
-      pumpify(
-        fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-        split(),
-        filterBeforeDelay(delay),
-      ) : 
-      fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
+    stacks: v8LogToTickStacks(isolateLogPath),
     pid: proc.pid,
     folder: folder
   }
-}
-
-function filterBeforeDelay (delay) {
-  delay *= 1000 // ms -> ns
-  var start
-  var pastDelay = false
-
-  return through(function (line, enc, cb) {
-    var diff
-    line += ''
-    if (/cpu-clock:/.test(line)) {
-      if (!start) {
-        start = parseInt(parseFloat(line.match(/[0-9]+[0-9]+:/)[0], 10), 10)
-      } else {
-        diff = parseInt(parseFloat(line.match(/[0-9]+[0-9]+:/)[0], 10), 10) - start
-        pastDelay = (diff > delay)
-      }
-    }
-    if (pastDelay) {
-      cb(null, line + '\n')
-    } else {
-      cb()
-    }
-  })  
 }

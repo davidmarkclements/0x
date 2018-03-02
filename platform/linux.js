@@ -6,12 +6,12 @@ const pump = require('pump')
 const split = require('split2')
 const through = require('through2')
 const debug = require('debug')('0x')
+const traceStacksToTickStacks = require('../lib/trace-stacks-to-tick-stacks')
 const { promisify } = require('util')
 
 const {
   determineOutputDir,
   ensureDirExists,
-  stacksToFlamegraphStream,
   tidy,
   pathTo
 } = require('../lib/util')
@@ -32,9 +32,6 @@ function linux (args, sudo, binary, cb) {
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
   var kernelTracingDebug = args.kernelTracingDebug
-  var delay = args.delay || args.d
-  delay = parseInt(delay, 10)
-  if (isNaN(delay)) { delay = 0 }
 
   var proc = spawn('sudo', [
     '-E',
@@ -67,7 +64,7 @@ function linux (args, sudo, binary, cb) {
   var folder = determineOutputDir(args, proc)
   ensureDirExists(folder)
 
-  setTimeout(status, delay || 100, 'Profiling')
+  status('Profiling')
 
   if (process.stdin.isPaused()) {
     process.stdin.resume()
@@ -82,11 +79,11 @@ function linux (args, sudo, binary, cb) {
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      status('Caught SIGINT, generating flamegraph')
+      status('Caught SIGINT, generating flamegraph\n')
       proc.on('exit', generate)
     } else {
       debug('Process exited, generating flamegraph')
-      status('Process exited, generating flamegraph')
+      status('Process exited, generating flamegraph\n')
       generate()
     }
 
@@ -101,13 +98,7 @@ function linux (args, sudo, binary, cb) {
 
       stacks.on('exit', function () {
         cb(null, {
-          stream : (delay > 0) ? 
-            pumpify(
-              fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-              split(),
-              filterBeforeDelay(delay),
-            ) : 
-            fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
+          stacks: traceStacksToTickStacks(folder + '/stacks.' + proc.pid + '.out'),
           pid: proc.pid,
           folder: folder
         })
@@ -118,28 +109,4 @@ function linux (args, sudo, binary, cb) {
       stdio: 'inherit'
     })
   }
-}
-
-
-function filterBeforeDelay (delay) {
-  var start
-  var pastDelay
-
-  return through(function (line, enc, cb) {
-    var diff
-    line += ''
-    if (/cpu-clock:/.test(line)) {
-      if (!start) {
-        start = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10)
-      } else {
-        diff = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10) - start
-        pastDelay = (diff > delay)
-      }
-    }
-    if (pastDelay) {
-      cb(null, line + '\n')
-    } else {
-      cb()
-    }
-  })
 }

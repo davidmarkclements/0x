@@ -11,7 +11,6 @@ const ui = require('./cmp/ui')(bel)
 module.exports = function (stacks, opts, done) {
   opts = opts || {}
   const min = opts.min || 950
-  const bg = 'white'
   const exclude = ['v8']
   var height = (depth(stacks) * 18) + 10 + 2
   height = height < min ? min : height

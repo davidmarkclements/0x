@@ -66,7 +66,7 @@ Once we're ready to generate a flamegraph we send a SIGINT.
 The simplest way to do this is pressing CTRL+C.
 
 When `0x` catches the SIGINT, it process the stacks and
-generates a profile folder (`<pid>.flamegraph`), containing `flamegraph.html`
+generates a profile folder (`<pid>.0x`), containing `flamegraph.html`
 
 
 ## Docker
@@ -115,7 +115,7 @@ Alternatively if we transfer the entire folder (containing the stacks file),
 we can pass the folder to `--visualize-only`:
 
 ```sh
-0x --visualize-only 7777.flamegraph # create a flamegraph.html in 7777.flamegraph
+0x --visualize-only 7777.0x # create a flamegraph.html in 7777.0x
 ```
 
 ## Memory Issues
@@ -189,7 +189,7 @@ form with possible variables being `{pid}`, `{timestamp}`, `{name}`
 (based on the `--name` flag) and `{outputDir}`(variables
 must be specified without whitespace, e.g. `{ pid }` is not supported).
 
-Default: `{pid}.flamegraph`
+Default: `{pid}.0x`
 
 ### --output-html | -F
 
@@ -361,20 +361,20 @@ Default: false
 Prefixes the current timestamp to the Profile Folder's name minimizing collisions
 in containerized environments
 
-Example: `1516395452110-3866.flamegraph`
+Example: `1516395452110-3866.0x`
 
 ## The Profile Folder
 
 By default, a profile folder will be created and named after the PID, e.g.
-`3866.flamegraph` (we can set this name manually using the `--output-dir` flag).
+`3866.0x` (we can set this name manually using the `--output-dir` flag).
 
 The Profile Folder can contain the following files
 
-* stacks.3866.out - the traced stacks
+
 * flamegraph.html - the interactive flamegraph
-* stacks.3866.json - a JSON tree generated from the stacks, not present by default, enable with `--json-stacks`
-* isolate-0x103000600-3866-v8.log - a v8 profiling log file 
-* isolate-0x103000600-3866-v8.log.json - v8 profiling log file processed into JSON using v8s internal tick processor
+* isolate-0x103000600-3866-v8.log - a v8 profiling log file
+* stacks.3866.json - with `--json-stacks` flag: a JSON tree representing the captured stacks
+* stacks.3866.out - in `--kernel-tracing` mode: the traced stacks 
 
 The is helpful, because there's other things you can do with
 stacks output. For instance, checkout [cpuprofilify](http://npmjs.com/cpuprofilify) and [traceviewify](http://npmjs.com/traceviewify).

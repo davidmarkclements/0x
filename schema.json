@@ -74,13 +74,7 @@
     "name": {
       "type": "string"
     },
-    "delay": {
-      "type": "number"
-    },
     "phase": {
-      "type": "number"
-    },
-    "d": {
       "type": "number"
     },
     "visualize-only": {

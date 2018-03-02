@@ -13,9 +13,6 @@
                           use cases.
                           Default: 2
 
-  -d | --delay            Delay before tracing begins.
-                          Default: 0
-
   -q | --quiet            Only output flamegraph URI, and fatal errors.
                           Default: false
 
