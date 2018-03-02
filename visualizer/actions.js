@@ -7,7 +7,7 @@ module.exports = createActions
 function createActions ({flamegraph, svg, state}, emit) {
 
   const initialTypeFiltersBgs = Object.assign({}, state.typeFilters.bgs)
-
+  window.state = state
   return {
     search, control, zoom, typeFilters
   }
@@ -65,8 +65,13 @@ function createActions ({flamegraph, svg, state}, emit) {
 
   function typeFilters () {
     return ({checked, name}) => {
-      if (checked) flamegraph.typeShow(name)
-      else flamegraph.typeHide(name)
+      if (checked) {
+        flamegraph.typeShow(name)
+        state.typeFilters.exclude.delete(name)
+      } else {
+        flamegraph.typeHide(name)
+        state.typeFilters.exclude.add(name)
+      } 
     }
   }
 
@@ -92,15 +97,15 @@ function createActions ({flamegraph, svg, state}, emit) {
         flamegraph.colors.core.s / 100 * 1.2,
         flamegraph.colors.core.l / 100 * 1.2
       )})`, 
-      nativeJS: `rgb(${hsl(
-        flamegraph.colors.nativeJS.h,
-        flamegraph.colors.nativeJS.s / 100 * 1.2,
-        flamegraph.colors.nativeJS.l / 100 * 1.2
+      native: `rgb(${hsl(
+        flamegraph.colors.native.h,
+        flamegraph.colors.native.s / 100 * 1.2,
+        flamegraph.colors.native.l / 100 * 1.2
       )})`, 
-      nativeC: `rgb(${hsl(
-        flamegraph.colors.nativeC.h,
-        flamegraph.colors.nativeC.s / 100 * 1.2,
-        flamegraph.colors.nativeC.l / 100 * 1.2
+      cpp: `rgb(${hsl(
+        flamegraph.colors.cpp.h,
+        flamegraph.colors.cpp.s / 100 * 1.2,
+        flamegraph.colors.cpp.l / 100 * 1.2
       )})`, 
       regexp: `rgb(${hsl(
         flamegraph.colors.regexp.h,

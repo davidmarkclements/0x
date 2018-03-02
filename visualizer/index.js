@@ -11,17 +11,19 @@ const ui = require('./cmp/ui')(bel)
 module.exports = function (stacks, opts, done) {
   opts = opts || {}
   const min = opts.min || 950
-  const exclude = ['v8']
+  const exclude = new Set(['native', 'cpp', 'regexp', 'v8'])
   var height = (depth(stacks) * 18) + 10 + 2
   height = height < min ? min : height
   const width = innerWidth * 0.85
+
+  if (!opts.kernelTracing) opts.categorizer = v8cats
 
   const flamegraph = fg(opts)
     .width(width)
     .height(height)
     .tiers(false)
   
-  exclude.forEach(flamegraph.typeHide)
+  Array.from(exclude).forEach(flamegraph.typeHide)
 
   const chart = graph()
   d3.select(chart).datum(stacks).call(flamegraph)
@@ -47,8 +49,8 @@ module.exports = function (stacks, opts, done) {
         app: '#fff',
         deps: '#fff',
         core: '#fff',
-        nativeJS: '#fff',
-        nativeC: '#fff',
+        native: '#fff',
+        cpp: '#fff',
         regexp: '#fff',
         v8: '#fff'
       }, 
@@ -73,4 +75,25 @@ function depth (stacks) {
     if (d.depth > deepest) deepest = d.depth
   })
   return deepest + 1
+}
+
+
+function v8cats (child) {
+  var name = child.name
+  if (!/.js/.test(name)) {
+    switch (true) {
+      case /\[CODE:RegExp\]/.test(name): return {type: 'regexp'}
+      case /\[CODE:.*\]/.test(name): return {type: 'v8'}
+      case /\.$/.test(name): return {type: 'core'}
+      case /\[CPP\]/.test(name): return {type: 'cpp'}
+      default: return {type: 'v8'}
+    }
+  }
+
+  switch (true) {
+    case / native /.test(name): return {type: 'native'}
+    case (name.indexOf('/') === -1 || /internal\//.test(name) && !/ \//.test(name)): return {type: 'core'}
+    case /node_modules/.test(name): return {type: 'deps'}
+    default: return {type: 'app'}
+  }
 }

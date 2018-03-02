@@ -18,7 +18,9 @@
 * ui: removed langs button
 * ui: removed theme button
 * ui: style changes (adopted tachyons css)
-* altered mapFrames API (frames is now an array of objects, not strings)
+* altered mapFrames API (frames is now an array of objects, not strings)  
+* ui: rename/reoganize type labels
+* ui: tier coloring improvements
 
 
 # v3.4.1

@@ -28,7 +28,7 @@
     "browserify": "^13.0.0",
     "concat-stream": "^1.5.2",
     "d3": "^3.5.16",
-    "d3-fg": "^1.0.0",
+    "d3-fg": "^2.0.0",
     "debug": "^2.2.0",
     "end-of-stream": "^1.1.0",
     "hsl-to-rgb-for-reals": "^1.1.0",

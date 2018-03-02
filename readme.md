@@ -281,10 +281,10 @@ Default: false
 
 Exclude tiers or langs, comma seperated list
 
-Options: v8, regexp, nativeC, nativeJS, core, deps, app, js, c
+Options: v8, regexp, cpp, native, core, deps, app, js, c
 
 Examples:
-`0x -x v8,nativeC,core my-app.js`
+`0x -x v8,cpp,core my-app.js`
 `0x -x c my-app.js`
 
 Default: v8
@@ -294,7 +294,7 @@ Default: v8
 Include tiers, Overwrites exclude. Really only useful
 for including the v8 tier (which is excluded by default).
 
-Options: v8, regexp, nativeC, nativeJS, core, deps, app, js, c
+Options: v8, regexp, cpp, native, core, deps, app, js, c
 
 Example: `0x --include v8 my-app.js`
 

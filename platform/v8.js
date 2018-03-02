@@ -7,6 +7,7 @@ const split = require('split2')
 const through = require('through2')
 const { promisify } = require('util')
 const debug = require('debug')('0x')
+
 const v8LogToTickStacks = require('../lib/v8-log-to-tick-stacks')
 
 const {
