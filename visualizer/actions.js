@@ -36,9 +36,9 @@ function createActions ({flamegraph, svg, state}, emit) {
           flamegraph.search('\\*', 'yellow')
           return
         case 'not-optimized':
-          state.control.notOptimized = !state.control.notOptimized
+          state.control.unoptimized = !state.control.unoptimized
           emit(state)
-          if (!state.control.notOptimized) return flamegraph.clear('lime')
+          if (!state.control.unoptimized) return flamegraph.clear('lime')
           flamegraph.search('~', 'lime')
           return
       }

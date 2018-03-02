@@ -7,11 +7,11 @@ const button = (render) => ({label}, action) => render `
 module.exports = (render) => (state, action) => {
   const tiers = button(render)({label: `${state.tiers ? '–' : '+'} Tiers`}, () => action({type: 'tiers'}))
   const optimized = button(render)({label: `${state.optimized ? '–' : '+'}  Optimized`}, () => action({type: 'optimized'}))
-  const notOptimized = button(render)({label: `${state.notOptimized ? '–' : '+'}  Not Optimized`}, () => action({type: 'not-optimized'}))
+  const unoptimized = button(render)({label: `${state.unoptimized ? '–' : '+'}  Unoptimized`}, () => action({type: 'not-optimized'}))
 
   return render `
     <div style="position: absolute; bottom: 0px; left: 5%; margin-left: -35px; min-height: 5%;">
-      ${tiers}${optimized}${notOptimized}
+      ${tiers}${optimized}${unoptimized}
     </div>
   `
 }

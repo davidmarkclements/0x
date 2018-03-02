@@ -42,7 +42,7 @@ module.exports = function (stacks, opts, done) {
     control: {
       tiers: false,
       optimized: false,
-      notOptimized: false
+      unoptimized: false
     },
     typeFilters: {
       bgs: {
