@@ -18,7 +18,7 @@
 * ui: removed langs button
 * ui: removed theme button
 * ui: style changes (adopted tachyons css)
-
+* altered mapFrames API (frames is now an array of objects, not strings)
 
 
 # v3.4.1
