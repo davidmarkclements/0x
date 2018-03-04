@@ -58,13 +58,7 @@ async function v8 (args, binary) {
     process.stdin.write('\u001b[?25l')
   }
 
-  if (!manual) {
-    status('Caught SIGINT, generating flamegraph\n')
-    try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
-    await new Promise((resolve) => proc.on('exit', resolve))
-  } else {
-    status('Process exited, generating flamegraph\n')
-  }
+  status('Process exited, generating flamegraph\n')
 
   debug('moving isolate file into folder')
   const isolateLog = fs.readdirSync(args.workingDir).find(function (f) {

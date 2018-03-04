@@ -89,8 +89,7 @@ function validate (args) {
     }
   )
   if (valid(args)) return
-
-  const [{keyword, dataPath, params, message}] = ajv.errors
+  const [{keyword, dataPath, params, message}] = valid.errors
   if (keyword === 'type') {
 
     const flag = dataPath.substr(

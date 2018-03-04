@@ -11,7 +11,7 @@ const ui = require('./cmp/ui')(bel)
 module.exports = function (stacks, opts, done) {
   opts = opts || {}
   const min = opts.min || 950
-  const exclude = new Set(['native', 'cpp', 'regexp', 'v8'])
+  const exclude = new Set(['cpp', 'regexp', 'v8'])
   var height = (depth(stacks) * 18) + 10 + 2
   height = height < min ? min : height
   const width = innerWidth * 0.85
@@ -86,6 +86,10 @@ function v8cats (child) {
       case /\[CODE:.*\]/.test(name): return {type: 'v8'}
       case /\.$/.test(name): return {type: 'core'}
       case /\[CPP\]/.test(name): return {type: 'cpp'}
+      case /\[eval\]/.test(name): return {type: 'native'} // unless we create an eval checkbox
+                                                          // "native" is the next best label since
+                                                          // you cannot tell where the eval comes
+                                                          // from (app, deps, core)
       default: return {type: 'v8'}
     }
   }
