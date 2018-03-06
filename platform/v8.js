@@ -3,6 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const spawn = require('child_process').spawn
 const pumpify = require('pumpify')
+const pump = require('pump')
 const split = require('split2')
 const through = require('through2')
 const { promisify } = require('util')
@@ -20,23 +21,24 @@ const {
 
 module.exports = v8
 
+
+
 async function v8 (args, binary) {
   const { status } = args
 
   var node = !binary || binary === 'node' ? await pathTo('node') : binary
-  var delay = args.delay
-  delay = parseInt(delay, 10)
-  if (isNaN(delay)) { delay = 0 }
 
   var proc = spawn(node, [
-    '--prof', 
+    '--prof',
     `--logfile=%p-v8.log`,
+    '--print-opt-source',
+    '-r', path.join(__dirname, '..', 'lib', 'instrument'),
     '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
   ].filter(Boolean).concat(args.argv), {
-    stdio: ['ignore', 'inherit', 'inherit']
+    stdio: ['ignore', 'pipe', 'inherit']
   })
-  // timeout merely for effect
-  setTimeout(status, delay || 0, 'Profiling')
+
+  const inlined = collectInliningInfo(proc)
   
   const { code, manual } = await Promise.race([
     new Promise((resolve) => process.once('SIGINT', () => resolve({code: 0, manual: true}))),
@@ -73,7 +75,34 @@ async function v8 (args, binary) {
 
   return {
     stacks: v8LogToTickStacks(isolateLogPath),
+    inlined: inlined,
     pid: proc.pid,
     folder: folder
   }
+}
+
+
+function collectInliningInfo (sp) {
+  const inlined = {}
+  var root
+  pump(sp.stdout, split(), through((s, _, cb) => {
+    s += '\n'
+    if (s[0] === '\u0001') { // stdout from user land
+      process.stdout.write(s)
+      return cb()
+    } 
+    //trace data
+    if (/^(--- FUNCTION SOURCE |INLINE )/.test(s)) {
+      const [match, file, fn = '(anonymous)', id, ix, pos] = /\((.+):(.+)?\) id\{(\d+),(-?\d+)\} start\{(\d+)}/.exec(s) || [false]
+      if (match === false) return cb()
+      if (ix === '-1') root = {file, fn, id, ix, pos, key: `${fn} ${file}`}
+      else {
+        const key = `${fn} ${file}`
+        inlined[key] = inlined[key] || []
+        inlined[key].push({file, fn, id, ix, pos, caller: root})
+      }
+    }
+    cb()
+  }))
+  return inlined
 }

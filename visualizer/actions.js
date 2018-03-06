@@ -33,13 +33,13 @@ function createActions ({flamegraph, svg, state}, emit) {
           state.control.optimized = !state.control.optimized
           emit(state)
           if (!state.control.optimized) return flamegraph.clear('yellow')
-          flamegraph.search('\\*', 'yellow')
+          flamegraph.search('^\\*', 'yellow')
           return
         case 'not-optimized':
           state.control.unoptimized = !state.control.unoptimized
           emit(state)
           if (!state.control.unoptimized) return flamegraph.clear('lime')
-          flamegraph.search('~', 'lime')
+          flamegraph.search('^~', 'lime')
           return
       }
     }
@@ -102,6 +102,11 @@ function createActions ({flamegraph, svg, state}, emit) {
         flamegraph.colors.native.s / 100 * 1.2,
         flamegraph.colors.native.l / 100 * 1.2
       )})`, 
+      'pre-inlined': `rgb(${hsl(
+        flamegraph.colors['pre-inlined'].h,
+        flamegraph.colors['pre-inlined'].s / 100 * 1.2,
+        flamegraph.colors['pre-inlined'].l / 100 * 1.2
+      )})`,  
       cpp: `rgb(${hsl(
         flamegraph.colors.cpp.h,
         flamegraph.colors.cpp.s / 100 * 1.2,

@@ -54,10 +54,9 @@ async function zeroEks (args, binary) {
   
   args.mapFrames = args.mapFrames || phases[args.phase]
 
-  // kernel tracing returns a stream, default mode supplies json directly
-  var { stacks, pid, folder } = await startProcessAndCollectTraceData(args, binary)
-
-  const tree = tickStacksToTree(stacks, args.mapFrames)
+  var { stacks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary)
+  args.inlined = inlined
+  const tree = tickStacksToTree(stacks, args.mapFrames, args.inlined)
 
   if (jsonStacks === true) {
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
@@ -141,7 +140,6 @@ async function visualize (args) {
     const pid = rx.exec(stacks)[1] 
     args.src = join(folder, stacks)
 
-
     if (!args.title) {
       try {
         const { title } = JSON.parse(fs.readFileSync(join(folder, 'meta.json')))
@@ -156,7 +154,14 @@ async function visualize (args) {
       v8LogToTickStacks(args.src) :
       traceStacksToTickStacks(args.src)
 
-    const tree = tickStacksToTree(tickStacks, args.mapFrames)
+    var inlined
+    try {
+      inlined = JSON.parse(fs.readFileSync(join(folder, 'meta.json'))).inlined
+    } catch (e) {
+      debug(e)
+    }      
+
+    const tree = tickStacksToTree(tickStacks, args.mapFrames, inlined)
 
     await generateFlamegraph(args, {tree, pid, folder})
 
