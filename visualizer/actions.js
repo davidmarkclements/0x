@@ -34,6 +34,7 @@ function createActions ({flamegraph, state}, emit) {
         case 'view':
           state.control.merged = !state.control.merged
           state.typeFilters.showPreInlined = !state.control.merged
+          state.key.showOptUnopt = !state.control.merged
           emit(state)
           if (state.control.merged) flamegraph.renderTree(state.trees.merged)
           else flamegraph.renderTree(state.trees.unmerged)

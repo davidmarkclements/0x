@@ -10,7 +10,8 @@ module.exports = ({colors, trees, exclude, merged = false}) => ({
       colorHash({top: 1, name: 'luke-warm'}, 1, 100),
       colorHash({top: 3, name: 'warm'}, 1, 100),
       colorHash({top: 10, name: 'hot'}, 1, 100)
-    ]
+    ],
+    showOptUnopt: !merged
   },
   control: {
     tiers: false,
