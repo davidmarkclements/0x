@@ -33,8 +33,8 @@ function createActions ({flamegraph, state}, emit) {
           return
         case 'view':
           state.control.merged = !state.control.merged
-          state.typeFilters.showPreInlined = !state.control.merged
-          state.key.showOptUnopt = !state.control.merged
+          state.typeFilters.enablePreInlined = !state.control.merged
+          state.key.enableOptUnopt = !state.control.merged
           emit(state)
           if (state.control.merged) flamegraph.renderTree(state.trees.merged)
           else flamegraph.renderTree(state.trees.unmerged)
@@ -74,14 +74,16 @@ function createActions ({flamegraph, state}, emit) {
   }
 
   function typeFilters () {
-    return ({checked, name}) => {
+    return ({name}) => {
+      const checked = state.typeFilters.exclude.has(name)
       if (checked) {
         flamegraph.typeShow(name)
         state.typeFilters.exclude.delete(name)
       } else {
         flamegraph.typeHide(name)
         state.typeFilters.exclude.add(name)
-      } 
+      }
+      emit(state)
     }
   }
 

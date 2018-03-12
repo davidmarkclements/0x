@@ -17,9 +17,11 @@ module.exports = (render) => ({state, actions}) => {
     <div>
       ${search(actions.search())}
       ${zoom(actions.zoom())}
-      ${controls(state.control, actions.control())}
       ${key(state.key)}
-      ${typeFilters(state.typeFilters, actions.typeFilters())}
+      <div class='absolute bottom left w-100 h8 tc'>
+        ${controls(state.control, actions.control())}
+        ${typeFilters(state.typeFilters, actions.typeFilters())}
+      </div>
     </div>
   `
 }

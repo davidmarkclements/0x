@@ -11,7 +11,7 @@ module.exports = ({colors, trees, exclude, merged = false}) => ({
       colorHash({top: 3, name: 'warm'}, 1, 100),
       colorHash({top: 10, name: 'hot'}, 1, 100)
     ],
-    showOptUnopt: !merged
+    enableOptUnopt: !merged
   },
   control: {
     tiers: false,
@@ -20,8 +20,9 @@ module.exports = ({colors, trees, exclude, merged = false}) => ({
     merged: merged
   },
   typeFilters: {
-    showPreInlined: !merged,
+    enablePreInlined: !merged,
     unhighlighted: {
+      'pre-inlined': '#fff',
       app: '#fff',
       deps: '#fff',
       core: '#fff',
@@ -31,6 +32,11 @@ module.exports = ({colors, trees, exclude, merged = false}) => ({
       v8: '#fff'
     },
     highlighted: {
+      'pre-inlined': `rgb(${hsl(
+        colors['pre-inlined'].h,
+        colors['pre-inlined'].s / 100 * 1.2,
+        colors['pre-inlined'].l / 100 * 1.2
+      )})`, 
       app: `rgb(${hsl(
         colors.app.h,
         colors.app.s / 100 * 1.2,
@@ -50,11 +56,6 @@ module.exports = ({colors, trees, exclude, merged = false}) => ({
         colors.native.h,
         colors.native.s / 100 * 1.2,
         colors.native.l / 100 * 1.2
-      )})`, 
-      'pre-inlined': `rgb(${hsl(
-        colors['pre-inlined'].h,
-        colors['pre-inlined'].s / 100 * 1.2,
-        colors['pre-inlined'].l / 100 * 1.2
       )})`,  
       cpp: `rgb(${hsl(
         colors.cpp.h,
