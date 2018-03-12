@@ -6,7 +6,7 @@ const pump = require('pump')
 const split = require('split2')
 const through = require('through2')
 const debug = require('debug')('0x')
-const traceStacksToTickStacks = require('../lib/trace-stacks-to-tick-stacks')
+const traceStacksToTicks = require('../lib/trace-stacks-to-ticks')
 const { promisify } = require('util')
 
 const {
@@ -98,7 +98,7 @@ function linux (args, sudo, binary, cb) {
 
       stacks.on('exit', function () {
         cb(null, {
-          stacks: traceStacksToTickStacks(folder + '/stacks.' + proc.pid + '.out'),
+          ticks: traceStacksToTicks(folder + '/stacks.' + proc.pid + '.out'),
           pid: proc.pid,
           folder: folder
         })

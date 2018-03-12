@@ -8,9 +8,8 @@ const { join, isAbsolute, relative, dirname } = require('path')
 const fs = require('fs')
 const pump = require('pump')
 const ajv = require('ajv')()
-const traceStacksToTickStacks = require('./lib/trace-stacks-to-tick-stacks')
-const v8LogToTickStacks = require('./lib/v8-log-to-tick-stacks')
-const tickStacksToTree = require('./lib/tick-stacks-to-tree')
+const traceStacksToTicks = require('./lib/trace-stacks-to-ticks')
+const v8LogToTicks = require('./lib/v8-log-to-ticks')
 const schema = require('./schema.json')
 const platform = process.platform
 const {
@@ -36,7 +35,7 @@ async function startProcessAndCollectTraceData (args, binary) {
     default: return sun(args, await isSudo(), binary)
   }
 }
-
+const ticksToTree = require('./lib/ticks-to-tree')
 async function zeroEks (args, binary) {
   args.name = args.name || 'flamegraph'
   args.log = args.log || noop
@@ -54,11 +53,11 @@ async function zeroEks (args, binary) {
   
   args.mapFrames = args.mapFrames || phases[args.phase]
 
-  var { stacks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary)
+  var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary)
   args.inlined = inlined
-  const tree = tickStacksToTree(stacks, args.mapFrames, args.inlined)
 
   if (jsonStacks === true) {
+    const tree = await ticksToTree(ticks, args.mapFrames, inlined)
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
   }
 
@@ -73,7 +72,7 @@ async function zeroEks (args, binary) {
     return
   }
 
-  await generateFlamegraph(args, {tree, pid, folder})
+  await generateFlamegraph(args, {ticks, inlined, pid, folder})
 }
 
 module.exports = zeroEks
@@ -123,7 +122,7 @@ async function generateFlamegraph (args, opts) {
 
 async function visualize (args) {
   try { 
-    const { visualizeOnly } = args
+    const { visualizeOnly, jsonStacks } = args
     const folder = isAbsolute(visualizeOnly) ? 
       relative(args.workingDir, visualizeOnly) :
       visualizeOnly
@@ -137,7 +136,7 @@ async function visualize (args) {
 
     const srcType = isolateLog.test(stacks) ? 'v8' : 'kernel-tracing'
     const rx = (srcType === 'v8') ? isolateLog : traceFile
-    const pid = rx.exec(stacks)[1] 
+    const pid = rx.exec(stacks)[srcType === 'v8' ? 2 : 1] 
     args.src = join(folder, stacks)
 
     if (!args.title) {
@@ -150,20 +149,23 @@ async function visualize (args) {
     }
 
     args.mapFrames = args.mapFrames || phases[args.phase]
-    const tickStacks = (srcType === 'v8') ? 
-      v8LogToTickStacks(args.src) :
-      traceStacksToTickStacks(args.src)
+    const ticks = (srcType === 'v8') ? 
+      await v8LogToTicks(args.src) :
+      traceStacksToTicks(args.src)
 
     var inlined
     try {
       inlined = JSON.parse(fs.readFileSync(join(folder, 'meta.json'))).inlined
     } catch (e) {
       debug(e)
-    }      
+    }
 
-    const tree = tickStacksToTree(tickStacks, args.mapFrames, inlined)
+    if (jsonStacks === true) {
+      const tree = await ticksToTree(ticks, args.mapFrames, inlined)
+      fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
+    }
 
-    await generateFlamegraph(args, {tree, pid, folder})
+    await generateFlamegraph(args, {ticks, inlined, pid, folder})
 
   } catch (e) {
     if (e.code === 'ENOENT') {

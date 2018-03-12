@@ -6,7 +6,7 @@ const pump = require('pump')
 const split = require('split2')
 const sym = require('perf-sym')
 const debug = require('debug')('0x')
-const traceStacksToTickStacks = require('../lib/trace-stacks-to-tick-stacks')
+const traceStacksToTicks = require('../lib/trace-stacks-to-ticks')
 const { promisify } = require('util')
 const {
   determineOutputDir,
@@ -146,7 +146,7 @@ function sun (args, sudo, binary, cb) {
         (err) => {
           if (err) return void cb(err)
           cb(null, {
-            stacks: traceStacksToTickStacks(folder + '/stacks.' + proc.pid + '.out'),
+            ticks: traceStacksToTicks(folder + '/stacks.' + proc.pid + '.out'),
             pid: proc.pid, 
             folder: folder
           })

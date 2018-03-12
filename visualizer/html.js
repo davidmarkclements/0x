@@ -18,7 +18,10 @@ function html (opts) {
     <head>
       <meta charset="utf-8">
       <style> ${tachyons} </style>
-      <style> rect:hover {opacity: 0.9} </style>
+      <style>
+        button:focus { outline:0 !important; } 
+        rect:hover {opacity: 0.9} 
+      </style>
     </head>
     <body class='m0 bg-white sans-serif'>
       <script> ${script} </script>

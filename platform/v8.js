@@ -9,19 +9,16 @@ const through = require('through2')
 const { promisify } = require('util')
 const debug = require('debug')('0x')
 
-const v8LogToTickStacks = require('../lib/v8-log-to-tick-stacks')
+const v8LogToTicks = require('../lib/v8-log-to-ticks')
 
 const {
   determineOutputDir,
   ensureDirExists,
-  stacksToFlamegraphStream,
   tidy,
   pathTo
 } = require('../lib/util')
 
 module.exports = v8
-
-
 
 async function v8 (args, binary) {
   const { status } = args
@@ -74,7 +71,7 @@ async function v8 (args, binary) {
   fs.renameSync(path.join(args.workingDir, isolateLog), isolateLogPath)
 
   return {
-    stacks: v8LogToTickStacks(isolateLogPath),
+    ticks: await v8LogToTicks(isolateLogPath),
     inlined: inlined,
     pid: proc.pid,
     folder: folder

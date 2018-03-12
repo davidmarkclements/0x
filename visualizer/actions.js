@@ -4,10 +4,11 @@ const hsl = require('hsl-to-rgb-for-reals')
 
 module.exports = createActions
 
-function createActions ({flamegraph, svg, state}, emit) {
+function createActions ({flamegraph, state}, emit) {
+  const { colors } = flamegraph
 
-  const initialTypeFiltersBgs = Object.assign({}, state.typeFilters.bgs)
-  window.state = state
+  state.typeFilters.bgs = state.typeFilters.unhighlighted
+
   return {
     search, control, zoom, typeFilters
   }
@@ -20,14 +21,22 @@ function createActions ({flamegraph, svg, state}, emit) {
   }
 
   function control () {
-
     return ({type}) => {
       switch (type) {
         case 'tiers':
           state.control.tiers = !state.control.tiers
           flamegraph.tiers(state.control.tiers)
-          _typeFiltersColoring(state.control.tiers)
+          state.typeFilters.bgs = state.control.tiers ? 
+            state.typeFilters.highlighted : 
+            state.typeFilters.unhighlighted
           emit(state)
+          return
+        case 'view':
+          state.control.merged = !state.control.merged
+          state.typeFilters.showPreInlined = !state.control.merged
+          emit(state)
+          if (state.control.merged) flamegraph.renderTree(state.trees.merged)
+          else flamegraph.renderTree(state.trees.unmerged)
           return
         case 'optimized':
           state.control.optimized = !state.control.optimized
@@ -52,12 +61,12 @@ function createActions ({flamegraph, svg, state}, emit) {
         case 'in': 
           zoomLevel += 0.3
           if (zoomLevel > 1) zoomLevel = 1
-          svg.style.transform = 'scale(' + zoomLevel + ')'
+          flamegraph.setGraphZoom(zoomLevel)
           return
         case 'out':
           zoomLevel -= 0.3
           if (zoomLevel < 0.1) zoomLevel = 0.1
-          svg.style.transform = 'scale(' + zoomLevel + ')'
+          flamegraph.setGraphZoom(zoomLevel)
           return
       }
     }
@@ -74,57 +83,5 @@ function createActions ({flamegraph, svg, state}, emit) {
       } 
     }
   }
-
-  function _typeFiltersColoring (tierModeEnabled) {
-    if (tierModeEnabled === false) {
-      state.typeFilters.bgs = initialTypeFiltersBgs
-      return
-    }
-
-    state.typeFilters.bgs = {
-      app: `rgb(${hsl(
-        flamegraph.colors.app.h,
-        flamegraph.colors.app.s / 100 * 1.2,
-        flamegraph.colors.app.l / 100 * 1.2
-      )})`, 
-      deps: `rgb(${hsl(
-        flamegraph.colors.deps.h,
-        flamegraph.colors.deps.s / 100 * 1.2,
-        flamegraph.colors.deps.l / 100 * 1.2
-      )})`, 
-      core: `rgb(${hsl(
-        flamegraph.colors.core.h,
-        flamegraph.colors.core.s / 100 * 1.2,
-        flamegraph.colors.core.l / 100 * 1.2
-      )})`, 
-      native: `rgb(${hsl(
-        flamegraph.colors.native.h,
-        flamegraph.colors.native.s / 100 * 1.2,
-        flamegraph.colors.native.l / 100 * 1.2
-      )})`, 
-      'pre-inlined': `rgb(${hsl(
-        flamegraph.colors['pre-inlined'].h,
-        flamegraph.colors['pre-inlined'].s / 100 * 1.2,
-        flamegraph.colors['pre-inlined'].l / 100 * 1.2
-      )})`,  
-      cpp: `rgb(${hsl(
-        flamegraph.colors.cpp.h,
-        flamegraph.colors.cpp.s / 100 * 1.2,
-        flamegraph.colors.cpp.l / 100 * 1.2
-      )})`, 
-      regexp: `rgb(${hsl(
-        flamegraph.colors.regexp.h,
-        flamegraph.colors.regexp.s / 100 * 1.2,
-        flamegraph.colors.regexp.l / 100 * 1.2
-      )})`, 
-      v8: `rgb(${hsl(
-        flamegraph.colors.v8.h,
-        flamegraph.colors.v8.s / 100 * 1.2,
-        flamegraph.colors.v8.l / 100 * 1.2
-     )})` 
-    }
-
-  }
-
 
 }

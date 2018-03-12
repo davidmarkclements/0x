@@ -11,19 +11,19 @@ const createHoc = (render) => ({bg, exclude, name}, action) => {
   `
 }  
 
-module.exports = (render) => ({bgs, exclude}, action) => {
+module.exports = (render) => ({bgs, exclude, showPreInlined}, action) => {
   const hoc = createHoc(render)
+  const preInlined = showPreInlined ? hoc({bg: bgs['pre-inlined'], exclude, name: 'pre-inlined'}, action) : ''
   const app = hoc({bg: bgs.app, exclude, name: 'app'}, action)
   const deps = hoc({bg: bgs.deps, exclude, name: 'deps'}, action)
   const core = hoc({bg: bgs.core, exclude, name: 'core'}, action)
-  const preInlined = hoc({bg: bgs['pre-inlined'], exclude, name: 'pre-inlined'}, action)
   const native = hoc({bg: bgs.native, exclude, name: 'native'}, action)
   const regexp = hoc({bg: bgs.regexp, exclude, name: 'regexp'}, action)
   const v8 = hoc({bg: bgs.v8, exclude, name: 'v8'}, action)
   const cpp = hoc({bg: bgs.cpp, exclude, name: 'cpp'}, action)
   return render `
     <div class='absolute bottom-1 right-2 h1 pr5 f5 black'>
-      ${app}${deps}${core}${native}${preInlined}${regexp}${v8}${cpp}
+      ${preInlined}${app}${deps}${core}${native}${regexp}${v8}${cpp}
     </div>
   `
 }
