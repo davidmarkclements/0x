@@ -43,13 +43,13 @@ function createActions ({flamegraph, state}, emit) {
           state.control.optimized = !state.control.optimized
           emit(state)
           if (!state.control.optimized) return flamegraph.clear('yellow')
-          flamegraph.search('^\\*', 'yellow')
+          flamegraph.search(RegExp('^\\*'), 'yellow')
           return
         case 'not-optimized':
           state.control.unoptimized = !state.control.unoptimized
           emit(state)
           if (!state.control.unoptimized) return flamegraph.clear('lime')
-          flamegraph.search('^~', 'lime')
+          flamegraph.search(/^~/, 'lime')
           return
       }
     }

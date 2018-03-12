@@ -1,6 +1,6 @@
 'use strict'
 const fg = require('d3-fg')
-const render = require('bel')
+const render = require('nanohtml')
 const morphdom = require('morphdom')
 const createActions = require('./actions')
 const createState = require('./state')
