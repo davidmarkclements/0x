@@ -10,16 +10,16 @@ const pump = require('pump')
 const ajv = require('ajv')()
 const traceStacksToTicks = require('./lib/trace-stacks-to-ticks')
 const v8LogToTicks = require('./lib/v8-log-to-ticks')
+const ticksToTree = require('./lib/ticks-to-tree')
+const phases = require('./lib/phases')
+const render = require('./lib/render')
 const schema = require('./schema.json')
+
 const platform = process.platform
 const {
   isSudo,
-  silence,
-  render,
-  createBundle,
   tidy,
-  noop,
-  phases
+  noop
 } = require('./lib/util')
 
 async function startProcessAndCollectTraceData (args, binary) {
@@ -35,7 +35,7 @@ async function startProcessAndCollectTraceData (args, binary) {
     default: return sun(args, await isSudo(), binary)
   }
 }
-const ticksToTree = require('./lib/ticks-to-tree')
+
 async function zeroEks (args, binary) {
   args.name = args.name || 'flamegraph'
   args.log = args.log || noop

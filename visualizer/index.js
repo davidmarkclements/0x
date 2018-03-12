@@ -9,8 +9,6 @@ const title = require('./cmp/title')(render)
 const ui = require('./cmp/ui')(render)
 
 module.exports = function (trees, opts) {
-  window.trees = trees
-
   opts = opts || {}
   const { kernelTracing } = opts
   const exclude = new Set(['cpp', 'regexp', 'v8', 'native'])

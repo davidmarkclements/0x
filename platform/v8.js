@@ -1,12 +1,11 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
-const spawn = require('child_process').spawn
+const { spawn } = require('child_process')
 const pumpify = require('pumpify')
 const pump = require('pump')
 const split = require('split2')
 const through = require('through2')
-const { promisify } = require('util')
 const debug = require('debug')('0x')
 
 const v8LogToTicks = require('../lib/v8-log-to-ticks')
