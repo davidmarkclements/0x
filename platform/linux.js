@@ -1,10 +1,7 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
-const spawn = require('child_process').spawn
-const pump = require('pump')
-const split = require('split2')
-const through = require('through2')
+const { spawn } = require('child_process')
 const debug = require('debug')('0x')
 const traceStacksToTicks = require('../lib/trace-stacks-to-ticks')
 const { promisify } = require('util')
@@ -88,7 +85,7 @@ function linux (args, sudo, binary, cb) {
     function generate () {
       var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat], {
         stdio: [
-          'ignore', 
+          'ignore',
           fs.openSync(folder + '/stacks.' + proc.pid + '.out', 'w'),
           kernelTracingDebug ? process.stderr : 'ignore'
         ]

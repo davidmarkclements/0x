@@ -32,7 +32,7 @@ async function cmd (argv, banner = defaultBanner) {
     '--': true,
     number: ['phase'],
     boolean: [
-      'open', 'version', 'help', 'quiet', 
+      'open', 'version', 'help', 'quiet',
       'silent', 'treeDebug', 'kernelTracingDebug',
       'kernelTracing', 'collectOnly'
     ],
@@ -43,7 +43,7 @@ async function cmd (argv, banner = defaultBanner) {
       'output-dir': 'outputDir',
       D: 'outputDir',
       'output-html': 'outputHtml',
-      F: 'outputHtml', 
+      F: 'outputHtml',
       version: 'v',
       help: 'h',
       loggingOutput: 'logging-output',
@@ -62,8 +62,8 @@ async function cmd (argv, banner = defaultBanner) {
     throw Error(
       'Node version unsupported. Current Node version is ' + process.version + '\n' +
       'Support extends from Node 8.5.0 and above\n\n' +
-      'On Linux, macOS or Solaris kernel tracing mode may be used\n' + 
-      'to generate a flamegraph with the current Node version\n' + 
+      'On Linux, macOS or Solaris kernel tracing mode may be used\n' +
+      'to generate a flamegraph with the current Node version\n' +
       'See help for more info\n'
     )
   }
@@ -111,7 +111,7 @@ function parseSubprocessCommand (args) {
 }
 
 function createStatus ({silent, quiet}) {
-  const statusStream = process.stderr 
+  const statusStream = process.stderr
   if (quiet || silent) return () => {}
   const status = sll(statusStream)
   return hasUnicode ? (s) => status(`🔥  ${s}`) : status

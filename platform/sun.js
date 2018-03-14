@@ -3,7 +3,6 @@ const fs = require('fs')
 const path = require('path')
 const spawn = require('child_process').spawn
 const pump = require('pump')
-const split = require('split2')
 const sym = require('perf-sym')
 const debug = require('debug')('0x')
 const traceStacksToTicks = require('../lib/trace-stacks-to-ticks')
@@ -18,7 +17,7 @@ module.exports = promisify(sun)
 
 function sun (args, sudo, binary, cb) {
   const { status, outputDir, workingDir, name } = args
-  
+
   var dtrace = pathTo('dtrace')
   var profile = require.resolve('perf-sym/profile_1ms.d')
   if (!dtrace) return void cb(Error('Unable to locate dtrace - make sure it\'s in your PATH'))
@@ -72,8 +71,6 @@ function sun (args, sudo, binary, cb) {
         }
         debug('dtrace out closed')
       })
-    
-
 
     setTimeout(status, 100, 'Profiling')
 
@@ -96,7 +93,7 @@ function sun (args, sudo, binary, cb) {
       status('No stacks, profiling had not begun\n')
       tidy(args)
       cb(Error('Profiling not begun'))
-      return 
+      return
     }
 
     if (!manual) {
@@ -148,12 +145,11 @@ function sun (args, sudo, binary, cb) {
           if (err) return void cb(err)
           cb(null, {
             ticks: traceStacksToTicks(folder + '/stacks.' + proc.pid + '.out'),
-            pid: proc.pid, 
+            pid: proc.pid,
             folder: folder
           })
         }
       )
-
     }
   }
 }

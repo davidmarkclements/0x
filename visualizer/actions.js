@@ -1,11 +1,8 @@
 'use strict'
 
-const hsl = require('hsl-to-rgb-for-reals')
-
 module.exports = createActions
 
 function createActions ({flamegraph, state}, emit) {
-  const { colors } = flamegraph
   state.typeFilters.bgs = state.typeFilters.unhighlighted
 
   return {
@@ -21,8 +18,8 @@ function createActions ({flamegraph, state}, emit) {
 
   function highlightTypeFilters () {
     return Object.assign(
-      {}, 
-      state.typeFilters.highlighted, 
+      {},
+      state.typeFilters.highlighted,
       Array.from(state.typeFilters.exclude).reduce((o, k) => {
         o[k] = state.typeFilters.unhighlighted[k]
         return o
@@ -35,9 +32,9 @@ function createActions ({flamegraph, state}, emit) {
         case 'tiers':
           state.control.tiers = !state.control.tiers
           flamegraph.tiers(state.control.tiers)
-          state.typeFilters.bgs = state.control.tiers ? 
-            highlightTypeFilters() : 
-            state.typeFilters.unhighlighted
+          state.typeFilters.bgs = state.control.tiers
+            ? highlightTypeFilters()
+            : state.typeFilters.unhighlighted
           emit(state)
           return
         case 'view':
@@ -59,7 +56,6 @@ function createActions ({flamegraph, state}, emit) {
           emit(state)
           if (!state.control.unoptimized) return flamegraph.clear('lime')
           flamegraph.search(/^~/, 'lime')
-          return
       }
     }
   }
@@ -68,7 +64,7 @@ function createActions ({flamegraph, state}, emit) {
     var zoomLevel = 1
     return ({type}) => {
       switch (type) {
-        case 'in': 
+        case 'in':
           zoomLevel += 0.3
           if (zoomLevel > 1) zoomLevel = 1
           flamegraph.setGraphZoom(zoomLevel)
@@ -77,7 +73,6 @@ function createActions ({flamegraph, state}, emit) {
           zoomLevel -= 0.3
           if (zoomLevel < 0.1) zoomLevel = 0.1
           flamegraph.setGraphZoom(zoomLevel)
-          return
       }
     }
   }
@@ -96,5 +91,4 @@ function createActions ({flamegraph, state}, emit) {
       emit(state)
     }
   }
-
 }

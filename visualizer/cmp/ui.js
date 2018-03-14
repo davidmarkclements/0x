@@ -7,13 +7,13 @@ const zoomCmp = require('./zoom')
 const searchCmp = require('./search')
 
 module.exports = (render) => ({state, actions}) => {
-  const typeFilters = typeFiltersCmp(render) 
-  const key = keyCmp(render) 
-  const controls = controlsCmp(render) 
-  const zoom = zoomCmp(render) 
-  const search = searchCmp(render) 
+  const typeFilters = typeFiltersCmp(render)
+  const key = keyCmp(render)
+  const controls = controlsCmp(render)
+  const zoom = zoomCmp(render)
+  const search = searchCmp(render)
 
-  return render `
+  return render`
     <div>
       ${search(actions.search())}
       ${zoom(actions.zoom())}
@@ -25,5 +25,3 @@ module.exports = (render) => ({state, actions}) => {
     </div>
   `
 }
-
-

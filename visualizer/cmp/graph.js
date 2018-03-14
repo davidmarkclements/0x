@@ -1,6 +1,6 @@
 'use strict'
 
-module.exports = (render) => Object.assign(() => render `
+module.exports = (render) => Object.assign(() => render`
   <chart class='db overflow-y-scroll overflow-x-hidden' style='padding-left: 5%; padding-right: 5%; height: 85%;'>
   </chart>
 `, { v8cats })
@@ -27,7 +27,7 @@ function v8cats (child, merge) {
 
   switch (true) {
     case / native /.test(name): return {type: 'native'}
-    case (name.indexOf('/') === -1 || /internal\//.test(name) && !/ \//.test(name)): return {type: 'core'}
+    case (name.indexOf('/') === -1 || (/internal\//.test(name) && !/ \//.test(name))): return {type: 'core'}
     case /node_modules/.test(name): return {type: 'deps'}
     default: return {type: 'app'}
   }

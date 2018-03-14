@@ -2,7 +2,6 @@
 const fs = require('fs')
 const path = require('path')
 const { spawn } = require('child_process')
-const pumpify = require('pumpify')
 const pump = require('pump')
 const split = require('split2')
 const through = require('through2')
@@ -35,10 +34,10 @@ async function v8 (args, binary) {
 
   status('Profiling')
   const inlined = collectInliningInfo(proc)
-  
-  const { code, manual } = await Promise.race([
-    new Promise((resolve) => process.once('SIGINT', () => resolve({code: 0, manual: true}))),
-    new Promise((resolve) => proc.once('exit', (code) => resolve({code, manual: false})))
+
+  const { code } = await Promise.race([
+    new Promise((resolve) => process.once('SIGINT', () => resolve({code: 0}))),
+    new Promise((resolve) => proc.once('exit', (code) => resolve({code})))
   ])
 
   if (code !== 0) {
@@ -76,7 +75,6 @@ async function v8 (args, binary) {
   }
 }
 
-
 function collectInliningInfo (sp) {
   const inlined = {}
   var root
@@ -85,8 +83,8 @@ function collectInliningInfo (sp) {
     if (s[0] === '\u0001') { // stdout from user land
       process.stdout.write(s)
       return cb()
-    } 
-    //trace data
+    }
+    // trace data
     if (/^(--- FUNCTION SOURCE |INLINE )/.test(s)) {
       const [match, file, fn = '(anonymous)', id, ix, pos] = /\((.+):(.+)?\) id\{(\d+),(-?\d+)\} start\{(\d+)}/.exec(s) || [false]
       if (match === false) return cb()

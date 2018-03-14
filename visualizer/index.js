@@ -20,12 +20,12 @@ module.exports = function (trees, opts) {
   const { colors } = flamegraph
 
   const state = createState({colors, trees, exclude, kernelTracing})
-  
+
   const actions = createActions({flamegraph, state}, (state) => {
     morphdom(iface, ui({state, actions}))
   })
   const iface = ui({state, actions})
-  
+
   document.body.appendChild(title({title: opts.title}))
   document.body.appendChild(chart)
   document.body.appendChild(iface)
