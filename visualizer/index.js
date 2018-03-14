@@ -19,7 +19,7 @@ module.exports = function (trees, opts) {
   const flamegraph = fg({categorizer, tree, exclude: Array.from(exclude), element: chart})
   const { colors } = flamegraph
 
-  const state = createState({colors, trees, exclude})
+  const state = createState({colors, trees, exclude, kernelTracing})
   
   const actions = createActions({flamegraph, state}, (state) => {
     morphdom(iface, ui({state, actions}))

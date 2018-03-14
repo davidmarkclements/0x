@@ -6,7 +6,6 @@ module.exports = createActions
 
 function createActions ({flamegraph, state}, emit) {
   const { colors } = flamegraph
-
   state.typeFilters.bgs = state.typeFilters.unhighlighted
 
   return {
@@ -20,6 +19,16 @@ function createActions ({flamegraph, state}, emit) {
     }
   }
 
+  function highlightTypeFilters () {
+    return Object.assign(
+      {}, 
+      state.typeFilters.highlighted, 
+      Array.from(state.typeFilters.exclude).reduce((o, k) => {
+        o[k] = state.typeFilters.unhighlighted[k]
+        return o
+      }, {}))
+  }
+
   function control () {
     return ({type}) => {
       switch (type) {
@@ -27,7 +36,7 @@ function createActions ({flamegraph, state}, emit) {
           state.control.tiers = !state.control.tiers
           flamegraph.tiers(state.control.tiers)
           state.typeFilters.bgs = state.control.tiers ? 
-            state.typeFilters.highlighted : 
+            highlightTypeFilters() : 
             state.typeFilters.unhighlighted
           emit(state)
           return
@@ -83,6 +92,7 @@ function createActions ({flamegraph, state}, emit) {
         flamegraph.typeHide(name)
         state.typeFilters.exclude.add(name)
       }
+      if (state.control.tiers) state.typeFilters.bgs = highlightTypeFilters()
       emit(state)
     }
   }

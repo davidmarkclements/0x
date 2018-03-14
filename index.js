@@ -3,28 +3,58 @@
 const { sun, linux, windows, v8 } = require('./platform')
 const { execSync } = require('child_process') 
 const debug = require('debug')('0x')
-const launch = require('opn')
 const { join, isAbsolute, relative, dirname } = require('path')
 const fs = require('fs')
 const pump = require('pump')
-const ajv = require('ajv')()
+const validate = require('./lib/validate')(require('./schema.json'))
 const traceStacksToTicks = require('./lib/trace-stacks-to-ticks')
 const v8LogToTicks = require('./lib/v8-log-to-ticks')
 const ticksToTree = require('./lib/ticks-to-tree')
 const phases = require('./lib/phases')
 const render = require('./lib/render')
-const schema = require('./schema.json')
 
 const platform = process.platform
-const {
-  isSudo,
-  tidy,
-  noop
-} = require('./lib/util')
+const { tidy, noop, isSudo } = require('./lib/util')
+
+module.exports = zeroEks
+
+async function zeroEks (args, binary) {
+  args.name = args.name || 'flamegraph'
+  args.log = args.log || noop
+  args.status = args.status || noop
+  validate(args)
+  const { collectOnly, visualizeOnly, treeDebug, mapFrames, open } = args
+  if (collectOnly && visualizeOnly) {
+    throw Error('"collect only" and "visualize only" cannot be used together')
+  }
+
+  if (visualizeOnly) return visualize(args)
+
+  args.title = args.title || 'node ' + args.argv.join(' ')
+  args.mapFrames = args.mapFrames || phases[args.phase]
+  var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary)
+
+  if (treeDebug === true) {
+    const tree = await ticksToTree(ticks, args,mapFrames, inlined)
+    fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
+  }
+
+  fs.writeFileSync(`${folder}/meta.json`, JSON.stringify({...args, inlined}))
+
+  if (collectOnly === true) {
+    debug('collect-only mode bailing on rendering')
+    tidy()
+    debug('done')
+    return folder
+  }
+
+  const file = await generateFlamegraph({...args, ticks, inlined, pid, folder})
+  return file
+}
 
 async function startProcessAndCollectTraceData (args, binary) {
   if (!Array.isArray(args.argv)) {
-    throw Error('0x: argv option is required')
+    throw Error('argv option is required')
   }
   args.name = args.name || 'flamegraph'
   
@@ -36,142 +66,68 @@ async function startProcessAndCollectTraceData (args, binary) {
   }
 }
 
-async function zeroEks (args, binary) {
-  args.name = args.name || 'flamegraph'
-  args.log = args.log || noop
-  args.status = args.status || noop
-  validate(args)
-  if (args.collectOnly && args.visualizeOnly) {
-    throw Error('--collect-only and --visualize-only cannot be used together')
-  }
-
-  if (args.visualizeOnly) return visualize(args)
-
-  args.title = args.title || 'node ' + args.argv.join(' ')
-
-  const { collectOnly, jsonStacks } = args
-  
-  args.mapFrames = args.mapFrames || phases[args.phase]
-
-  var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary)
-  args.inlined = inlined
-
-  if (jsonStacks === true) {
-    const tree = await ticksToTree(ticks, args.mapFrames, inlined)
-    fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
-  }
-
-  fs.writeFileSync(`${folder}/meta.json`, JSON.stringify(args, 0, 2))
-  if (collectOnly === true) {
-    const log = args.log
-    debug('--collect-only flag, bailing on rendering')
-    tidy(args)
-    log(`\n\n  stats collected in file://${folder}\n`, true)
-    log('\n')
-    debug('done')
-    return
-  }
-
-  await generateFlamegraph(args, {ticks, inlined, pid, folder})
-}
-
-module.exports = zeroEks
-
-function validate (args) {
-  const privateProps = {
-    workingDir: {type: 'string'}
-  }
-  const valid = ajv.compile({
-      ...schema, 
-      properties: {...schema.properties, ...privateProps}
-    }
-  )
-  if (valid(args)) return
-  const [{keyword, dataPath, params, message}] = valid.errors
-  if (keyword === 'type') {
-
-    const flag = dataPath.substr(
-      1, 
-      dataPath[dataPath.length -1] === ']' ? 
-        dataPath.length - 2 : 
-        dataPath.length - 1 
-    )
-    const dashPrefix = flag.length === 1 ? '-' : '--'
-    throw Error(`The ${dashPrefix}${flag} option ${message}\n`)
-  }
-  if (keyword === 'additionalProperties') {
-    const flag = params.additionalProperty
-    const dashPrefix = flag.length === 1 ? '-' : '--'
-    throw Error(`${dashPrefix}${flag} is not a recognized flag\n`)
-  }
-}
-
-async function generateFlamegraph (args, opts) {
+async function generateFlamegraph (opts) {
   try  { 
-    const file = await render(args, opts)
-    const log = args.log
-    log('flamegraph generated in\n')
-    log(file + '\n', true)
-    tidy(args)
-    if (args.open) launch(file, {wait: false})
+    const file = await render(opts)
+    tidy()
+    return file
   } catch (err) {
-    tidy(args)
+    tidy()
     throw err
   }
 }
 
-async function visualize (args) {
+async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFrames, phase, open, name }) {
   try { 
-    const { visualizeOnly, jsonStacks } = args
     const folder = isAbsolute(visualizeOnly) ? 
-      relative(args.workingDir, visualizeOnly) :
+      relative(workingDir, visualizeOnly) :
       visualizeOnly
     const ls = fs.readdirSync(folder)
     const traceFile = /^stacks\.(.*)\.out$/    
     const isolateLog = /^isolate-(0x[0-9A-Fa-f]{2,12})-(.*)-v8.log$/
     const stacks = ls.find((f) => isolateLog.test(f) || traceFile.test(f))
     if (!stacks) {
-      throw Error('Invalid data path provided to --visualize-only (no stacks or v8 log file found)')
+      throw Error('Invalid data path provided (no stacks or v8 log file found)')
+    }
+
+    var meta
+    try {
+      meta = JSON.parse(fs.readFileSync(join(folder, 'meta.json')))
+    } catch (e) {
+      meta = {}
+      debug(e)
     }
 
     const srcType = isolateLog.test(stacks) ? 'v8' : 'kernel-tracing'
     const rx = (srcType === 'v8') ? isolateLog : traceFile
-    const pid = rx.exec(stacks)[srcType === 'v8' ? 2 : 1] 
-    args.src = join(folder, stacks)
+    const pid = rx.exec(stacks)[srcType === 'v8' ? 2 : 1]
+    const { inlined } = meta
+    const src = join(folder, stacks)
+    title = title || meta.title
+    name = name || meta.name
 
-    if (!args.title) {
-      try {
-        const { title } = JSON.parse(fs.readFileSync(join(folder, 'meta.json')))
-        args.title = title
-      } catch (e) {
-        debug(e)
-      }
-    }
-
-    args.mapFrames = args.mapFrames || phases[args.phase]
+    mapFrames = mapFrames || phases['phase' in meta ? meta.phase : phase]
     const ticks = (srcType === 'v8') ? 
-      await v8LogToTicks(args.src) :
-      traceStacksToTicks(args.src)
+      await v8LogToTicks(src) :
+      traceStacksToTicks(src)
 
-    var inlined
-    try {
-      inlined = JSON.parse(fs.readFileSync(join(folder, 'meta.json'))).inlined
-    } catch (e) {
-      debug(e)
-    }
-
-    if (jsonStacks === true) {
-      const tree = await ticksToTree(ticks, args.mapFrames, inlined)
+    if (treeDebug === true) {
+      const tree = await ticksToTree(ticks, mapFrames, inlined)
       fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
     }
 
-    await generateFlamegraph(args, {ticks, inlined, pid, folder})
+    const file = await generateFlamegraph({ 
+      visualizeOnly, treeDebug, workingDir, title, name,
+      mapFrames, phase, open, ticks, inlined, pid, folder
+    })
+
+    return file
 
   } catch (e) {
     if (e.code === 'ENOENT') {
-      throw Error('Invalid data path provided to --visualize-only (unable to access/does not exist)')
+      throw Error('Invalid data path provided (unable to access/does not exist)')
     } else if (e.code === 'ENOTDIR') {
-      throw Error('Invalid data path provided to --visualize-only (not a directory)')
+      throw Error('Invalid data path provided (not a directory)')
     } else throw e
   }
 }

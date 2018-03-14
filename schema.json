@@ -38,10 +38,10 @@
     "s": {
       "type": "boolean"
     },
-    "jsonStacks": {
+    "treeDebug": {
       "type": "boolean"
     },
-    "json-stacks": {
+    "tree-debug": {
       "type": "boolean"
     },
     "logging-output": {

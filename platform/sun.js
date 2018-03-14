@@ -9,8 +9,7 @@ const debug = require('debug')('0x')
 const traceStacksToTicks = require('../lib/trace-stacks-to-ticks')
 const { promisify } = require('util')
 const {
-  determineOutputDir,
-  ensureDirExists,
+  getTargetFolder,
   tidy,
   pathTo
 } = require('../lib/util')
@@ -18,12 +17,13 @@ const {
 module.exports = promisify(sun)
 
 function sun (args, sudo, binary, cb) {
-  const { status } = args
+  const { status, outputDir, workingDir, name } = args
+  
   var dtrace = pathTo('dtrace')
   var profile = require.resolve('perf-sym/profile_1ms.d')
-  if (!dtrace) return void cb(Error('0x: Unable to locate dtrace - make sure it\'s in your PATH'))
+  if (!dtrace) return void cb(Error('Unable to locate dtrace - make sure it\'s in your PATH'))
   if (!sudo) {
-    status('0x captures stacks using dtrace, which requires sudo access\n')
+    status('Stacks are captured using DTrace, which requires sudo access\n')
     return spawn('sudo', ['true'])
       .on('exit', function () { sun(args, true, binary, cb) })
   }
@@ -40,7 +40,7 @@ function sun (args, sudo, binary, cb) {
   }).on('exit', function (code) {
     if (code !== 0) {
       tidy(args)
-      const err = Error('0x Target subprocess error, code: ' + code)
+      const err = Error('Target subprocess error, code: ' + code)
       err.code = code
       cb(err)
       return
@@ -56,8 +56,7 @@ function sun (args, sudo, binary, cb) {
 
     if (kernelTracingDebug) { prof.stderr.pipe(process.stderr) }
 
-    folder = determineOutputDir(args, proc)
-    ensureDirExists(folder)
+    folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
 
     prof.on('exit', function (code) {
       profExited = true
@@ -73,6 +72,8 @@ function sun (args, sudo, binary, cb) {
         }
         debug('dtrace out closed')
       })
+    
+
 
     setTimeout(status, 100, 'Profiling')
 
@@ -94,13 +95,13 @@ function sun (args, sudo, binary, cb) {
       debug('Profiling not begun')
       status('No stacks, profiling had not begun\n')
       tidy(args)
-      cb(Error('0x: Profiling not begun'))
+      cb(Error('Profiling not begun'))
       return 
     }
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      status('Caught SIGINT, generating flamegraph\n ')
+      status('Caught SIGINT, generating flamegraph')
     }
 
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}

@@ -10,8 +10,7 @@ const traceStacksToTicks = require('../lib/trace-stacks-to-ticks')
 const { promisify } = require('util')
 
 const {
-  determineOutputDir,
-  ensureDirExists,
+  getTargetFolder,
   tidy,
   pathTo
 } = require('../lib/util')
@@ -19,11 +18,11 @@ const {
 module.exports = promisify(linux)
 
 function linux (args, sudo, binary, cb) {
-  const { status } = args
+  const { status, outputDir, workingDir, name } = args
   var perf = pathTo('perf')
-  if (!perf) return void cb(Error('0x: Unable to locate dtrace - make sure it\'s in your PATH'))
+  if (!perf) return void cb(Error('Unable to locate dtrace - make sure it\'s in your PATH'))
   if (!sudo) {
-    status('0x captures stacks using perf, which requires sudo access\n')
+    status('Stacks are captured using perf(1), which requires sudo access\n')
     return spawn('sudo', ['true'])
       .on('exit', function () { linux(args, true, binary, cb) })
   }
@@ -61,8 +60,7 @@ function linux (args, sudo, binary, cb) {
     analyze(true)
   })
 
-  var folder = determineOutputDir(args, proc)
-  ensureDirExists(folder)
+  var folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
 
   status('Profiling')
 
@@ -79,11 +77,11 @@ function linux (args, sudo, binary, cb) {
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      status('Caught SIGINT, generating flamegraph\n')
+      status('Caught SIGINT, generating flamegraph')
       proc.on('exit', generate)
     } else {
       debug('Process exited, generating flamegraph')
-      status('Process exited, generating flamegraph\n')
+      status('Process exited, generating flamegraph')
       generate()
     }
 

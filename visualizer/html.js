@@ -19,7 +19,7 @@ function html (opts) {
       <meta charset="utf-8">
       <style> ${tachyons} </style>
       <style>
-        button:focus { outline:0 !important; } 
+        button:focus { outline:0; } 
         rect:hover {opacity: 0.9} 
       </style>
     </head>

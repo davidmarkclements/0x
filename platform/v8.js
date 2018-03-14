@@ -11,8 +11,7 @@ const debug = require('debug')('0x')
 const v8LogToTicks = require('../lib/v8-log-to-ticks')
 
 const {
-  determineOutputDir,
-  ensureDirExists,
+  getTargetFolder,
   tidy,
   pathTo
 } = require('../lib/util')
@@ -20,7 +19,7 @@ const {
 module.exports = v8
 
 async function v8 (args, binary) {
-  const { status } = args
+  const { status, outputDir, workingDir, name } = args
 
   var node = !binary || binary === 'node' ? await pathTo('node') : binary
 
@@ -34,6 +33,7 @@ async function v8 (args, binary) {
     stdio: ['ignore', 'pipe', 'inherit']
   })
 
+  status('Profiling')
   const inlined = collectInliningInfo(proc)
   
   const { code, manual } = await Promise.race([
@@ -48,15 +48,14 @@ async function v8 (args, binary) {
     throw err
   }
 
-  var folder = determineOutputDir(args, proc)
-  ensureDirExists(folder)
+  const folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
 
   if (process.stdin.isPaused()) {
     process.stdin.resume()
     process.stdin.write('\u001b[?25l')
   }
 
-  status('Process exited, generating flamegraph\n')
+  status('Process exited, generating flamegraph')
 
   debug('moving isolate file into folder')
   const isolateLog = fs.readdirSync(args.workingDir).find(function (f) {

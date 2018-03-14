@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 
 const fs = require('fs')
-const minimist = require('minimist')
 const { join } = require('path')
+const minimist = require('minimist')
 const semver = require('semver')
-const zeroEks = require('./')
-const { version } = require('./package.json')
 const debug = require('debug')('0x')
 const sll = require('single-line-log')
+const launch = require('opn')
+const hasUnicode = require('has-unicode')()
+const zeroEks = semver.lt(process.version, '8.5.0') === true ? () => {} : require('./')
+const { version } = require('./package.json')
 
 const defaultBanner = `
   0x ${version}
@@ -18,20 +20,20 @@ const defaultBanner = `
 
 if (module.parent === null) {
   cmd(process.argv.slice(2)).catch((err) => {
-    console.error('0x: ', err.message)
+    console.error(hasUnicode ? `🔥  ${err.message}` : err.message)
     debug(err)
     process.exit(err.code || 1)
   })
 } else module.exports = cmd
 
-function cmd (argv, banner = defaultBanner) {
+async function cmd (argv, banner = defaultBanner) {
   var args = minimist(argv, {
     stopEarly: true,
     '--': true,
     number: ['phase'],
     boolean: [
       'open', 'version', 'help', 'quiet', 
-      'silent', 'jsonStacks', 'kernelTracingDebug',
+      'silent', 'treeDebug', 'kernelTracingDebug',
       'kernelTracing', 'collectOnly'
     ],
     alias: {
@@ -44,12 +46,12 @@ function cmd (argv, banner = defaultBanner) {
       F: 'outputHtml', 
       version: 'v',
       help: 'h',
-      jsonStacks: 'json-stacks',
       loggingOutput: 'logging-output',
       visualizeOnly: 'visualize-only',
       collectOnly: 'collect-only',
       kernelTracing: 'kernel-tracing',
       kernelTracingDebug: 'kernel-tracing-debug',
+      treeDebug: 'tree-debug'
     },
     default: {
       phase: 2
@@ -57,10 +59,13 @@ function cmd (argv, banner = defaultBanner) {
   })
 
   if (semver.lt(process.version, '8.5.0') === true) {
-    console.error('0x v4 supports Node 8.5.0 and above, current Node version is ' + process.version)
-    console.error('On Linux, macOS or Solaris the --kernel-tracing flag\nmay be able to generate a flamegraph with the current Node version')
-    console.error('See 0x --help for more info')
-    process.exit(1)
+    throw Error(
+      'Node version unsupported. Current Node version is ' + process.version + '\n' +
+      'Support extends from Node 8.5.0 and above\n\n' +
+      'On Linux, macOS or Solaris kernel tracing mode may be used\n' + 
+      'to generate a flamegraph with the current Node version\n' + 
+      'See help for more info\n'
+    )
   }
 
   if (args.help || argv.length === 0) {
@@ -69,13 +74,23 @@ function cmd (argv, banner = defaultBanner) {
   }
 
   if (args.version) return console.log('0x ' + version)
+  const status = createStatus(args)
   args.workingDir = process.cwd()
-  args.log = createLogger(args)
-  args.status = createStatus(args)
+  args.status = status
   const { pathToNodeBinary, subprocessArgv } = parseSubprocessCommand(args)
   args.argv = subprocessArgv
 
-  return zeroEks(args, pathToNodeBinary)  
+  if (args.visualizeOnly) status(`Creating flamegraph from ${args.visualizeOnly}`)
+
+  const assetPath = await zeroEks(args, pathToNodeBinary)
+
+  if (args.collectOnly) status(`Stats collected in folder file://${assetPath}\n`)
+  else {
+    status('Flamegraph generated in\n' + assetPath + '\n')
+    if (args.open) launch(assetPath, {wait: false})
+  }
+
+  return assetPath
 }
 
 function parseSubprocessCommand (args) {
@@ -95,18 +110,9 @@ function parseSubprocessCommand (args) {
   return { pathToNodeBinary, subprocessArgv }
 }
 
-function createLogger ({silent, quiet}) {
-  const logStream = process.stderr
-  return function log (msg, force) {
-    if (silent) return
-    if (!force && quiet) return 
-    logStream.write(msg) 
-  }
-}
-
 function createStatus ({silent, quiet}) {
   const statusStream = process.stderr 
-  return quiet || silent
-    ? () => {}
-    : sll(statusStream)
+  if (quiet || silent) return () => {}
+  const status = sll(statusStream)
+  return hasUnicode ? (s) => status(`🔥  ${s}`) : status
 }

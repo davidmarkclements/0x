@@ -48,7 +48,7 @@
                            
                           Default: '{outputDir}/{name}.html' 
                           
-  --json-stacks           Output a JSON file of stacks as {outputDir}/stacks.{pid}.json
+  --tree-debug            Output a JSON file of stacks as {outputDir}/stacks.{pid}.json
 
   --collect-only          Do not process captured stacks into a flamegraph.
 

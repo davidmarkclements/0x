@@ -2,7 +2,7 @@
 
 const { colorHash } = require('d3-fg')
 
-module.exports = ({colors, trees, exclude, merged = false}) => ({
+module.exports = ({colors, trees, exclude, merged = false, kernelTracing}) => ({
   trees,
   key: {
     colors: [
@@ -17,10 +17,12 @@ module.exports = ({colors, trees, exclude, merged = false}) => ({
     tiers: false,
     optimized: false,
     unoptimized: false,
+    renderOptUnopt: !kernelTracing,
     merged: merged
   },
   typeFilters: {
     enablePreInlined: !merged,
+    renderPreInlined: !kernelTracing,
     unhighlighted: {
       'pre-inlined': '#fff',
       app: '#fff',

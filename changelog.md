@@ -4,23 +4,44 @@
 * add `--kernel-tracing` option
 * removed `--svg` flag
 * removed `--gen` flag
-* removed `--timestamp-profiles`
-* removed `--theme`
-* removed `--include`
-* removed `--exclude | -x`
-* removed `--tiers | -t`
-* removed `--langs | -l`
-* renamed `--trace-info` to `--kernel-tracing-debug`
-* removed `--log-output` 
-* removed `--stacks-only`
-* removed `-d | --delay`
+* removed `--timestamp-profiles` flag
+* removed `--theme` flag
+* removed `--include` flag
+* removed `--exclude | -x` flag
+* removed `--tiers | -t` flag
+* removed `--langs | -l` flag
+* renamed `--trace-info` to `--kernel-tracing-debug` flag
+* removed `--log-output` flag
+* removed `--stacks-only` flag
+* removed `-d | --delay` flag
+* renamed `--json-stacks` to `--tree-debug` flag
 * profile folders renamed to `{outputDir}/{name}.0x`
 * ui: removed langs button
 * ui: removed theme button
-* ui: style changes (adopted tachyons css)
+* ui: style changes, minor redesign
 * altered mapFrames API (frames is now an array of objects, not strings)  
-* ui: rename/reoganize type labels
+* ui: rename/reorganize type labels
 * ui: tier coloring improvements
+* ui: search improvements
+* categorization improvements
+* API: removed `log` option
+* API: added `kernelTracing` option
+* API: removed `svg` option
+* API: removed `gen` option 
+* API: removed `timestamp-profiles` option
+* API: removed `theme` option
+* API: removed `include` option
+* API: removed `exclude` option
+* API: removed `tiers` option
+* API: removed `langs` option
+* API: renamed `traceInfo` to `kernelTracingDebug` option
+* API: removed `logOutput` option 
+* API: removed `stacksOnly` option
+* API: removed `delay` option 
+* API: renamed `jsonStacks` to `treeDebug` option
+* enhanced status console output (can be overridden in API)
+* added merging capability (v8 prof only)
+* added capturing inline data along side v8 prof ("pre-inlined" functions)
 
 
 # v3.4.1
