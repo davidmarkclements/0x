@@ -42,7 +42,7 @@ async function v8 (args, binary) {
 
   if (code !== 0) {
     tidy(args)
-    const err = Error('0x Target subprocess error, code: ' + code)
+    const err = Error('Target subprocess error, code: ' + code)
     err.code = code
     throw err
   }
@@ -58,7 +58,7 @@ async function v8 (args, binary) {
 
   debug('moving isolate file into folder')
   const isolateLog = fs.readdirSync(args.workingDir).find(function (f) {
-    return new RegExp(`isolate-(0x[0-9A-Fa-f]{2,12})-${proc.pid}-v8.log`).test(f)
+    return new RegExp(`isolate-0(x)?([0-9A-Fa-f]{2,16})-${proc.pid}-v8.log`).test(f)
   })
 
   if (!isolateLog) throw Error('no isolate logfile found')
