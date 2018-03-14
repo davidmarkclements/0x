@@ -20,7 +20,7 @@ const defaultBanner = `
 
 if (module.parent === null) {
   cmd(process.argv.slice(2)).catch((err) => {
-    console.error(hasUnicode ? `🔥  ${err.message}` : err.message)
+    console.error(hasUnicode ? `\n🚫  ${err.message}` : `\n${err.message}`)
     debug(err)
     process.exit(err.code || 1)
   })
