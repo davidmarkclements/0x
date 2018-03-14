@@ -69,3 +69,4 @@
                           Default: node [nodeFlags] script.js
 
   -v | --version          Output the 0x version
+
