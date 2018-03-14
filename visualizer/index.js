@@ -2,10 +2,10 @@
 const fg = require('d3-fg')
 const render = require('nanohtml')
 const morphdom = require('morphdom')
+const debounce = require('debounce')
 const createActions = require('./actions')
 const createState = require('./state')
 const graph = require('./cmp/graph')(render)
-const title = require('./cmp/title')(render)
 const ui = require('./cmp/ui')(render)
 
 module.exports = function (trees, opts) {
@@ -19,14 +19,19 @@ module.exports = function (trees, opts) {
   const flamegraph = fg({categorizer, tree, exclude: Array.from(exclude), element: chart})
   const { colors } = flamegraph
 
-  const state = createState({colors, trees, exclude, kernelTracing})
+  window.addEventListener('resize', debounce(() => {
+    const width = document.body.clientWidth * 0.85
+    flamegraph.width(width).update()
+    chart.querySelector('svg').setAttribute('width', width)
+  }, 150))
+
+  const state = createState({colors, trees, exclude, kernelTracing, title: opts.title})
 
   const actions = createActions({flamegraph, state}, (state) => {
     morphdom(iface, ui({state, actions}))
   })
   const iface = ui({state, actions})
 
-  document.body.appendChild(title({title: opts.title}))
   document.body.appendChild(chart)
   document.body.appendChild(iface)
 }

@@ -23,7 +23,7 @@ function html (opts) {
         rect:hover {opacity: 0.9} 
       </style>
     </head>
-    <body class='m0 bg-white sans-serif'>
+    <body class='m0 bg-white sans-serif overflow-hidden'>
       <script> ${script} </script>
     </body>
     </html>

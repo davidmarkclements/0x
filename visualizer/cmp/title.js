@@ -1,7 +1,8 @@
 'use strict'
 
-module.exports = (render) => (props) => render`
-   <h1 class='sans-serif black-70 b lh-title mt0 measure f3 ml4'> 
-    ${props.title} 
+module.exports = (render) => ({title}) => render`
+   <h1 id=title class='sans-serif black-70 bg-white b lh-title measure-narrow measure-l f4 ml2 mt0 dib'>
+    <style>@media (max-width: 584px) {#title {display: none}}</style>
+    ${title} xyx more text blah blah blah blah blah blah blah
   </h1>
 `

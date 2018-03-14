@@ -1,8 +1,7 @@
 'use strict'
 
 module.exports = (render) => ({colors, enableOptUnopt}) => render`
-
-  <div style="position: absolute; top: 0.5em; right: 5%; margin-right: 240px;">
+  <div id=key class='absolute dn db-l' style="top: 0.5em; right: 234px;">
     <div class='fl' style="margin-right: 5px;">cold</div>
     <div class='fl' style="background: ${colors[0]}; height: 20px; width: 20px; margin-right: 5px;"></div>
     <div class='fl' style="background: ${colors[1]}; height: 20px; width: 20px; margin-right: 5px;"></div>

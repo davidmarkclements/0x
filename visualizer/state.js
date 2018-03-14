@@ -3,7 +3,7 @@
 const hsl = require('hsl-to-rgb-for-reals')
 const { colorHash } = require('d3-fg')
 
-module.exports = ({colors, trees, exclude, merged = false, kernelTracing}) => ({
+module.exports = ({colors, trees, exclude, merged = false, kernelTracing, title}) => ({
   trees,
   key: {
     colors: [
@@ -14,6 +14,7 @@ module.exports = ({colors, trees, exclude, merged = false, kernelTracing}) => ({
     ],
     enableOptUnopt: !merged
   },
+  title: { title },
   control: {
     tiers: false,
     optimized: false,

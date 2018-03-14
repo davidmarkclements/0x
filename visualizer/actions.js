@@ -10,9 +10,11 @@ function createActions ({flamegraph, state}, emit) {
   }
 
   function search () {
-    return ({value}) => {
-      if (!value) return flamegraph.clear()
-      flamegraph.search(value, 'cyan')
+    return ({type, value}) => {
+      if (type === 'key') {
+        if (!value) return flamegraph.clear()
+        flamegraph.search(value, 'cyan')
+      }
     }
   }
 
@@ -20,7 +22,9 @@ function createActions ({flamegraph, state}, emit) {
     return Object.assign(
       {},
       state.typeFilters.highlighted,
-      Array.from(state.typeFilters.exclude).reduce((o, k) => {
+      [...Array.from(state.typeFilters.exclude),
+        (state.typeFilters.enablePreInlined ? '' : 'pre-inlined')
+      ].reduce((o, k) => {
         o[k] = state.typeFilters.unhighlighted[k]
         return o
       }, {}))
@@ -41,6 +45,9 @@ function createActions ({flamegraph, state}, emit) {
           state.control.merged = !state.control.merged
           state.typeFilters.enablePreInlined = !state.control.merged
           state.key.enableOptUnopt = !state.control.merged
+          state.typeFilters.bgs = state.control.tiers
+            ? highlightTypeFilters()
+            : state.typeFilters.unhighlighted
           emit(state)
           if (state.control.merged) flamegraph.renderTree(state.trees.merged)
           else flamegraph.renderTree(state.trees.unmerged)

@@ -2,7 +2,7 @@
 
 const button = (render) => ({label, pressed, disabled, width}, action) => render`
   <button 
-    class="f6 pointer br2 ba ph3 pv2 dib black mb2 mt1 ml1 mr1 ${disabled ? 'o-50 bg-silver' : ''}"
+    class="f6 pointer br2 ba ph3 pv1 dib black mb2 mt1 ml1 mr1 ${disabled ? 'o-50 bg-silver' : ''}"
     ${disabled ? 'disabled' : ''}
     style="
       ${pressed ? 'box-shadow: 0 0 0 .125em black;' : ''}
