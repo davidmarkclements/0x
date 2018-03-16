@@ -81,7 +81,7 @@ The `flamegraph.html` file contains the 0x UI, which is explained in
 ## Production Servers
 
 A lightweight, production server friendly, approach to generating a 
-flamegraph is described in [/docs/production-servers.md](/docs/production-servers.md).
+flamegraph is described in [docs/production-servers.md](docs/production-servers.md).
 
 ## The Profile Folder
 
@@ -181,7 +181,7 @@ dtrace on macOS and SmartOS). This will capture
 native stack frames (C++ modules and Libuv I/O), 
 but may result in missing stacks on Node 8.
 
-See [kernel-tracing doc](docs/kernel-tracing.md) for more information.
+See [docs/kernel-tracing](docs/kernel-tracing.md) for more information.
 
 Default: false 
 
