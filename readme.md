@@ -88,22 +88,7 @@ flamegraph is described in [docs/production-servers.md](docs/production-servers.
 By default, a Profile Folder will be created and named after the PID, e.g.
 `3866.0x` (we can set this name manually using the `--output-dir` flag).
 
-The Profile Folder can contain the following files
-
-* flamegraph.html - the interactive flamegraph
-* isolate-0x103000600-3866-v8.log - a v8 profiling log file
-* isolate-0x103000600-3866-v8.json - the profile log file processed into JSON
-* meta.json - additional meta data captured via processing
-* stacks.3866.json - only with `--tree-debug` flag: a JSON tree representing the captured stacks 
-
-The hex address in the isolate log files (0x103000600) is set according
-to V8 internals, and will (most likely) differ each time a process is profiled. 
-
-When used with the [`--kernel-tracing`](#--kernel-tracing) flag the Profile Folder won't
-contain the isolate V8 log or JSON files, but will contain the following:
-
-* .stacks.3866.out - pre-processed captured stacks via kernel tracing 
-* stacks.3866.out - post-processed captured stacks via kernel tracing
+The Profile Folder is explained in more detail in [docs/profile-folder.md](docs/profiler-folder.md)
 
 ## Example
 
@@ -130,7 +115,7 @@ Print usage info.
 
 ### --open | -o
 
-Open the flamegraph on your browser using `open` or `xdg-open` (see
+Open the flamegraph in the browser using `open` or `xdg-open` (see
 https://www.npmjs.com/package/open for details).
 
 ### --name
@@ -148,6 +133,8 @@ Default: flamegraph
 ### ---title 
 
 Set the title to display in the flamegraph UI.
+
+Default: the command that 0x ran to start the process 
 
 ### --output-dir | -D
 
@@ -169,7 +156,7 @@ send the HTML output to STDOUT (note
 due to the nature of CLI argument parsing, this must be set using `=`, 
 e.g. `--output-html=-`).
 
-If either this flag or --name is set to - 
+If either this flag or `--name` is set to `-` 
 then the HTML will go to STDOUT.
 
 Default: `{outputDir}/{name}.html`
@@ -181,7 +168,7 @@ dtrace on macOS and SmartOS). This will capture
 native stack frames (C++ modules and Libuv I/O), 
 but may result in missing stacks on Node 8.
 
-See [docs/kernel-tracing](docs/kernel-tracing.md) for more information.
+See [docs/kernel-tracing.md](docs/kernel-tracing.md) for more information.
 
 Default: false 
 
@@ -189,13 +176,13 @@ Default: false
 
 Stage in initialization to begin aggregating stacks. 
 
-**Phase 0** visualizes from the very start, this includes bootstrapping 
+`--phase=0` visualizes from the very start, this includes bootstrapping 
 stacks and loading the application module tree (these can dominate the flamegraph). 
 
-**Phase 1** excludes core bootstrapping stacks, except the end of the boostrapping process 
+`--phase=1` excludes core bootstrapping stacks, except the end of the boostrapping process 
 where the application module tree is loaded from the entry point. 
 
-**Phase 2** excludes all initialization, this renders the most pragmatic flamegraph for most 
+`--phase=2` excludes all initialization, this renders the most pragmatic flamegraph for most 
 use cases.
 
 Default: 2
@@ -215,22 +202,21 @@ Default: false
 
 ### --collect-only
 
-Don't generate the flamegraph, only create the stacks
-output. 
+Don't generate the flamegraph, only create the Profile Folder,
+with relevant outputs.
 
 Default: false
 
 ### --visualize-only 
 
 Supply a path to a profile folder to build or rebuild visualization 
-from original stacks. Similar to --gen flag, except specify containing folder
-instead of stacks file.
+from original stacks.
 
-Default: ''  
+Default: undefined
 
 ### --kernel-tracing-debug
 
-Show output from dtrace or perf tools
+Show output from DTrace or perf(1) tools.
 
 Default: false
 
@@ -266,92 +252,7 @@ capture()
 
 ```
 
-### `require('0x')(opts) => Promise -> assetPath`
-
-The `opts` argument is an object, with the following properties:
-
-#### `argv` (array) – required
-
-Pass the arguments that the spawned Node process should receive. 
-
-#### `workingDir` (string)
-
-The base directory where profile folders will be placed. 
-
-Default: process.cwd()
-
-#### `pathToNodeBinary` (string)
-
-The path to any node binary executable. This will be used to run execute 
-the script and arguments supplied in `argv`.
-
-Default: Node executable according to the `PATH` environment variable.
-
-#### `name` (string) 
-
-The name of the flamegraph HTML output file, without the extension.
-
-Default: flamegraph
-
-#### `title` (string)
-
-See [`--title`](#--title)
-
-#### `visualizeOnly` (string)
-
-See [`--visualize-only`](#--visualize-only)
-
-#### `collectOnly` (boolean)
-
-See [`--collect-only`](#--collect-only)
-
-#### `phase` (number)
-
-See [`--phase`](#--phase)
-
-#### `mapFrames` (function)
-
-Will override phase. A custom mapping function that receives 
-an array of frames and an instance of the Profiler (see [stacks-to-json-stack-tree](http://github.com/davidmarkclements/stacks-to-json-stack-tree)).
-
-Takes the form `(frames, profiler) => Array|false`. 
-
-The `frames` parameter is an array of objects containing a `name` property.
-
-Return `false` to remove the whole stack from the output, or return a 
-modified array to change the output. 
-
-#### `quiet` (boolean)
-
-See [`--quiet`](#--quiet---q)
-
-#### `silent` (boolean)
-
-See [`--silent`](#--silent---s)
-
-### `kernelTracing`
-
-See [`--kernel-tracing`](#--kernel-tracing)
-
-#### `outputDir` (string)
-
-See [`--output-dir`](#--output-dir---d)
-
-#### `outputHtml` (string)
-
-See [`--output-html`](#--output-html---f)
-
-#### `open` (boolean)
-
-See [`--open`](#--open---o)
-
-#### `treeDebug` (boolean)
-
-See [`--tree-debug`](#--tree-debug)
-
-#### `kernelTracingDebug` (boolean)
-
-See [`--kernel-tracing-debug`](#--kernel-tracing-debug)
+The Programmatic API is detailed in [docs/api.md](docs/api.md).
 
 ## Troubleshooting
 

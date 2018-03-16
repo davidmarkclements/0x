@@ -47,7 +47,9 @@
 * support for eval'd code - appears under native frames
 * DOCS: readme changes to reflect API changes
 * DOCS: additional /docs folder for in depth topics
- 
+* API: removed `quiet` (still part of CLI)
+* API: removed `silent` (still part of CLI)
+* API: removed `open` (still part of CLI)
 
 
 # v3.4.1
