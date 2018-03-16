@@ -88,7 +88,7 @@ flamegraph is described in [docs/production-servers.md](docs/production-servers.
 By default, a Profile Folder will be created and named after the PID, e.g.
 `3866.0x` (we can set this name manually using the `--output-dir` flag).
 
-The Profile Folder is explained in more detail in [docs/profile-folder.md](docs/profiler-folder.md)
+The Profile Folder is explained in more detail in [docs/profile-folder.md](docs/profile-folder.md)
 
 ## Example
 
