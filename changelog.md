@@ -1,29 +1,29 @@
 # v4.0.0
 * internal refactor
 * v8 prof is now the default method of stack collection
-* add `--kernel-tracing` option
-* removed `--svg` flag
-* removed `--gen` flag
-* removed `--timestamp-profiles` flag
-* removed `--theme` flag
-* removed `--include` flag
-* removed `--exclude | -x` flag
-* removed `--tiers | -t` flag
-* removed `--langs | -l` flag
-* renamed `--trace-info` to `--kernel-tracing-debug` flag
-* removed `--log-output` flag
-* removed `--stacks-only` flag
-* removed `-d | --delay` flag
-* renamed `--json-stacks` to `--tree-debug` flag
 * profile folders renamed to `{outputDir}/{name}.0x`
-* ui: removed langs button
-* ui: removed theme button
-* ui: style changes, minor redesign
-* altered mapFrames API (frames is now an array of objects, not strings)  
-* ui: rename/reorganize type labels
-* ui: tier coloring improvements
-* ui: search improvements
-* categorization improvements
+* CLI: add `--kernel-tracing` option
+* CLI: removed `--svg` flag
+* CLI: removed `--gen` flag
+* CLI: removed `--timestamp-profiles` flag
+* CLI: removed `--theme` flag
+* CLI: removed `--include` flag
+* CLI: removed `--exclude | -x` flag
+* CLI: removed `--tiers | -t` flag
+* CLI: removed `--langs | -l` flag
+* CLI: renamed `--trace-info` to `--kernel-tracing-debug` flag
+* CLI: removed `--logging-output` flag
+* CLI: removed `--stacks-only` flag
+* CLI: removed `-d | --delay` flag
+* CLI: renamed `--json-stacks` to `--tree-debug` flag
+* UI: removed langs button
+* UI: removed theme button
+* UI: style changes, minor redesign
+* API: altered mapFrames API (frames is now an array of objects, not strings)  
+* UI: rename/reorganize type labels
+* UI: tier coloring improvements
+* UI: search improvements
+* UI: categorization improvements
 * API: removed `log` option
 * API: added `kernelTracing` option
 * API: removed `svg` option
@@ -35,13 +35,19 @@
 * API: removed `tiers` option
 * API: removed `langs` option
 * API: renamed `traceInfo` to `kernelTracingDebug` option
-* API: removed `logOutput` option 
+* API: removed `loggingOutput` option 
 * API: removed `stacksOnly` option
 * API: removed `delay` option 
 * API: renamed `jsonStacks` to `treeDebug` option
-* enhanced status console output (can be overridden in API)
-* added merging capability (v8 prof only)
-* added capturing inline data along side v8 prof ("pre-inlined" functions)
+* CLI: enhanced status console output (can be overridden in API)
+* UI: added merging capability (v8 prof only)
+* UI: fully responsive
+* added capturing inline data along side v8 prof ("inlinable" functions)
+* profiling REPL no longer supported
+* support for eval'd code - appears under native frames
+* DOCS: readme changes to reflect API changes
+* DOCS: additional /docs folder for in depth topics
+ 
 
 
 # v3.4.1

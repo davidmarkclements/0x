@@ -74,10 +74,6 @@ function sun (args, sudo, binary, cb) {
 
     setTimeout(status, 100, 'Profiling')
 
-    if (process.stdin.isPaused()) {
-      process.stdin.resume()
-      process.stdout.write('\u001b[?25l')
-    }
   }
 
   start()

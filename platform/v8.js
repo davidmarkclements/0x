@@ -48,12 +48,7 @@ async function v8 (args, binary) {
   }
 
   const folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
-
-  if (process.stdin.isPaused()) {
-    process.stdin.resume()
-    process.stdin.write('\u001b[?25l')
-  }
-
+  
   status('Process exited, generating flamegraph')
 
   debug('moving isolate file into folder')

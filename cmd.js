@@ -46,7 +46,6 @@ async function cmd (argv, banner = defaultBanner) {
       F: 'outputHtml',
       version: 'v',
       help: 'h',
-      loggingOutput: 'logging-output',
       visualizeOnly: 'visualize-only',
       collectOnly: 'collect-only',
       kernelTracing: 'kernel-tracing',
@@ -61,10 +60,9 @@ async function cmd (argv, banner = defaultBanner) {
   if (semver.lt(process.version, '8.5.0') === true) {
     throw Error(
       'Node version unsupported. Current Node version is ' + process.version + '\n' +
-      'Support extends from Node 8.5.0 and above\n\n' +
-      'On Linux, macOS or Solaris kernel tracing mode may be used\n' +
-      'to generate a flamegraph with the current Node version\n' +
-      'See help for more info\n'
+      'Support extends from Node 8.5.0 and above.\n\n' +
+      '  npm i -g 0x@3 for Node 6.x.x – 8.4.0\n' + 
+      '  npm i -g 0x@2 for Node 4\n'
     )
   }
 
@@ -79,10 +77,11 @@ async function cmd (argv, banner = defaultBanner) {
   args.status = status
   const { pathToNodeBinary, subprocessArgv } = parseSubprocessCommand(args)
   args.argv = subprocessArgv
+  args.pathToNodeBinary = pathToNodeBinary
 
   if (args.visualizeOnly) status(`Creating flamegraph from ${args.visualizeOnly}`)
 
-  const assetPath = await zeroEks(args, pathToNodeBinary)
+  const assetPath = await zeroEks(args)
 
   if (args.collectOnly) status(`Stats collected in folder file://${assetPath}\n`)
   else {

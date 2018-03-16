@@ -23,7 +23,7 @@ function createActions ({flamegraph, state}, emit) {
       {},
       state.typeFilters.highlighted,
       [...Array.from(state.typeFilters.exclude),
-        (state.typeFilters.enablePreInlined ? '' : 'pre-inlined')
+        (state.typeFilters.enableInlinable ? '' : 'inlinable')
       ].reduce((o, k) => {
         o[k] = state.typeFilters.unhighlighted[k]
         return o
@@ -43,7 +43,7 @@ function createActions ({flamegraph, state}, emit) {
           return
         case 'view':
           state.control.merged = !state.control.merged
-          state.typeFilters.enablePreInlined = !state.control.merged
+          state.typeFilters.enableInlinable = !state.control.merged
           state.key.enableOptUnopt = !state.control.merged
           state.typeFilters.bgs = state.control.tiers
             ? highlightTypeFilters()

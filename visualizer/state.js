@@ -23,10 +23,10 @@ module.exports = ({colors, trees, exclude, merged = false, kernelTracing, title}
     merged: merged
   },
   typeFilters: {
-    enablePreInlined: !merged,
-    renderPreInlined: !kernelTracing,
+    enableInlinable: !merged,
+    renderInlinable: !kernelTracing,
     unhighlighted: {
-      'pre-inlined': '#fff',
+      inlinable: '#fff',
       app: '#fff',
       deps: '#fff',
       core: '#fff',
@@ -36,10 +36,10 @@ module.exports = ({colors, trees, exclude, merged = false, kernelTracing, title}
       v8: '#fff'
     },
     highlighted: {
-      'pre-inlined': `rgb(${hsl(
-        colors['pre-inlined'].h,
-        colors['pre-inlined'].s / 100 * 1.2,
-        colors['pre-inlined'].l / 100 * 1.2
+      inlinable: `rgb(${hsl(
+        colors['inlinable'].h,
+        colors['inlinable'].s / 100 * 1.2,
+        colors['inlinable'].l / 100 * 1.2
       )})`,
       app: `rgb(${hsl(
         colors.app.h,

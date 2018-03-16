@@ -1,5 +1,6 @@
-# <img alt=0x src=assets/0x-logo.png width=350>
+# 0x
 
+<img alt=0x src=assets/0x-logo.png width=350>
 
 🔥 single-command flamegraph profiling 🔥
 
@@ -7,25 +8,29 @@ Discover the bottlenecks and hot paths in your code, with flamegraphs.
 
 ## Visualize Stack Traces
 
-`0x` can profile and generate an interactive flamegraph for a Node process in a single command, on both Linux *and* OS X. Whilst this seems trivial... it's not. Well it wasn't before `0x`.
-
-## Demo
-
-![](assets/demo.gif)
-
-An example interactive flamegraph can be viewed at <http://davidmarkclements.github.io/0x-demo/>
+`0x` can profile and generate an interactive flamegraph for a Node process with a single command,
+on any platform which Node runs on (macOs, Linux, Windows, Android...).
 
 ## Support
 
-* Node v6+
+* Node v8.5.0 and above
+* Default usage supports any Operating System that Node runs on!
+* Chrome
+  * Other browsers may open flamegraphs in a degraded, but functional form 
 
-* OS
-  * Linux
-    * requires [perf](https://en.wikipedia.org/wiki/Perf_(Linux))
-  * OS X
-    * Up-to-date XCode
-  * SmartOS
-  * *not* Windows (PR's welcome)
+## Legacy
+
+Older versions of Node are supported via previous 0x versions:
+
+| 0x | Node       | macOS/SmartOS | Linux | Windows |
+|----|------------|-------|-------|---------|
+| v4 | v8.5.0+    | ☑️    | ☑️     | ☑️      |
+| v3 | v6 – v8.4.0| ☑️    | ☑️     | ⤬      |
+| v2 | v4         | ☑️    | ☑️     | ⤬      |
+
+## Demo
+
+An example interactive flamegraph can be viewed at <http://davidmarkclements.github.io/0x-demo/>
 
 ## Install
 
@@ -35,19 +40,19 @@ npm install -g 0x
 
 ## Basic Usage
 
-Prefix the usual command for starting a process with 0x:
+Use `0x` to run a script:
 
 ```sh
 0x my-app.js
 ```
 
-You can make the flamegraph automatically open in your browser with:
+Open the flamegraph automatically in the browser with:
 
 ```sh
 0x -o my-app.js
 ```
 
-Using a custom Node.js executable:
+Using a custom node executable:
 
 ```sh
 0x -- /path/to/node my-app.js
@@ -56,110 +61,72 @@ Using a custom Node.js executable:
 Passing custom arguments to node:
 
 ```sh
-0x -- node --trace-opt --trace-deopt my-app.js
+0x -- node --zero-fill-buffers my-app.js
 ```
 
 ## Generating
 
-Once we're ready to generate a flamegraph we send a SIGINT.
+When ready to generate a flamegraph, send a SIGINT.
 
 The simplest way to do this is pressing CTRL+C.
 
 When `0x` catches the SIGINT, it process the stacks and
-generates a profile folder (`<pid>.0x`), containing `flamegraph.html`
+generates a profile folder (`<pid>.0x`), containing `flamegraph.html`.
 
+## The UI
 
-## Docker
-Due to security reasons Docker containers tend to result in the following error:
-
-```bash
-Cannot read kernel map
-perf_event_open(..., PERF_FLAG_FD_CLOEXEC) failed with unexpected error 1 (Operation not permitted)
-perf_event_open(..., 0) failed unexpectedly with error 1 (Operation not permitted)
-Error:
-You may not have permission to collect stats.
-[...]
-```
-We can work around this problem by running our container with the `--privileged` option
-or add `privileged: true` in your `docker-compose.yml` file.
-See the [Docker's doc](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) for more info.
-
+The `flamegraph.html` file contains the 0x UI, which is explained in 
+[docs/ui.md](docs/ui.md).
 
 ## Production Servers
 
-Generating a flamegraph can be quite intense on CPU and memory,
-if we have restricted resources we should generate the flamegraph
-in two pieces.
+A lightweight, production server friendly, approach to generating a 
+flamegraph is described in [/docs/production-servers.md](/docs/production-servers.md).
 
-First we can use the `--collect-only` flag to purely capture stacks.
+## The Profile Folder
 
-```sh
-0x --collect-only my-app.js  #0x on the server
-```
+By default, a Profile Folder will be created and named after the PID, e.g.
+`3866.0x` (we can set this name manually using the `--output-dir` flag).
 
-Press ctrl+c when ready, this will create the usual profile folder,
-holding one file, that `stacks.$PID.out` file.
+The Profile Folder can contain the following files
 
-Now we need to transfer the stacks file from our production server
-to our local dev machine.
+* flamegraph.html - the interactive flamegraph
+* isolate-0x103000600-3866-v8.log - a v8 profiling log file
+* isolate-0x103000600-3866-v8.json - the profile log file processed into JSON
+* meta.json - additional meta data captured via processing
+* stacks.3866.json - only with `--tree-debug` flag: a JSON tree representing the captured stacks 
 
-Let's say the pid was 7777, we can generate the flamegraph locally with
+The hex address in the isolate log files (0x103000600) is set according
+to V8 internals, and will (most likely) differ each time a process is profiled. 
 
-```sh
-0x --gen stacks.7777.out # 0x locally
-```
+When used with the [`--kernel-tracing`](#--kernel-tracing) flag the Profile Folder won't
+contain the isolate V8 log or JSON files, but will contain the following:
 
-Now the hard work is done away from production, ensuring we avoid any service-level problems.
+* .stacks.3866.out - pre-processed captured stacks via kernel tracing 
+* stacks.3866.out - post-processed captured stacks via kernel tracing
 
-Alternatively if we transfer the entire folder (containing the stacks file),
-we can pass the folder to `--visualize-only`:
+## Example
 
-```sh
-0x --visualize-only 7777.0x # create a flamegraph.html in 7777.0x
-```
-
-## Memory Issues
-
-As your stack grows you may have memory issues with both Node and your browser.
-
-For Node, run with the following flag
-```
---stack-size=8024
-```
-
-For Chrome, run with the following flag
-```
---js-flags="--stack-size 8024"
-```
-
-Where 8024 is the megabytes of RAM required to run load stack. Adjust this as needed and confirm you have it to spare.
-
-## Empty Output Stacks
-
-If you are getting empty output stacks, you may have to run with `sudo`:
-```sh
-sudo 0x my-app.js
-```
-
-## Command nesting
-
-Use `--` to set the `node` executable and/or set node flags
+Clone this repo, run `npm i -g` and from the repo root run
 
 ```sh
-0x [0xFlags] -- node [nodeFlags] script.js [scriptFlags]
+0x examples/rest-api
 ```
 
-For instance
+In another tab run
 
 ```sh
-0x --open -- node --zero-fill-buffers script.js --my-own-arg
+npm run stress-rest-example
 ```
 
-## 0x Flags
+To put some load on the rest server, once that's done
+use ctrl + c to kill the server.
+
+## Command Line API
 
 ### --help | -h
 
-Print usage info
+Print usage info.
 
 ### --open | -o
 
@@ -207,31 +174,14 @@ then the HTML will go to STDOUT.
 
 Default: `{outputDir}/{name}.html`
 
-
-### --gen | -g
-
-Generate the flamegraph from a specified stacks.out file.
-The `--tiers` and `--langs` flags can also be combined with this flag.
-Outputs to STDOUT unless the `--name` flag is set, in which case 
-outputs to a file `{name}.html` in the current folder.
-
 ### --kernel-tracing
 
 Use an OS kernel tracing tool (perf on Linux or 
-dtrace on macOs and Solaris). This will capture 
+dtrace on macOS and SmartOS). This will capture 
 native stack frames (C++ modules and Libuv I/O), 
 but may result in missing stacks on Node 8.
 
-This is due to the version of V8 used in the Node 8+
-which does not expose unoptimized call frames to 
-kernel tracing tools (hence these functions will not
-appear in the flamegraph). It's possible to cause
-all functions to appear in the flamegraph with the `--kernel-tracing`
-flag when the `--always-opt` flag is passed to the `node` binary 
-(e.g. `0x --kernel-tracing node --always-opt app.js`). This can be
-useful, but it's important to bear in mind this will change
-the performance characterstics of the process so may lead to false
-positives when it comes to identifying bottlenecks.
+See [kernel-tracing doc](docs/kernel-tracing.md) for more information.
 
 Default: false 
 
@@ -250,66 +200,6 @@ use cases.
 
 Default: 2
 
-### --delay | -d
-
-Milliseconds. Delay before tracing begins (or before stacks are processed in the Linux case), allows us to ignore
-initialisation stacks (e.g. module loading).
-
-Example: `0x -d 2000 my-app.js`
-
-Default: 0
-
-### --langs | -l
-
-Color code the stacks by JS and C
-
-Example: `0x -l my-app.js`
-
-Default: false
-
-### --tiers | -t
-
-A comma separated list
-
-Overrides langs, Color code frames by type
-
-Examples: `0x -t my-app.js`
-
-Default: false
-
-### --exclude | -x
-
-Exclude tiers or langs, comma seperated list
-
-Options: v8, regexp, cpp, native, core, deps, app, js, c
-
-Examples:
-`0x -x v8,cpp,core my-app.js`
-`0x -x c my-app.js`
-
-Default: v8
-
-### --include
-
-Include tiers, Overwrites exclude. Really only useful
-for including the v8 tier (which is excluded by default).
-
-Options: v8, regexp, cpp, native, core, deps, app, js, c
-
-Example: `0x --include v8 my-app.js`
-
-Default: false
-
-### --theme
-
-Dark or Light theme
-
-Options: dark | light
-
-Example: `0x --theme light my-app.js`
-
-Default: dark
-
 ### --quiet | -q 
 
 Limit output, the only output will be fatal errors or 
@@ -320,12 +210,6 @@ Default: false
 ### --silent | -s
 
 Suppress all output, except fatal errors.
-
-Default: false
-
-### --json-stacks
-
-Save the intermediate JSON tree representation of the stacks.
 
 Default: false
 
@@ -344,69 +228,18 @@ instead of stacks file.
 
 Default: ''  
 
-### --logging-output 
-
-Specify `stdout` or `stderr` as 0x's output stream.
-
-Default: stderr
-
-### --trace-info
+### --kernel-tracing-debug
 
 Show output from dtrace or perf tools
 
 Default: false
 
-#### --timestamp-profiles
+### --tree-debug
 
-Prefixes the current timestamp to the Profile Folder's name minimizing collisions
-in containerized environments
+Save the intermediate tree representation of captured trace output to a JSON
+file.
 
-Example: `1516395452110-3866.0x`
-
-## The Profile Folder
-
-By default, a profile folder will be created and named after the PID, e.g.
-`3866.0x` (we can set this name manually using the `--output-dir` flag).
-
-The Profile Folder can contain the following files
-
-
-* flamegraph.html - the interactive flamegraph
-* isolate-0x103000600-3866-v8.log - a v8 profiling log file
-* stacks.3866.json - with `--json-stacks` flag: a JSON tree representing the captured stacks
-* stacks.3866.out - in `--kernel-tracing` mode: the traced stacks 
-
-The is helpful, because there's other things you can do with
-stacks output. For instance, checkout [cpuprofilify](http://npmjs.com/cpuprofilify) and [traceviewify](http://npmjs.com/traceviewify).
-
-## Example
-
-Want to try it out? Clone this repo, run `npm i -g` and
-from the repo root run
-
-```sh
-0x examples/rest-api
-```
-
-In another tab run
-
-```sh
-npm run stress-rest-example
-```
-
-To put some load on the rest server, once that's done
-use ctrl + c to kill the server.
-
-Now try some other options, e.g.
-
-```sh
-0x -t examples/rest-api
-```
-
-Babel (ES6 Transpile) Examples
--------
-
-See `./examples/babel` for an example. Note the babel require hook is not currently supported. Notes on using the babel-cli instead can be found in the babel example readme.
+Default: false
 
 ## Programmatic API 
 
@@ -415,20 +248,25 @@ See `./examples/babel` for an example. Note the babel require hook is not curren
 ```js
 const zeroEks = require('0x')
 const path = require('path')
-zeroEks({
-  argv: [path.join(__dirname, 'my-app.js'), '--my-flag', '"value for my flag"'],
-  workingDir: __dirname
-})
+
+async function capture () {
+  const opts = {
+    argv: [path.join(__dirname, 'my-app.js'), '--my-flag', '"value for my flag"'],
+    workingDir: __dirname
+  }
+  try {
+    const file = await zeroEks(opts)
+    console.log(`flamegraph in ${file}`)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+capture()
+
 ```
 
-### `require('0x')(opts, binary, cb)`
-
-The `cb` option is a error first callback which is invoked after a 
-profile folder has been created and populated.
-
-The `binary` option can be `false` (to default to the `node` executed resolved
-according to environment `PATH`) or a string holding the path to any 
-node binary executable.
+### `require('0x')(opts) => Promise -> assetPath`
 
 The `opts` argument is an object, with the following properties:
 
@@ -442,79 +280,30 @@ The base directory where profile folders will be placed.
 
 Default: process.cwd()
 
+#### `pathToNodeBinary` (string)
+
+The path to any node binary executable. This will be used to run execute 
+the script and arguments supplied in `argv`.
+
+Default: Node executable according to the `PATH` environment variable.
+
 #### `name` (string) 
 
 The name of the flamegraph HTML output file, without the extension.
 
-Default: flamegraph 
-
-#### `open` (boolean)
-
-See [`--open`](#--open---o)
-
-#### `quiet` (boolean)
-
-See [`--quiet`](#--quiet---q)
-
-#### `silent` (boolean)
-
-See [`--silent`](#--silent---s)
-
-#### `jsonStacks` (boolean)
-
-See [`--json-stacks`](#--json-stacks)
-
-#### `loggingOutput` (boolean)
-
-See [`--logging-output`](#--logging-output)
-
-#### `timestampProfiles` (boolean)
-
-See [`--timestamp-profiles`](#--timestamp-profiles)
-
-#### `traceInfo` (boolean)
-
-See [`--trace-info`](#--trace-info)
-
-#### `theme` (string)
-
-See [`--theme`](#--theme)
-
-#### `include` (string)
-
-See [`--include`](#--include)
-
-#### `exclude` (string)
-
-See [`--exlude`](#--exlude---x)
-
-#### `langs` (string)
-
-See [`--langs`](#--langs---l)
-
-#### `tiers` (string)
-
-See [`--tiers`](#--tiers---t)
-
-#### `gen` (string)
-
-See [`--gen`](#--gen---g)
-
-#### `outputDir` (string)
-
-See [`--output-dir`](#--output-dir---d)
-
-#### `outputHtml` (string)
-
-See [`--output-html`](#--output-html---f)
+Default: flamegraph
 
 #### `title` (string)
 
 See [`--title`](#--title)
 
-### `kernelTracing`
+#### `visualizeOnly` (string)
 
-See [`--kernel-tracing`](#--kernel-tracing)
+See [`--visualize-only`](#--visualize-only)
+
+#### `collectOnly` (boolean)
+
+See [`--collect-only`](#--collect-only)
 
 #### `phase` (number)
 
@@ -525,44 +314,62 @@ See [`--phase`](#--phase)
 Will override phase. A custom mapping function that receives 
 an array of frames and an instance of the Profiler (see [stacks-to-json-stack-tree](http://github.com/davidmarkclements/stacks-to-json-stack-tree)).
 
-Takes the form `(frames, profiler) => Array|false`. Return false to remove 
-the whole stack from the output, or return a modified array to change 
-the output. 
+Takes the form `(frames, profiler) => Array|false`. 
 
-#### `delay` (number)
+The `frames` parameter is an array of objects containing a `name` property.
 
-See [`--delay`](#--delay---d)
+Return `false` to remove the whole stack from the output, or return a 
+modified array to change the output. 
 
-#### `visualizeOnly` (string)
+#### `quiet` (boolean)
 
-See [`--visualize-only`](#--visualize-only)
+See [`--quiet`](#--quiet---q)
 
-#### `collectOnly` (boolean)
+#### `silent` (boolean)
 
-See [`--collect-only`](#--collect-only)
+See [`--silent`](#--silent---s)
 
-### `require('0x').stacksToFlamegraph(opts, binary, cb)`
+### `kernelTracing`
 
-This method will take a captured stacks input file 
-and generate a flamegraph HTML file.
+See [`--kernel-tracing`](#--kernel-tracing)
 
-It takes the same arguments as the main function, but the 
-`gen` argument (which should hold a path to the source 
-stacks file) and the `name` argument (which should specify a
-destination out file) is required. 
+#### `outputDir` (string)
 
-## v2
+See [`--output-dir`](#--output-dir---d)
 
-If you still need support for Node v4, use [0x v2.x.x](https://github.com/davidmarkclements/0x/tree/v2)
+#### `outputHtml` (string)
 
-## v1
+See [`--output-html`](#--output-html---f)
 
-Don't use v1, it was an experiment and is  non functional
-Should have be v0...
+#### `open` (boolean)
 
-## Contributions
+See [`--open`](#--open---o)
 
-Yes please!
+#### `treeDebug` (boolean)
+
+See [`--tree-debug`](#--tree-debug)
+
+#### `kernelTracingDebug` (boolean)
+
+See [`--kernel-tracing-debug`](#--kernel-tracing-debug)
+
+## Troubleshooting
+
+### Memory Issues
+
+Very complex applications with lots of stacks may hit memory issues. 
+
+The `--stack-size` flag can be used to set the memory to the maximum 8GB 
+in order to work around this when profiling:
+
+```
+node --stack-size=8024 $(which 0x) my-app.js
+```
+
+There may still be a problem opening the flamegraph in Chrome. The same work
+around can be used by opening Chrome from the command line (platform dependent)
+and nesting the `--stack-size` flag within the `--js-flags` flag: 
+`--js-flags="--stack-size 8024"`.
 
 ## Debugging
 

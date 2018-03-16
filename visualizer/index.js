@@ -16,11 +16,16 @@ module.exports = function (trees, opts) {
   const chart = graph()
   const tree = trees.unmerged // default view
   const categorizer = !kernelTracing && graph.v8cats
-  const flamegraph = fg({categorizer, tree, exclude: Array.from(exclude), element: chart})
+  const flamegraph = fg({
+    categorizer, 
+    tree, 
+    exclude: Array.from(exclude), 
+    element: chart
+  })
   const { colors } = flamegraph
 
   window.addEventListener('resize', debounce(() => {
-    const width = document.body.clientWidth * 0.85
+    const width = document.body.clientWidth * 0.89
     flamegraph.width(width).update()
     chart.querySelector('svg').setAttribute('width', width)
   }, 150))

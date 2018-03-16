@@ -2,7 +2,7 @@
 
 module.exports = (render) => Object.assign(() => render`
   <chart 
-    class='db overflow-y-scroll overflow-x-hidden' 
+    class='db overflow-y-scroll overflow-x-hidden relative' 
     style='padding-left: 5%; padding-right: 5%; height: calc(100% - 66px)'
   >
   </chart>
@@ -11,7 +11,7 @@ module.exports = (render) => Object.assign(() => render`
 function v8cats (child, merge) {
   var name = child.name
 
-  if (/\[PRE-INLINED\]/.test(name)) return {type: 'pre-inlined'}
+  if (/\[INLINABLE\]/.test(name)) return {type: 'inlinable'}
 
   if (!/\.js/.test(name)) {
     switch (true) {

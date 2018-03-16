@@ -16,7 +16,7 @@
   "author": "David Mark Clements",
   "license": "MIT",
   "engines": {
-    "node": ">=8"
+    "node": ">=8.5.0"
   },
   "bugs": {
     "url": "https://github.com/davidmarkclements/0x/issues"
@@ -27,7 +27,7 @@
     "ajv": "^6.0.1",
     "browserify": "^13.0.0",
     "concat-stream": "^1.5.2",
-    "d3-fg": "^4.2.0",
+    "d3-fg": "^6.0.0",
     "debounce": "^1.1.0",
     "debug": "^2.2.0",
     "end-of-stream": "^1.1.0",

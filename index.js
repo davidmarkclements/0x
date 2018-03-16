@@ -16,9 +16,8 @@ const { tidy, noop, isSudo } = require('./lib/util')
 
 module.exports = zeroEks
 
-async function zeroEks (args, binary) {
+async function zeroEks (args) {
   args.name = args.name || 'flamegraph'
-  args.log = args.log || noop
   args.status = args.status || noop
   validate(args)
   const { collectOnly, visualizeOnly, treeDebug, mapFrames } = args
@@ -30,6 +29,7 @@ async function zeroEks (args, binary) {
 
   args.title = args.title || 'node ' + args.argv.join(' ')
   args.mapFrames = args.mapFrames || phases[args.phase]
+  const binary = args.pathToNodeBinary
   var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary)
 
   if (treeDebug === true) {
@@ -82,7 +82,7 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
       : visualizeOnly
     const ls = fs.readdirSync(folder)
     const traceFile = /^stacks\.(.*)\.out$/
-    const isolateLog = /^isolate-(0x[0-9A-Fa-f]{2,12})-(.*)-v8.log$/
+    const isolateLog = /^isolate-(0x[0-9A-Fa-f]{2,12})-(.*)-v8\.(log|json)$/
     const stacks = ls.find((f) => isolateLog.test(f) || traceFile.test(f))
     if (!stacks) {
       throw Error('Invalid data path provided (no stacks or v8 log file found)')

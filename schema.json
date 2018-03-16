@@ -44,12 +44,6 @@
     "tree-debug": {
       "type": "boolean"
     },
-    "logging-output": {
-      "type": "boolean"
-    },
-    "loggingOutput": {
-      "type": "boolean"
-    },
     "D": {
       "type": "string"
     },
@@ -101,8 +95,9 @@
     "kernel-tracing-debug": {
       "type": "boolean"
     },
+    "pathToNodeBinary": {},
+    "path-to-node-binary": {},
     "status": {},
-    "log": {},
     "--": {
       "type": "array",
       "items": {}

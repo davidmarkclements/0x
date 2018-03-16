@@ -61,11 +61,6 @@ function linux (args, sudo, binary, cb) {
 
   status('Profiling')
 
-  if (process.stdin.isPaused()) {
-    process.stdin.resume()
-    process.stdout.write('\u001b[?25l')
-  }
-
   process.once('SIGINT', analyze)
 
   function analyze (manual) {
