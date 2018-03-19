@@ -17,7 +17,7 @@ const {
 
 module.exports = v8
 
-async function v8 (args, binary) {
+async function v8 (args, binary, onPort) {
   const { status, outputDir, workingDir, name } = args
 
   var node = !binary || binary === 'node' ? await pathTo('node') : binary
@@ -27,10 +27,13 @@ async function v8 (args, binary) {
     `--logfile=%p-v8.log`,
     '--print-opt-source',
     '-r', path.join(__dirname, '..', 'lib', 'instrument'),
-    '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
+    '-r', path.join(__dirname, '..', 'lib', 'soft-exit'),
+    onPort && '-r', onPort && path.join(__dirname, '..', 'lib', 'detect-port.js')
   ].filter(Boolean).concat(args.argv), {
-    stdio: ['ignore', 'pipe', 'inherit']
+    stdio: ['ignore', 'pipe', 'inherit', 'pipe']
   })
+
+  proc.stdio[3].once('data', data => onPort(Number(data.toString())))
 
   status('Profiling')
   const inlined = collectInliningInfo(proc)

@@ -83,7 +83,13 @@
     "collectOnly": {
       "type": "boolean"
     },
-    "kernelTracing": {
+    "on-port": {
+      "type": "string"
+    },
+    "onPort": {
+      "type": "string"
+    },
+     "kernelTracing": {
       "type": "boolean"
     },
     "kernel-tracing": {
