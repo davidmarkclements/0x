@@ -5,6 +5,7 @@ const debug = require('debug')('0x')
 const { join, isAbsolute, relative } = require('path')
 const fs = require('fs')
 const execspawn = require('execspawn')
+const envString = require('env-string')
 const validate = require('./lib/validate')(require('./schema.json'))
 const traceStacksToTicks = require('./lib/trace-stacks-to-ticks')
 const v8LogToTicks = require('./lib/v8-log-to-ticks')
@@ -52,8 +53,9 @@ async function zeroEks (args) {
   return file
 
   function spawnOnPort (port) {
-    process.env.PORT = '' + port
-    execspawn(args.onPort, {stdio: 'inherit'})
+    const env = Object.assign({}, process.env, {PORT: '' + port})
+    const script = envString(args.onPort, env)
+    execspawn(script, {stdio: 'inherit', env})
   }
 }
 
