@@ -19,7 +19,7 @@ module.exports = ({colors, trees, exclude, merged = false, kernelTracing, title}
     tiers: false,
     optimized: false,
     unoptimized: false,
-    renderOptUnopt: !kernelTracing,
+    renderMergedBtn: !kernelTracing,
     merged: merged
   },
   typeFilters: {
