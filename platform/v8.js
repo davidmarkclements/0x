@@ -25,9 +25,9 @@ async function v8 (args, binary) {
     '--prof',
     `--logfile=%p-v8.log`,
     '--print-opt-source',
-    '-r', path.join(__dirname, '..', 'lib', 'instrument'),
-    '-r', path.join(__dirname, '..', 'lib', 'soft-exit'),
-    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'detect-port.js')] : [])
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'mux-stdout'),
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
+    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].concat(args.argv), {
     stdio: ['ignore', 'pipe', 'inherit', 'pipe']
   })

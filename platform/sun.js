@@ -33,8 +33,8 @@ function sun (args, sudo, binary, cb) {
 
   args = Object.assign([
     '--perf-basic-prof',
-    '-r', path.join(__dirname, '..', 'lib', 'soft-exit'),
-    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'detect-port.js')] : [])
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
+    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].concat(args.argv), args)
 
   var proc = spawn(node, args, {

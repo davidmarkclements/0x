@@ -45,8 +45,8 @@ function linux (args, sudo, binary, cb) {
     '--',
     node,
     '--perf-basic-prof',
-    '-r', path.join(__dirname, '..', 'lib', 'soft-exit'),
-    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'detect-port.js')] : [])
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
+    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].filter(Boolean).concat(args.argv), {
     stdio: ['ignore', 'inherit', 'inherit', 'pipe']
   }).on('exit', function (code) {
