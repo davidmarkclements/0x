@@ -10,13 +10,15 @@ const { promisify } = require('util')
 const {
   getTargetFolder,
   tidy,
-  pathTo
+  pathTo,
+  spawnOnPort,
+  when
 } = require('../lib/util')
 
 module.exports = promisify(sun)
 
 function sun (args, sudo, binary, cb) {
-  const { status, outputDir, workingDir, name } = args
+  const { status, outputDir, workingDir, name, onPort } = args
 
   var dtrace = pathTo('dtrace')
   var profile = require.resolve('perf-sym/profile_1ms.d')
@@ -31,14 +33,15 @@ function sun (args, sudo, binary, cb) {
 
   args = Object.assign([
     '--perf-basic-prof',
-    '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
+    '-r', path.join(__dirname, '..', 'lib', 'soft-exit'),
+    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'detect-port.js')] : [])
   ].concat(args.argv), args)
 
   var proc = spawn(node, args, {
-    stdio: 'inherit'
+    stdio: ['ignore', 'inherit', 'inherit', 'pipe']
   }).on('exit', function (code) {
     if (code !== 0) {
-      tidy(args)
+      tidy()
       const err = Error('Target subprocess error, code: ' + code)
       err.code = code
       cb(err)
@@ -71,14 +74,22 @@ function sun (args, sudo, binary, cb) {
         }
         debug('dtrace out closed')
       })
-
-    setTimeout(status, 100, 'Profiling')
-
   }
 
-  start()
+  if (onPort) status('Profiling\n')
+  else status('Profiling')
 
-  process.once('SIGINT', analyze)
+  start()
+  
+  when(proc.stdio[3], 'data').then((port) => {
+    const whenPort = spawnOnPort(onPort, port)
+    whenPort.then(() => proc.kill('SIGINT'))
+    whenPort.catch((err) => {
+      proc.kill()
+      cb(err)
+    })
+    process.once('SIGINT', analyze)
+  })
 
   function analyze (manual) {
     if (analyze.called) { return }
@@ -87,7 +98,7 @@ function sun (args, sudo, binary, cb) {
     if (!prof) {
       debug('Profiling not begun')
       status('No stacks, profiling had not begun\n')
-      tidy(args)
+      tidy()
       cb(Error('Profiling not begun'))
       return
     }
@@ -112,7 +123,7 @@ function sun (args, sudo, binary, cb) {
         } else {
           status('Unable to find map file!\n')
           debug('Unable to find map file after multiple attempts')
-          tidy(args)
+          tidy()
           cb(Error('0x: Unable to find map file'))
           return
         }
@@ -129,7 +140,7 @@ function sun (args, sudo, binary, cb) {
           return
         }
         debug('Unable to find map file after multiple attempts')
-        tidy(args)
+        tidy()
         cb(Error('Unable to find map file'))
         return
       }

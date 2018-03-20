@@ -118,6 +118,33 @@ Print usage info.
 Open the flamegraph in the browser using `open` or `xdg-open` (see
 https://www.npmjs.com/package/open for details).
 
+## --on-port | -P          
+
+Run a given command and then generate the flamegraph. 
+The command as specified has access to a `$PORT` variable. 
+The `$PORT` variable is set according to the first port that 
+profiled process opens. 
+
+For instance, here's an example of using [autocannon](http://npm.im/autocannon) 
+to load-test the process:
+
+```sh
+0x -P 'autocannon localhost:$PORT' app.js
+```
+
+When the load-test completes, the profiled processed will be 
+sent a SIGINT and the flamegraph will be automatically generated.  
+
+Remember to use single quotes to avoid bash interpolation,
+or else escape variable (e.g. `0x -P "autocannon localhost:$PORT" app.js`
+won't work wheras `0x -P "autocannon localhost:\$PORT" app.js` will).
+
+Note: On Windows interpolation usually occurs with `%PORT%`, however
+in this case the dollar-prefix `$PORT` is the correct syntax 
+(because the interpolation is not shell based). 
+
+Default: ''
+
 ### --name
 
 The name of the HTML file, without the .html extension

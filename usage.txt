@@ -1,6 +1,21 @@
   --open | -o             Automatically open after finishing
                           Default: false
 
+  --on-port | -P          Run a given command and then generate
+                          the flamegraph. The command as specified
+                          has access to a $PORT variable. 
+                          The $PORT variable is set according
+                          to the first port that profiled process 
+                          opens. 
+
+                          Example: 
+                          0x -P 'autocannon localhost:$PORT' app.js
+
+                          Note: Remember to use single quotes or else
+                          escape the $PORT variable.
+
+                          Default: ''
+
   --phase                 Stage in initialization to begin aggregating
                           stacks. Phase 0 visualizes from the very start,
                           this includes bootstrapping stacks and loading 

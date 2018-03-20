@@ -9,13 +9,15 @@ const { promisify } = require('util')
 const {
   getTargetFolder,
   tidy,
-  pathTo
+  pathTo,
+  spawnOnPort,
+  when
 } = require('../lib/util')
 
 module.exports = promisify(linux)
 
 function linux (args, sudo, binary, cb) {
-  const { status, outputDir, workingDir, name } = args
+  const { status, outputDir, workingDir, name, onPort } = args
   var perf = pathTo('perf')
   if (!perf) return void cb(Error('Unable to locate dtrace - make sure it\'s in your PATH'))
   if (!sudo) {
@@ -43,9 +45,10 @@ function linux (args, sudo, binary, cb) {
     '--',
     node,
     '--perf-basic-prof',
-    '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
+    '-r', path.join(__dirname, '..', 'lib', 'soft-exit'),
+    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'detect-port.js')] : [])
   ].filter(Boolean).concat(args.argv), {
-    stdio: ['ignore', 'inherit', 'inherit']
+    stdio: ['ignore', 'inherit', 'inherit', 'pipe']
   }).on('exit', function (code) {
     if (code !== null && code !== 0 && code !== 143 && code !== 130) {
       tidy(args)
@@ -59,9 +62,18 @@ function linux (args, sudo, binary, cb) {
 
   var folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
 
-  status('Profiling')
+  if (onPort) status('Profiling\n')
+  else status('Profiling')
 
-  process.once('SIGINT', analyze)
+  when(proc.stdio[3], 'data').then((port) => {
+    const whenPort = spawnOnPort(onPort, port)
+    whenPort.then(() => proc.kill('SIGINT'))
+    whenPort.catch((err) => {
+      proc.kill()
+      cb(err)
+    })
+    process.once('SIGINT', analyze)
+  })
 
   function analyze (manual) {
     if (analyze.called) { return }

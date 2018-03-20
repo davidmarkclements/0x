@@ -89,6 +89,9 @@
     "onPort": {
       "type": "string"
     },
+    "P": {
+      "type": "string"
+    },    
      "kernelTracing": {
       "type": "boolean"
     },

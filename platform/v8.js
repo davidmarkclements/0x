@@ -6,52 +6,59 @@ const pump = require('pump')
 const split = require('split2')
 const through = require('through2')
 const debug = require('debug')('0x')
-
 const v8LogToTicks = require('../lib/v8-log-to-ticks')
 
 const {
   getTargetFolder,
-  tidy,
-  pathTo
+  pathTo,
+  spawnOnPort,
+  when
 } = require('../lib/util')
 
 module.exports = v8
 
-async function v8 (args, binary, onPort) {
-  const { status, outputDir, workingDir, name } = args
+async function v8 (args, binary) {
+  const { status, outputDir, workingDir, name, onPort } = args
 
   var node = !binary || binary === 'node' ? await pathTo('node') : binary
-
   var proc = spawn(node, [
     '--prof',
     `--logfile=%p-v8.log`,
     '--print-opt-source',
     '-r', path.join(__dirname, '..', 'lib', 'instrument'),
     '-r', path.join(__dirname, '..', 'lib', 'soft-exit'),
-    onPort && '-r', onPort && path.join(__dirname, '..', 'lib', 'detect-port.js')
-  ].filter(Boolean).concat(args.argv), {
+    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'detect-port.js')] : [])
+  ].concat(args.argv), {
     stdio: ['ignore', 'pipe', 'inherit', 'pipe']
   })
 
-  proc.stdio[3].once('data', data => onPort(Number(data.toString())))
-
-  status('Profiling')
   const inlined = collectInliningInfo(proc)
 
-  const { code } = await Promise.race([
-    new Promise((resolve) => process.once('SIGINT', () => resolve({code: 0}))),
-    new Promise((resolve) => proc.once('exit', (code) => resolve({code})))
+  if (onPort) status('Profiling\n')
+  else status('Profiling')
+
+  const whenPort = spawnOnPort(onPort, await when(proc.stdio[3], 'data'))
+   
+  const code = await Promise.race([
+    new Promise((resolve) => process.once('SIGINT', resolve)),
+    new Promise((resolve) => proc.once('exit', (code) => {
+      resolve(code)
+    })),
+    new Promise((resolve, reject) => {
+      whenPort.then(() => proc.kill('SIGINT'))
+      whenPort.catch((err) => {
+        proc.kill()
+        reject(err)
+      })
+    })
   ])
 
-  if (code !== 0) {
-    tidy(args)
-    const err = Error('Target subprocess error, code: ' + code)
-    err.code = code
-    throw err
+  if (code|0 !== 0) {
+    throw Object.assign(Error('Target subprocess error, code: ' + code), { code })
   }
 
   const folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
-  
+
   status('Process exited, generating flamegraph')
 
   debug('moving isolate file into folder')
@@ -62,9 +69,7 @@ async function v8 (args, binary, onPort) {
   if (!isolateLog) throw Error('no isolate logfile found')
 
   const isolateLogPath = path.join(folder, isolateLog)
-
   fs.renameSync(path.join(args.workingDir, isolateLog), isolateLogPath)
-
   return {
     ticks: await v8LogToTicks(isolateLogPath),
     inlined: inlined,

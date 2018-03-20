@@ -50,7 +50,9 @@ async function cmd (argv, banner = defaultBanner) {
       collectOnly: 'collect-only',
       kernelTracing: 'kernel-tracing',
       kernelTracingDebug: 'kernel-tracing-debug',
-      treeDebug: 'tree-debug'
+      treeDebug: 'tree-debug',
+      onPort: 'on-port',
+      P: 'onPort'
     },
     default: {
       phase: 2

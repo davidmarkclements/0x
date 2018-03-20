@@ -4,8 +4,6 @@ const { sun, linux, windows, v8 } = require('./platform')
 const debug = require('debug')('0x')
 const { join, isAbsolute, relative } = require('path')
 const fs = require('fs')
-const execspawn = require('execspawn')
-const envString = require('env-string')
 const validate = require('./lib/validate')(require('./schema.json'))
 const traceStacksToTicks = require('./lib/trace-stacks-to-ticks')
 const v8LogToTicks = require('./lib/v8-log-to-ticks')
@@ -31,9 +29,8 @@ async function zeroEks (args) {
 
   args.title = args.title || 'node ' + args.argv.join(' ')
   args.mapFrames = args.mapFrames || phases[args.phase]
-  const onPort = args.onPort && spawnOnPort
   const binary = args.pathToNodeBinary
-  var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary, onPort)
+  var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary)
 
   if (treeDebug === true) {
     const tree = await ticksToTree(ticks, args, mapFrames, inlined)
@@ -49,24 +46,23 @@ async function zeroEks (args) {
     return folder
   }
 
-  const file = await generateFlamegraph({...args, ticks, inlined, pid, folder})
-  return file
-
-  function spawnOnPort (port) {
-    const env = Object.assign({}, process.env, {PORT: '' + port})
-    const script = envString(args.onPort, env)
-    execspawn(script, {stdio: 'inherit', env})
+  try {
+    const file = await generateFlamegraph({...args, ticks, inlined, pid, folder})
+    return file
+  } catch (err) {
+    tidy()
+    throw err
   }
 }
 
-async function startProcessAndCollectTraceData (args, binary, onport) {
+async function startProcessAndCollectTraceData (args, binary) {
   if (!Array.isArray(args.argv)) {
     throw Error('argv option is required')
   }
   args.name = args.name || 'flamegraph'
 
   switch (args.kernelTracing ? platform : 'v8') {
-    case 'v8': return v8(args, binary, onport)
+    case 'v8': return v8(args, binary)
     case 'linux': return linux(args, await isSudo(), binary)
     case 'win32': return windows()
     default: return sun(args, await isSudo(), binary)

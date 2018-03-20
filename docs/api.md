@@ -27,6 +27,18 @@ The name of the flamegraph HTML output file, without the extension.
 
 Default: flamegraph
 
+#### `onPort` (string)
+
+Run a given command and then generate the flamegraph. 
+The command as specified has access to a `$PORT` variable. 
+The `$PORT` variable is set according to the first port that 
+profiled process opens. 
+
+When the load-test completes, the profiled processed will be 
+sent a SIGINT and the flamegraph will be automatically generated.  
+
+Default: ''
+
 #### `title` (string)
 
 Set the title to display in the flamegraph UI.
