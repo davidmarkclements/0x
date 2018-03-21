@@ -33,7 +33,8 @@ module.exports = ({colors, trees, exclude, merged = false, kernelTracing, title}
       native: '#fff',
       cpp: '#fff',
       regexp: '#fff',
-      v8: '#fff'
+      v8: '#fff',
+      init: '#fff'
     },
     highlighted: {
       inlinable: `rgb(${hsl(
@@ -75,6 +76,11 @@ module.exports = ({colors, trees, exclude, merged = false, kernelTracing, title}
         colors.v8.h,
         colors.v8.s / 100 * 1.2,
         colors.v8.l / 100 * 1.2
+      )})`,
+      init: `rgb(${hsl(
+        colors.init.h,
+        colors.init.s / 100 * 1.2,
+        colors.init.l / 100 * 1.2
       )})`
     },
     exclude

@@ -102,6 +102,10 @@ in an Unmerged flamegraph.
 Inlinable blocks are functions that are captured during profiling, which later become inlined 
 into their parent calling function. These blocks include the tag [INLINABLE].
 
+Inlinable blocks take precedent over app, deps and core blocks. This means if a 
+frame is app, deps or core but also inlinable, it will be shown when inlinable is 
+enabled regardless of whether app, deps or core are enabled.
+
 Enabled by default.
 
 #### native
@@ -116,11 +120,11 @@ will also appear as native frames, such functions have the function name `[eval]
 
 Disabled by default.
 
-#### regexp
+#### rx
 
-Regular expressions are also captured as "frames". In this case the regular expression 
-notation fills in as the "function name" portion of the block label. This can be useful
-in identifying slow regular expressions 
+Rx stands to Regular Expressions. Regular expressions are also captured as "frames". 
+In this case the regular expression notation fills in as the "function name" portion 
+of the block label. This can be useful in identifying slow regular expressions 
 (in particular [exponential time regular expressions](https://perlgeek.de/blog-en.cgi/perl-tips/in-search-of-an-exponetial-regexp.html)). 
 
 These will have the tag `[CODE:RegExp]`.
@@ -139,3 +143,24 @@ These are C++ frames that are called by the V8 layer, they do not include C++ fr
 that may be called in Node, Libuv or third party modules. In `--kernel-tracing` mode,
 however, non-V8 C++ frames *are* included. These frames can include the tags 
 `[CPP]` and `[SHARED_LIB]`.
+
+#### init
+
+The init category describes core functions that are either:
+
+* internal module system functions which are repeated frequently 
+as the dependency tree is loaded
+* other initialization functions that aren't related to the (public) module system
+
+Filtering out these frames reduces generally redundant initialization 
+noise.
+
+These frames include the `[INIT]` tag, but may also include any of the other tags.
+
+Any core frames that are also init frames are controlled by the init type 
+(e.g hiding core frames wont hide any core frames that are also init frames).
+
+However, any cpp frames that are also init frames are controlled by the cpp 
+type (e.g. hiding init frames wont hide cpp frames that are also init frames). 
+
+Disabled by default.

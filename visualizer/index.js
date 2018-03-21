@@ -11,7 +11,7 @@ const ui = require('./cmp/ui')(render)
 module.exports = function (trees, opts) {
   opts = opts || {}
   const { kernelTracing } = opts
-  const exclude = new Set(['cpp', 'regexp', 'v8', 'native'])
+  const exclude = new Set(['cpp', 'regexp', 'v8', 'native', 'init'])
 
   const chart = graph()
   const tree = trees.unmerged // default view

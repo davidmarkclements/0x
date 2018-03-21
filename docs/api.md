@@ -59,24 +59,9 @@ with relevant outputs.
 
 Default: false
 
-#### `phase` (number)
-
-Stage in initialization to begin aggregating stacks. 
-
-`phase: 0` visualizes from the very start, this includes bootstrapping 
-stacks and loading the application module tree (these can dominate the flamegraph). 
-
-`phase: 1` excludes core bootstrapping stacks, except the end of the boostrapping process 
-where the application module tree is loaded from the entry point. 
-
-`phase: 2` excludes all initialization, this renders the most pragmatic flamegraph for most 
-use cases.
-
-Default: 2
-
 #### `mapFrames` (function)
 
-Will override phase. A custom mapping function that receives 
+A custom mapping function that receives 
 an array of frames and an instance of the Profiler (see [stacks-to-json-stack-tree](http://github.com/davidmarkclements/stacks-to-json-stack-tree)).
 
 Takes the form `(frames, profiler) => Array|false`. 

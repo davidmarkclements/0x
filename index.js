@@ -8,7 +8,6 @@ const validate = require('./lib/validate')(require('./schema.json'))
 const traceStacksToTicks = require('./lib/trace-stacks-to-ticks')
 const v8LogToTicks = require('./lib/v8-log-to-ticks')
 const ticksToTree = require('./lib/ticks-to-tree')
-const phases = require('./lib/phases')
 const render = require('./lib/render')
 
 const platform = process.platform
@@ -28,7 +27,6 @@ async function zeroEks (args) {
   if (visualizeOnly) return visualize(args)
 
   args.title = args.title || 'node ' + args.argv.join(' ')
-  args.mapFrames = args.mapFrames || phases[args.phase]
   const binary = args.pathToNodeBinary
   var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary)
 
@@ -109,7 +107,6 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
     title = title || meta.title
     name = name || meta.name
 
-    mapFrames = mapFrames || phases['phase' in meta ? meta.phase : phase]
     const ticks = (srcType === 'v8')
       ? await v8LogToTicks(src)
       : traceStacksToTicks(src)
@@ -126,7 +123,6 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
       title,
       name,
       mapFrames,
-      phase,
       open,
       ticks,
       inlined,

@@ -37,20 +37,18 @@ async function v8 (args, binary) {
   if (onPort) status('Profiling\n')
   else status('Profiling')
 
-  const whenPort = spawnOnPort(onPort, await when(proc.stdio[3], 'data'))
-   
+  const whenPort = onPort && spawnOnPort(onPort, await when(proc.stdio[3], 'data'))
+
   const code = await Promise.race([
     new Promise((resolve) => process.once('SIGINT', resolve)),
-    new Promise((resolve) => proc.once('exit', (code) => {
-      resolve(code)
-    })),
-    new Promise((resolve, reject) => {
+    new Promise((resolve) => proc.once('exit', (code) => resolve(code))),
+    ...(onPort ? [new Promise((resolve, reject) => {
       whenPort.then(() => proc.kill('SIGINT'))
       whenPort.catch((err) => {
         proc.kill()
         reject(err)
       })
-    })
+    })] : [])
   ])
 
   if (code|0 !== 0) {

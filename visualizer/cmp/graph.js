@@ -8,7 +8,7 @@ module.exports = (render) => Object.assign(() => render`
   </chart>
 `, { v8cats })
 
-function v8cats (child, merge) {
+function v8cats (child) {
   var name = child.name
 
   if (/\[INLINABLE\]/.test(name)) return {type: 'inlinable'}
@@ -27,6 +27,8 @@ function v8cats (child, merge) {
       default: return {type: 'v8'}
     }
   }
+
+  if (/\[INIT\]/.test(name)) return {type: 'init'}
 
   switch (true) {
     case / native /.test(name): return {type: 'native'}

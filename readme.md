@@ -199,21 +199,6 @@ See [docs/kernel-tracing.md](docs/kernel-tracing.md) for more information.
 
 Default: false 
 
-### --phase
-
-Stage in initialization to begin aggregating stacks. 
-
-`--phase=0` visualizes from the very start, this includes bootstrapping 
-stacks and loading the application module tree (these can dominate the flamegraph). 
-
-`--phase=1` excludes core bootstrapping stacks, except the end of the boostrapping process 
-where the application module tree is loaded from the entry point. 
-
-`--phase=2` excludes all initialization, this renders the most pragmatic flamegraph for most 
-use cases.
-
-Default: 2
-
 ### --quiet | -q 
 
 Limit output, the only output will be fatal errors or 

@@ -30,7 +30,6 @@ async function cmd (argv, banner = defaultBanner) {
   var args = minimist(argv, {
     stopEarly: true,
     '--': true,
-    number: ['phase'],
     boolean: [
       'open', 'version', 'help', 'quiet',
       'silent', 'treeDebug', 'kernelTracingDebug',
@@ -53,9 +52,6 @@ async function cmd (argv, banner = defaultBanner) {
       treeDebug: 'tree-debug',
       onPort: 'on-port',
       P: 'onPort'
-    },
-    default: {
-      phase: 2
     }
   })
 

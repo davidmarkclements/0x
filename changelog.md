@@ -52,6 +52,8 @@
 * API: removed `open` (still part of CLI)
 * CLI: add `--on-port` flag
 * API: add `onPort` option
+* CLI: removed `--phase` flag
+* API: removed `phase` option
 
 # v3.4.1
 * break out the ui and stack converter portions into separate modules: d3-fg and stacks-to-json-tree.

@@ -68,9 +68,6 @@
     "name": {
       "type": "string"
     },
-    "phase": {
-      "type": "number"
-    },
     "visualize-only": {
       "type": "string"
     },
