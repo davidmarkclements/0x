@@ -13,7 +13,7 @@ Discover the bottlenecks and hot paths in your code, with flamegraphs.
 
 ![](assets/demo.gif)
 
-An example interactive flamegraph can be viewed at <http://davidmarkclements.github.io/0x-demo/>
+An example interactive flamegraph can be viewed at <http://davidmarkclements.github.io/0x-demo/v3.html>
 
 ## Support
 
