@@ -38,7 +38,7 @@ An example interactive flamegraph can be viewed at <http://davidmarkclements.git
 npm install -g 0x
 ```
 
-## Basic Usage
+## Usage
 
 Use `0x` to run a script:
 
@@ -46,19 +46,26 @@ Use `0x` to run a script:
 0x my-app.js
 ```
 
-Open the flamegraph automatically in the browser with:
+Immediately open the flamegraph in the browser:
 
 ```sh
 0x -o my-app.js
 ```
 
-Using a custom node executable:
+Automatically execute profiling command against the first
+port opened by profiled process:
+
+```sh
+0x -P 'autocannon localhost:$PORT' my-app.js
+```
+
+Use a custom node executable:
 
 ```sh
 0x -- /path/to/node my-app.js
 ```
 
-Passing custom arguments to node:
+Pass custom arguments to node:
 
 ```sh
 0x -- node --zero-fill-buffers my-app.js
