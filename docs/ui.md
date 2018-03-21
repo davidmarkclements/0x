@@ -122,7 +122,7 @@ Disabled by default.
 
 #### rx
 
-Rx stands to Regular Expressions. Regular expressions are also captured as "frames". 
+Rx stands for Regular Expressions. Regular expressions are also captured as "frames". 
 In this case the regular expression notation fills in as the "function name" portion 
 of the block label. This can be useful in identifying slow regular expressions 
 (in particular [exponential time regular expressions](https://perlgeek.de/blog-en.cgi/perl-tips/in-search-of-an-exponetial-regexp.html)). 
