@@ -1,48 +1,41 @@
 'use strict'
 const fs = require('fs')
 const path = require('path')
-const spawn = require('child_process').spawn
-const pump = require('pump')
-const split = require('split2')
-const through = require('through2')
+const { spawn } = require('child_process')
 const debug = require('debug')('0x')
+const traceStacksToTicks = require('../lib/trace-stacks-to-ticks')
+const { promisify } = require('util')
 
 const {
-  determineOutputDir,
-  ensureDirExists,
-  stacksToFlamegraphStream,
+  getTargetFolder,
   tidy,
   pathTo,
-  notFound,
-  v8ProfFlamegraph
+  spawnOnPort,
+  when
 } = require('../lib/util')
 
-module.exports = linux
+module.exports = promisify(linux)
 
-function linux (args, sudo, binary) {
-  const { log, status, ee } = args
-  var perf = pathTo(args, 'perf')
-  if (!perf) return notFound(args, 'perf')
-
+function linux (args, sudo, binary, cb) {
+  const { status, outputDir, workingDir, name, onPort } = args
+  var perf = pathTo('perf')
+  if (!perf) return void cb(Error('Unable to locate dtrace - make sure it\'s in your PATH'))
   if (!sudo) {
-    log('0x captures stacks using perf, which requires sudo access\n')
+    status('Stacks are captured using perf(1), which requires sudo access\n')
     return spawn('sudo', ['true'])
-      .on('exit', function () { linux(args, true, binary) })
+      .on('exit', function () { linux(args, true, binary, cb) })
   }
 
-  var node = !binary || binary === 'node' ? pathTo(args, 'node') : binary
+  var node = !binary || binary === 'node' ? pathTo('node') : binary
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
-  var traceInfo = args.traceInfo
-  var delay = args.delay || args.d
-  delay = parseInt(delay, 10)
-  if (isNaN(delay)) { delay = 0 }
+  var kernelTracingDebug = args.kernelTracingDebug
 
   var proc = spawn('sudo', [
     '-E',
     'perf',
     'record',
-    !traceInfo ? '-q' : '',
+    !kernelTracingDebug ? '-q' : '',
     '-e',
     'cpu-clock',
     '-F 1000', // 1000 samples per sec === 1ms profiling like dtrace
@@ -51,33 +44,36 @@ function linux (args, sudo, binary) {
     perfdat,
     '--',
     node,
-    ...(args.profViz ? ['--prof', `--logfile=${uid}-v8.log`] : []),
     '--perf-basic-prof',
-    '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
+    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].filter(Boolean).concat(args.argv), {
-    stdio: ['ignore', 'inherit', 'inherit']
+    stdio: ['ignore', 'inherit', 'inherit', 'pipe']
   }).on('exit', function (code) {
     if (code !== null && code !== 0 && code !== 143 && code !== 130) {
       tidy(args)
-      const err = Error('0x: Tracing subprocess error, code: ' + code)
+      const err = Error('Tracing subprocess error, code: ' + code)
       err.code = code
-      ee.emit('error', err, code)
+      cb(Error(err))
       return
     }
     analyze(true)
   })
 
-  var folder = determineOutputDir(args, proc)
-  ensureDirExists(folder)
+  var folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
 
-  setTimeout(status, delay || 100, 'Profiling')
+  if (onPort) status('Profiling\n')
+  else status('Profiling')
 
-  if (process.stdin.isPaused()) {
-    process.stdin.resume()
-    log('\u001b[?25l')
-  }
-
-  process.once('SIGINT', analyze)
+  when(proc.stdio[3], 'data').then((port) => {
+    const whenPort = spawnOnPort(onPort, port)
+    whenPort.then(() => proc.kill('SIGINT'))
+    whenPort.catch((err) => {
+      proc.kill()
+      cb(err)
+    })
+    process.once('SIGINT', analyze)
+  })
 
   function analyze (manual) {
     if (analyze.called) { return }
@@ -94,62 +90,25 @@ function linux (args, sudo, binary) {
     }
 
     function generate () {
-      if (args.profViz) v8ProfFlamegraph(args, {pid: uid, folder}, next)
-      else next()
+      var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat], {
+        stdio: [
+          'ignore',
+          fs.openSync(folder + '/stacks.' + proc.pid + '.out', 'w'),
+          kernelTracingDebug ? process.stderr : 'ignore'
+        ]
+      })
 
-      function next() {
-        
-        var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat], {
-          stdio: [
-            'ignore', 
-            fs.openSync(folder + '/stacks.' + proc.pid + '.out', 'w'),
-            traceInfo ? process.stderr : 'ignore'
-          ]
+      stacks.on('exit', function () {
+        cb(null, {
+          ticks: traceStacksToTicks(folder + '/stacks.' + proc.pid + '.out'),
+          pid: proc.pid,
+          folder: folder
         })
-
-        stacks.on('exit', function () {
-          if (delay > 0) {
-            pump(
-              fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-              filterBeforeDelay(delay),
-              stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
-            )
-          } else {
-            pump(
-              fs.createReadStream(folder + '/stacks.' + proc.pid + '.out'),
-              stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => status(''))
-            )
-          }
-        })
-      }
+      })
     }
 
     spawn('sudo', ['kill', '-SIGINT', '' + proc.pid], {
       stdio: 'inherit'
     })
   }
-}
-
-
-function filterBeforeDelay (delay) {
-  var start
-  var pastDelay
-
-  return through(function (line, enc, cb) {
-    var diff
-    line += ''
-    if (/cpu-clock:/.test(line)) {
-      if (!start) {
-        start = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10)
-      } else {
-        diff = parseInt(parseFloat(line.match(/[0-9]+\.[0-9]+:/)[0], 10) * 1000, 10) - start
-        pastDelay = (diff > delay)
-      }
-    }
-    if (pastDelay) {
-      cb(null, line + '\n')
-    } else {
-      cb()
-    }
-  })
 }

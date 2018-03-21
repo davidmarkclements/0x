@@ -3,56 +3,48 @@ const fs = require('fs')
 const path = require('path')
 const spawn = require('child_process').spawn
 const pump = require('pump')
-const split = require('split2')
 const sym = require('perf-sym')
 const debug = require('debug')('0x')
-
+const traceStacksToTicks = require('../lib/trace-stacks-to-ticks')
+const { promisify } = require('util')
 const {
-  determineOutputDir,
-  ensureDirExists,
-  stacksToFlamegraphStream,
+  getTargetFolder,
   tidy,
   pathTo,
-  notFound,
-  v8ProfFlamegraph
+  spawnOnPort,
+  when
 } = require('../lib/util')
 
-module.exports = sun
+module.exports = promisify(sun)
 
-function sun (args, sudo, binary) {
-  const { status, log, ee } = args
-  var dtrace = pathTo(args, 'dtrace')
+function sun (args, sudo, binary, cb) {
+  const { status, outputDir, workingDir, name, onPort } = args
+
+  var dtrace = pathTo('dtrace')
   var profile = require.resolve('perf-sym/profile_1ms.d')
-  if (!dtrace) return notFound(args, 'dtrace')
+  if (!dtrace) return void cb(Error('Unable to locate dtrace - make sure it\'s in your PATH'))
   if (!sudo) {
-    log('0x captures stacks using dtrace, which requires sudo access\n')
+    status('Stacks are captured using DTrace, which requires sudo access\n')
     return spawn('sudo', ['true'])
-      .on('exit', function () { sun(args, true, binary) })
+      .on('exit', function () { sun(args, true, binary, cb) })
   }
-  var node = !binary || binary === 'node' ? pathTo(args, 'node') : binary
-  var traceInfo = args.traceInfo
-  var delay = args.delay || args.d
-  delay = parseInt(delay, 10)
-  if (isNaN(delay)) { delay = 0 }
+  var node = !binary || binary === 'node' ? pathTo('node') : binary
+  var kernelTracingDebug = args.kernelTracingDebug
 
   args = Object.assign([
     '--perf-basic-prof',
-    '-r', path.join(__dirname, '..', 'lib', 'soft-exit')
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
+    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].concat(args.argv), args)
 
-  if (args.profViz) {
-    args.unshift('--prof')
-    args.unshift('--logfile=%p-v8.log')    
-  }
-
   var proc = spawn(node, args, {
-    stdio: 'inherit'
+    stdio: ['ignore', 'inherit', 'inherit', 'pipe']
   }).on('exit', function (code) {
     if (code !== 0) {
-      tidy(args)
-      const err = Error('0x Target subprocess error, code: ' + code)
+      tidy()
+      const err = Error('Target subprocess error, code: ' + code)
       err.code = code
-      ee.emit('error', err, code)
+      cb(err)
       return
     }
     analyze(true)
@@ -64,10 +56,9 @@ function sun (args, sudo, binary) {
   function start () {
     prof = spawn('sudo', [profile, '-p', proc.pid])
 
-    if (traceInfo) { prof.stderr.pipe(process.stderr) }
+    if (kernelTracingDebug) { prof.stderr.pipe(process.stderr) }
 
-    folder = determineOutputDir(args, proc)
-    ensureDirExists(folder)
+    folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
 
     prof.on('exit', function (code) {
       profExited = true
@@ -78,28 +69,27 @@ function sun (args, sudo, binary) {
       fs.createWriteStream(path.join(folder, '.stacks.' + proc.pid + '.out')),
       function (err) {
         if (err) {
-          status(err.message)
-          ee.emit('error', err)
+          cb(err)
           return
         }
         debug('dtrace out closed')
       })
-
-    setTimeout(status, 100, 'Profiling')
-
-    if (process.stdin.isPaused()) {
-      process.stdin.resume()
-      log('\u001b[?25l')
-    }
   }
 
-  if (delay) {
-    setTimeout(start, delay)
-  } else {
-    start()
-  }
+  if (onPort) status('Profiling\n')
+  else status('Profiling')
 
-  process.once('SIGINT', analyze)
+  start()
+  
+  when(proc.stdio[3], 'data').then((port) => {
+    const whenPort = spawnOnPort(onPort, port)
+    whenPort.then(() => proc.kill('SIGINT'))
+    whenPort.catch((err) => {
+      proc.kill()
+      cb(err)
+    })
+    process.once('SIGINT', analyze)
+  })
 
   function analyze (manual) {
     if (analyze.called) { return }
@@ -107,15 +97,15 @@ function sun (args, sudo, binary) {
 
     if (!prof) {
       debug('Profiling not begun')
-      log('No stacks, profiling had not begun\n')
-      tidy(args)
-      ee.emit('error', Error('0x: Profiling not begun'))
-      return 
+      status('No stacks, profiling had not begun\n')
+      tidy()
+      cb(Error('Profiling not begun'))
+      return
     }
 
     if (!manual) {
       debug('Caught SIGINT, generating flamegraph')
-      status('Caught SIGINT, generating flamegraph ')
+      status('Caught SIGINT, generating flamegraph')
     }
 
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
@@ -133,43 +123,40 @@ function sun (args, sudo, binary) {
         } else {
           status('Unable to find map file!\n')
           debug('Unable to find map file after multiple attempts')
-          tidy(args)
-          ee.emit('error', Error('0x: Unable to find map file'))
+          tidy()
+          cb(Error('0x: Unable to find map file'))
           return
         }
         return
       }
-      if (args.profViz) v8ProfFlamegraph(args, {folder, pid: proc.pid}, next)
-      else next()
-      function next () { 
-        var translate = sym({silent: true, pid: proc.pid})
+      var translate = sym({silent: true, pid: proc.pid})
 
-        if (!translate) {
-          debug('unable to find map file')
-          if (attempts) {
-            status('Unable to find map file - waiting 300ms and retrying\n')
-            debug('retrying')
-            setTimeout(capture, 300, attempts--)
-            return
-          }
-          status('Unable to find map file!\n')
-          debug('Unable to find map file after multiple attempts')
-          tidy(args)
-          ee.emit('error', Error('0x: Unable to find map file'))
+      if (!translate) {
+        debug('unable to find map file')
+        if (attempts) {
+          status('Unable to find map file - waiting 300ms and retrying\n')
+          debug('retrying')
+          setTimeout(capture, 300, attempts--)
           return
         }
-        pump(
-          fs.createReadStream(folder + '/.stacks.' + proc.pid + '.out'),
-          translate,
-          fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out')
-        )
-        pump(
-          translate,
-          stacksToFlamegraphStream(args, {pid: proc.pid, folder}, null, () => {
-            status('')
-          })
-        )
+        debug('Unable to find map file after multiple attempts')
+        tidy()
+        cb(Error('Unable to find map file'))
+        return
       }
+      pump(
+        fs.createReadStream(folder + '/.stacks.' + proc.pid + '.out'),
+        translate,
+        fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out'),
+        (err) => {
+          if (err) return void cb(err)
+          cb(null, {
+            ticks: traceStacksToTicks(folder + '/stacks.' + proc.pid + '.out'),
+            pid: proc.pid,
+            folder: folder
+          })
+        }
+      )
     }
   }
 }

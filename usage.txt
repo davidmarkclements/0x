@@ -1,51 +1,47 @@
-  --name                  The name of the HTML file, without the .html extension
-                          Can be set to - to write HTML to STDOUT (note
-                          due to the nature of CLI argument parsing, this must 
-                          be set using =, e.g. --name=-)
-
-                          If either this flag or --output-html-file is set to - 
-                          then the HTML will go to STDOUT.
-
-                          Default: flamegraph
-
-  --title                 Set the title to display in the flamegraph UI
-                          Default: node [nodeFlags] script.js
-
   --open | -o             Automatically open after finishing
+                          
                           Default: false
 
-  --prof-viz              Experimental. Node 8+ only. Create an additional 
-                          flamegraph using log output when from the V8 --prof.
-                          This will create an additional flamegraph named according 
-                          to the --name flag, prefixed with v8-prof-. If --name 
-                          is set to - then flamegraph HTML will be streamed
-                          to STDOUT. 
+  --on-port | -P          Run a given command and then generate
+                          the flamegraph. The command as specified
+                          has access to a $PORT variable. 
+                          The $PORT variable is set according
+                          to the first port that profiled process 
+                          opens. 
 
-  --prof-only             Experimental. Only create the prof-viz flamegraph 
+                          Example: 
+                          0x -P 'autocannon localhost:$PORT' app.js
 
-  --phase                 Stage in initialization to begin aggregating
-                          stacks. Phase 0 visualizes from the very start,
-                          this includes bootstrapping stacks and loading 
-                          the application module tree (these can dominate
-                          the flamegraph). Phase 1 excludes core bootstrapping
-                          stacks, except the end of the boostrapping process 
-                          where the application module tree is loaded from 
-                          the entry point. Phase 2 excludes all initialization, 
-                          this renders the most pragmatic flamegraph for most 
-                          use cases.
-                          Default: 2
+                          Note: Remember to use single quotes or else
+                          escape the $PORT variable.
 
-  --delay | -d            Delay before tracing begins, allows us to ignore
-                          initialisation stacks (e.g. module loading).
-                          Milliseconds
-                          Default: 0
+                          Default: ''
+
+
+  -q | --quiet            Only output flamegraph URI, and fatal errors.
+                          
+                          Default: false
+
+  -s | --silent           Complete silence, 0x will not output anything,
+                          other than fatal errors.
+                          
+                          Default: false
+
+  --kernel-tracing        Use an OS kernel tracing tool (perf on Linux or 
+                          dtrace on macOs and Solaris). This will capture 
+                          native stack frames (C++ modules and Libuv I/O), 
+                          but may result in missing stacks on Node 8.
+                          
+                          Default: false
+
+
 
   --output-dir | -D       Specify artifact output directory.
                           Template variables {outputDir}, {pid}, {timestamp}, {cwd}
                           (current working directory) and {name} 
                           (based on the --name flag) are supported.
 
-                          Default: '{pid}.flamegraph'
+                          Default: '{pid}.0x'
 
   --output-html | -F      Specify destination path for the flamegraph HTML file.
                           Template variables {outputDir}, {pid}, {timestamp}, {cwd}
@@ -60,50 +56,32 @@
                            
                           Default: '{outputDir}/{name}.html'
 
-  --svg                   Generates an `flamegraph.svg` file in the artifact
-                          output directory, in addition to the `flamegraph.html` file.
-
-  --langs | -l            Coarser form of tiers, colour code by JS or C
-                          Default: false
-
-  --tiers | -t            Overrides langs, Colour code frames by type:
-                          v8, regexp, nativeC, nativeJS, core, deps, app
-                          Default: false
-
-  --exclude | -x          Exclude tiers or langs, comma seperated list
-                          Tiers: v8, regexp, nativeC, nativeJS, core, deps, app
-                          Langs: js, c
-                          Default: v8
-
-  --include               Include tiers or langs. Overwrites exclude
-
-  --theme                 Dark or Light theme
-                          Default: light
-
-  --trace-info            Show output from dtrace or perf tools
-                          Default: false
-
-  -q | --quiet            Only output flamegraph URI, and fatal errors.
-                          Default: false
-
-  -s | --silent           Complete silence, 0x will not output anything,
-                          other than fatal errors.
-                          Default: false
-
-  --timestamp-profiles    Add timestamp to you profile folder's name
-
-  --gen [flags] <file> |  Generate the flamegraph from a stacks.out file. 
-  -g [flags] <file> |     Possible flags include --tiers and --langs and --name
-                          Outputs HTML to STDOUT by default, unless --name is set.       
+  --kernel-tracing-debug  Show output from dtrace or perf tools. 
                           
-  --json-stacks           Output a JSON file of stacks as stacks.<pid>.json
+                          Default: false
 
+  --tree-debug            Output a JSON file of stacks as {outputDir}/stacks.{pid}.json
+                          
+                          Default: false
 
-  --log-output            The logging output stream. Can be stdout or stderr
-                          Default: stderr
+  --collect-only          Do not process captured stacks into a flamegraph.
 
-  --collect-only          Do not process captured stacks into a flamegraph
+  --visualize-only <dir>  Build or rebuild flamegraph using the output dir.
+                          Counterpart to --collect-only.
 
-  --visualize-only <folder> Build or rebuild visualization from original stacks, 
-                            similar to --gen flag, except specify containing folder
-                            instead of stacks file.  
+  --name                  The name of the HTML file, without the .html extension
+                          Can be set to - to write HTML to STDOUT (note
+                          due to the nature of CLI argument parsing, this must 
+                          be set using =, e.g. --name=-)
+
+                          If either this flag or --output-html is set to - 
+                          then the HTML will go to STDOUT.
+
+                          Default: flamegraph
+
+  --title                 Set the title to display in the flamegraph UI
+                          
+                          Default: node [nodeFlags] script.js
+
+  -v | --version          Output the 0x version
+

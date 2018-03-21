@@ -1,5 +1,61 @@
-# v3.4.1
+# v4.0.0
+* internal refactor
+* v8 prof is now the default method of stack collection
+* profile folders renamed to `{outputDir}/{name}.0x`
+* CLI: add `--kernel-tracing` option
+* CLI: removed `--svg` flag
+* CLI: removed `--gen` flag
+* CLI: removed `--timestamp-profiles` flag
+* CLI: removed `--theme` flag
+* CLI: removed `--include` flag
+* CLI: removed `--exclude | -x` flag
+* CLI: removed `--tiers | -t` flag
+* CLI: removed `--langs | -l` flag
+* CLI: renamed `--trace-info` to `--kernel-tracing-debug` flag
+* CLI: removed `--logging-output` flag
+* CLI: removed `--stacks-only` flag
+* CLI: removed `-d | --delay` flag
+* CLI: renamed `--json-stacks` to `--tree-debug` flag
+* UI: removed langs button
+* UI: removed theme button
+* UI: style changes, minor redesign
+* API: altered mapFrames API (frames is now an array of objects, not strings)  
+* UI: rename/reorganize type labels
+* UI: tier coloring improvements
+* UI: search improvements
+* UI: categorization improvements
+* API: removed `log` option
+* API: added `kernelTracing` option
+* API: removed `svg` option
+* API: removed `gen` option 
+* API: removed `timestamp-profiles` option
+* API: removed `theme` option
+* API: removed `include` option
+* API: removed `exclude` option
+* API: removed `tiers` option
+* API: removed `langs` option
+* API: renamed `traceInfo` to `kernelTracingDebug` option
+* API: removed `loggingOutput` option 
+* API: removed `stacksOnly` option
+* API: removed `delay` option 
+* API: renamed `jsonStacks` to `treeDebug` option
+* CLI: enhanced status console output (can be overridden in API)
+* UI: added merging capability (v8 prof only)
+* UI: fully responsive
+* added capturing inline data along side v8 prof ("inlinable" functions)
+* profiling REPL no longer supported
+* support for eval'd code - appears under native frames
+* DOCS: readme changes to reflect API changes
+* DOCS: additional /docs folder for in depth topics
+* API: removed `quiet` (still part of CLI)
+* API: removed `silent` (still part of CLI)
+* API: removed `open` (still part of CLI)
+* CLI: add `--on-port` flag
+* API: add `onPort` option
+* CLI: removed `--phase` flag
+* API: removed `phase` option
 
+# v3.4.1
 * break out the ui and stack converter portions into separate modules: d3-fg and stacks-to-json-tree.
 
 # v3.4.0
