@@ -65,15 +65,16 @@ function linux (args, sudo, binary, cb) {
   if (onPort) status('Profiling\n')
   else status('Profiling')
 
-  when(proc.stdio[3], 'data').then((port) => {
+  if (onPort) when(proc.stdio[3], 'data').then((port) => {
     const whenPort = spawnOnPort(onPort, port)
     whenPort.then(() => proc.kill('SIGINT'))
     whenPort.catch((err) => {
       proc.kill()
       cb(err)
     })
-    process.once('SIGINT', analyze)
   })
+
+  process.once('SIGINT', analyze)
 
   function analyze (manual) {
     if (analyze.called) { return }

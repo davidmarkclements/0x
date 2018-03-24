@@ -81,15 +81,16 @@ function sun (args, sudo, binary, cb) {
 
   start()
   
-  when(proc.stdio[3], 'data').then((port) => {
+  if (onPort) when(proc.stdio[3], 'data').then((port) => {
     const whenPort = spawnOnPort(onPort, port)
     whenPort.then(() => proc.kill('SIGINT'))
     whenPort.catch((err) => {
       proc.kill()
       cb(err)
     })
-    process.once('SIGINT', analyze)
   })
+
+  process.once('SIGINT', analyze)
 
   function analyze (manual) {
     if (analyze.called) { return }
