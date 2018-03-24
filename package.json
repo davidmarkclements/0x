@@ -30,7 +30,7 @@
     "debug": "^2.2.0",
     "end-of-stream": "^1.1.0",
     "hsl-to-rgb-for-reals": "^1.1.0",
-    "jsdom": "^8.0.4",
+    "jsdom": "^11.6.2",
     "minimist": "^1.2.0",
     "multistream": "^2.1.0",
     "once": "^1.4.0",
