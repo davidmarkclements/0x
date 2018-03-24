@@ -38,7 +38,7 @@ function sun (args, sudo, binary, cb) {
   ].concat(args.argv), args)
 
   var proc = spawn(node, args, {
-    stdio: ['ignore', 'inherit', 'inherit', 'pipe']
+    stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe']
   }).on('exit', function (code) {
     if (code !== 0) {
       tidy()
@@ -81,7 +81,7 @@ function sun (args, sudo, binary, cb) {
 
   start()
   
-  if (onPort) when(proc.stdio[3], 'data').then((port) => {
+  if (onPort) when(proc.stdio[5], 'data').then((port) => {
     const whenPort = spawnOnPort(onPort, port)
     whenPort.then(() => proc.kill('SIGINT'))
     whenPort.catch((err) => {

@@ -18,7 +18,6 @@ server.get('/a', function (req, res, next) {
 
 server.get('/b', function (req, res, next) {
   var tag = etag({entity: pkg + ++count, algorithm: 'sha256'})
-
   if (!(tag instanceof Error)) {
     res.setHeader('ETag', tag)
   }

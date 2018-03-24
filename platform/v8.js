@@ -25,11 +25,11 @@ async function v8 (args, binary) {
     '--prof',
     `--logfile=%p-v8.log`,
     '--print-opt-source',
-    '-r', path.join(__dirname, '..', 'lib', 'preload', 'mux-stdout'),
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'redir-stdout'),
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
     ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].concat(args.argv), {
-    stdio: ['ignore', 'pipe', 'inherit', 'pipe']
+    stdio: ['ignore', 'pipe', 'inherit', 'pipe', 'ignore', 'pipe']
   })
 
   const inlined = collectInliningInfo(proc)
@@ -37,7 +37,9 @@ async function v8 (args, binary) {
   if (onPort) status('Profiling\n')
   else status('Profiling')
 
-  const whenPort = onPort && spawnOnPort(onPort, await when(proc.stdio[3], 'data'))
+  proc.stdio[3].pipe(process.stdout)
+
+  const whenPort = onPort && spawnOnPort(onPort, await when(proc.stdio[5], 'data'))
 
   const code = await Promise.race([
     new Promise((resolve) => process.once('SIGINT', resolve)),
@@ -77,25 +79,43 @@ async function v8 (args, binary) {
 }
 
 function collectInliningInfo (sp) {
-  const inlined = {}
   var root
+  var stdoutIsPrintOptSourceOutput = false
+  var lastOptimizedFrame = null
+  var inlined = {}
   pump(sp.stdout, split(), through((s, _, cb) => {
     s += '\n'
-    if (s[0] === '\u0001') { // stdout from user land
-      process.stdout.write(s)
+
+    if (stdoutIsPrintOptSourceOutput === true && /^--- END ---/.test(s)) {
+      stdoutIsPrintOptSourceOutput = false
       return cb()
     }
     // trace data
-    if (/^(--- FUNCTION SOURCE |INLINE )/.test(s)) {
-      const [match, file, fn = '(anonymous)', id, ix, pos] = /\((.+):(.+)?\) id\{(\d+),(-?\d+)\} start\{(\d+)}/.exec(s) || [false]
-      if (match === false) return cb()
-      if (ix === '-1') root = {file, fn, id, ix, pos, key: `${fn} ${file}`}
-      else {
+    if (stdoutIsPrintOptSourceOutput === false) {
+      if (/INLINE/.test(s)) {
+        const [ match, inlinedFn ] = /INLINE \((.*)\)/.exec(s) || [ false ]
+        // shouldn't not match though..
+        if (match === false) return cb() 
+        const { fn, file } = lastOptimizedFrame
+        // could be a big problem if the fn doesn't match
+        if (fn !== inlinedFn) return cb()
+        
         const key = `${fn} ${file}`
         inlined[key] = inlined[key] || []
-        inlined[key].push({file, fn, id, ix, pos, caller: root})
-      }
+        inlined[key].push(lastOptimizedFrame)
+        cb()
+        return
+      } else if (/^--- FUNCTION SOURCE /.test(s)) {
+        stdoutIsPrintOptSourceOutput = true
+        const [match, file, fn = '(anonymous)', id, ix, pos] = /\((.+):(.+)?\) id\{(\d+),(-?\d+)\} start\{(\d+)}/.exec(s) || [false]
+        if (match === false) return cb()
+        if (ix === '-1') root = {file, fn, id, ix, pos, key: `${fn} ${file}`}
+        else {
+          lastOptimizedFrame = {file, fn, id, ix, pos, caller: root}
+        } 
+      } else process.stdout.write(s)
     }
+
     cb()
   }))
   return inlined

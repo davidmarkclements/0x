@@ -48,7 +48,7 @@ function linux (args, sudo, binary, cb) {
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
     ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].filter(Boolean).concat(args.argv), {
-    stdio: ['ignore', 'inherit', 'inherit', 'pipe']
+    stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe']
   }).on('exit', function (code) {
     if (code !== null && code !== 0 && code !== 143 && code !== 130) {
       tidy(args)
@@ -65,7 +65,7 @@ function linux (args, sudo, binary, cb) {
   if (onPort) status('Profiling\n')
   else status('Profiling')
 
-  if (onPort) when(proc.stdio[3], 'data').then((port) => {
+  if (onPort) when(proc.stdio[5], 'data').then((port) => {
     const whenPort = spawnOnPort(onPort, port)
     whenPort.then(() => proc.kill('SIGINT'))
     whenPort.catch((err) => {
