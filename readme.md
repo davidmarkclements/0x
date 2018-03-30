@@ -125,7 +125,7 @@ Print usage info.
 Open the flamegraph in the browser using `open` or `xdg-open` (see
 https://www.npmjs.com/package/open for details).
 
-## --on-port | -P          
+### --on-port | -P          
 
 Run a given command and then generate the flamegraph. 
 The command as specified has access to a `$PORT` variable. 
