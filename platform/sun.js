@@ -112,25 +112,33 @@ function sun (args, sudo, binary, cb) {
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
     try { process.kill(prof.pid, 'SIGINT') } catch (e) {}
 
+
     capture(10)
-    function capture (attempts) {
-      if (!profExited) {
+    function capture (attempts, translate) {
+      if (!translate) {
         if (attempts) {
           if (attempts < 5) {
             // desperate, killing prof process
             try { process.kill(prof.pid, 'SIGKILL') } catch (e) {}
           }
-          setTimeout(capture, 300, attempts - 1)
+
+          try { 
+            translate = sym({silent: true, pid: proc.pid}) 
+            capture(attempts, translate)
+          } catch (e) {
+            setTimeout(capture, 300, attempts - 1)  
+          }
         } else {
           status('Unable to find map file!\n')
           debug('Unable to find map file after multiple attempts')
           tidy()
-          cb(Error('0x: Unable to find map file'))
+          cb(Error('Unable to find map file'))
           return
         }
         return
       }
-      var translate = sym({silent: true, pid: proc.pid})
+      
+      translate = translate || sym({silent: true, pid: proc.pid})
 
       if (!translate) {
         debug('unable to find map file')
