@@ -95,7 +95,9 @@ function collectInliningInfo (sp) {
       if (/INLINE/.test(s)) {
         const [ match, inlinedFn ] = /INLINE \((.*)\)/.exec(s) || [ false ]
         // shouldn't not match though..
-        if (match === false) return cb() 
+        if (match === false) return cb()
+        
+        if (lastOptimizedFrame === null) return cb() 
         const { fn, file } = lastOptimizedFrame
         // could be a big problem if the fn doesn't match
         if (fn !== inlinedFn) return cb()
