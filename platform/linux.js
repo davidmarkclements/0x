@@ -19,7 +19,7 @@ module.exports = promisify(linux)
 function linux (args, sudo, binary, cb) {
   const { status, outputDir, workingDir, name, onPort } = args
   var perf = pathTo('perf')
-  if (!perf) return void cb(Error('Unable to locate dtrace - make sure it\'s in your PATH'))
+  if (!perf) return void cb(Error('Unable to locate perf - make sure it\'s in your PATH'))
   if (!sudo) {
     status('Stacks are captured using perf(1), which requires sudo access\n')
     return spawn('sudo', ['true'])
