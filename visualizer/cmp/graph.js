@@ -3,7 +3,7 @@
 module.exports = (render) => Object.assign(() => render`
   <chart 
     class='db overflow-y-scroll overflow-x-hidden relative' 
-    style='padding-left: 5%; padding-right: 5%; height: calc(100% - 66px)'
+    style='padding-left: 5%; padding-right: 5%; height: calc(100vh - 66px)'
   >
   </chart>
 `, { v8cats })
