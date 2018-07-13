@@ -54,12 +54,16 @@ function createActions ({flamegraph, state}, emit) {
           return
         case 'optimized':
           state.control.optimized = !state.control.optimized
+          // Deactivate the unoptimized button--d3-fg will auto clear its colours
+          state.control.unoptimized = false
           emit(state)
           if (!state.control.optimized) return flamegraph.clear('yellow')
           flamegraph.search(RegExp('^\\*'), 'yellow')
           return
         case 'not-optimized':
           state.control.unoptimized = !state.control.unoptimized
+          // Deactivate the optimized button--d3-fg will auto clear its colours
+          state.control.optimized = false
           emit(state)
           if (!state.control.unoptimized) return flamegraph.clear('lime')
           flamegraph.search(/^~/, 'lime')
