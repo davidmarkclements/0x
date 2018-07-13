@@ -73,7 +73,8 @@ function createActions ({flamegraph, state}, emit) {
       switch (type) {
         case 'in':
           zoomLevel += 0.3
-          if (zoomLevel > 1) zoomLevel = 1
+          // Some ludicrous max just in case
+          if (zoomLevel > 10) zoomLevel = 10
           flamegraph.setGraphZoom(zoomLevel)
           return
         case 'out':
