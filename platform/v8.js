@@ -24,10 +24,12 @@ module.exports = v8
 async function v8 (args, binary) {
   const { status, outputDir, workingDir, name, onPort } = args
 
+  const timestamp = Number(new Date())
+
   var node = !binary || binary === 'node' ? await pathTo('node') : binary
   var proc = spawn(node, [
     '--prof',
-    `--logfile=%p-v8.log`,
+    `--logfile=${timestamp}-v8.log`,
     '--print-opt-source',
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'redir-stdout'),
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
@@ -67,7 +69,7 @@ async function v8 (args, binary) {
 
   debug('moving isolate file into folder')
   const isolateLog = fs.readdirSync(args.workingDir).find(function (f) {
-    return new RegExp(`isolate-0(x)?([0-9A-Fa-f]{2,16})-${proc.pid}-v8.log`).test(f)
+    return new RegExp(`isolate-0(x)?([0-9A-Fa-f]{2,16})-${timestamp}-v8.log`).test(f)
   })
 
   if (!isolateLog) throw Error('no isolate logfile found')
