@@ -49,7 +49,7 @@ async function v8 (args, binary) {
     new Promise((resolve) => process.once('SIGINT', resolve)),
     new Promise((resolve) => proc.once('exit', (code) => resolve(code))),
     ...(onPort ? [new Promise((resolve, reject) => {
-      whenPort.then(() => proc.kill('SIGINT'))
+      whenPort.then(() => proc.stdio[5].destroy())
       whenPort.catch((err) => {
         proc.kill()
         reject(err)
