@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/davidmarkclements/0x#readme",
   "dependencies": {
-    "JSONStream": "^1.3.2",
     "ajv": "^6.0.1",
     "browserify": "^13.0.0",
     "concat-stream": "^1.5.2",
