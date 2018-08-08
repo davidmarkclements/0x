@@ -16,11 +16,15 @@ module.exports = function (trees, opts) {
   const chart = graph()
   const tree = trees.unmerged // default view
   const categorizer = !kernelTracing && graph.v8cats
+  const cellCount = tree.children.map(getDeepest).reduce((prev, next) => Math.max(prev, next), 0)
+  const headerBarOffset = 55
+  const cellHeight = 18.5
   const flamegraph = fg({
     categorizer, 
     tree, 
     exclude: Array.from(exclude), 
-    element: chart
+    element: chart,
+    height: (cellCount * cellHeight) + headerBarOffset
   })
   const { colors } = flamegraph
 
@@ -39,4 +43,11 @@ module.exports = function (trees, opts) {
 
   document.body.appendChild(chart)
   document.body.appendChild(iface)
+}
+
+function getDeepest (node) {
+  if (!node.children) {
+    return 1
+  }
+  return node.children.map(getDeepest).reduce((prev, next) => Math.max(prev, next), 0) + 1
 }
