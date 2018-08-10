@@ -20,7 +20,8 @@ module.exports = function (trees, opts) {
     categorizer, 
     tree, 
     exclude: Array.from(exclude), 
-    element: chart
+    element: chart,
+    topOffset: 55
   })
   const { colors } = flamegraph
 
