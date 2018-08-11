@@ -5,3 +5,4 @@ node_modules
 win
 package-lock.json
 todo
+.vscode
