@@ -37,7 +37,6 @@
     "jsonstream2": "^1.1.1",
     "minimist": "^1.2.0",
     "morphdom": "^2.3.3",
-    "multistream": "^2.1.0",
     "nanohtml": "^1.0.1",
     "on-net-listen": "^1.1.0",
     "opn": "^5.2.0",
