@@ -26,8 +26,8 @@ module.exports = function (trees, opts) {
 
   window.addEventListener('resize', debounce(() => {
     const width = document.body.clientWidth * 0.89
+    chart.querySelector('canvas').width = width
     flamegraph.width(width).update()
-    chart.querySelector('svg').setAttribute('width', width)
   }, 150))
 
   const state = createState({colors, trees, exclude, kernelTracing, title: opts.title})
