@@ -36,8 +36,10 @@ module.exports = function (trees, opts) {
   window.addEventListener('popstate', (event) => {
     userZoom = false
     jumpToState(event.state || {
-      merged: true,
-      nodeId: 0
+      // No hash anymore, jump to root node (0) but don't change settings
+      merged: state.control.merged,
+      exclude: Array.from(state.filterTypes.exclude),
+      nodeId: 0,
     })
   })
 
@@ -72,5 +74,6 @@ function parseHistoryState (str) {
   const parts = str.replace(/^#/, '').split('-')
   const merged = parts[0] === 'merged'
   const nodeId = parseInt(parts[1], 10)
-  return { merged, nodeId }
+  const excludeTypes = parts[2].split('+')
+  return { merged, nodeId, excludeTypes }
 }

@@ -110,24 +110,48 @@ function createActions ({flamegraph, state}, emit) {
   function pushState () {
     return (d) => {
       const { merged } = state.control
+      const excludeTypes = Array.from(state.typeFilters.exclude)
       const { nodesToIds } = merged ? mergedTags : unmergedTags
       const historyState = {
         merged,
         nodeId: nodesToIds.get(d),
+        excludeTypes
       }
       window.history.pushState(historyState, '', `#${stringifyHistoryState(historyState)}`)
     }
   }
 
+  // Jump to a state based on a history entry.
   function jumpToState () {
-    return ({merged, nodeId}) => {
+    return ({merged, nodeId, excludeTypes}) => {
       state.control.merged = merged
       state.typeFilters.enableInlinable = !merged
       state.key.enableOptUnopt = !merged
-      if (merged) flamegraph.renderTree(state.trees.merged)
-      else flamegraph.renderTree(state.trees.unmerged)
+
+      // Update type exclude state
+      // note that a user changing type exclusion does not add a new history entry,
+      // this is just necessary to make sure the correct types show up when linking
+      // to eg. a v8-internal stack frame.
+      const oldExclude = state.typeFilters.exclude
+      oldExclude.forEach((name) => {
+        if (!excludeTypes.includes(name)) { // it's still an array here 🙈
+          flamegraph.typeShow(name)
+        }
+      })
+      excludeTypes.forEach((name) => {
+        if (!oldExclude.has(name)) {
+          flamegraph.typeHide(name)
+        }
+      })
+      state.typeFilters.exclude = new Set(excludeTypes)
+      state.typeFilters.bgs = state.control.tiers
+        ? highlightTypeFilters()
+        : state.typeFilters.unhighlighted
+
+      flamegraph.renderTree(merged ? state.trees.merged : state.trees.unmerged)
       const { idsToNodes } = merged ? mergedTags : unmergedTags
       flamegraph.zoom(idsToNodes.get(nodeId))
+
       emit(state)
     }
   }
@@ -157,6 +181,6 @@ function tagNodesWithIds (data) {
   }
 }
 
-function stringifyHistoryState ({ merged, nodeId }) {
-  return `${merged ? 'merged' : 'unmerged'}-${nodeId}`
+function stringifyHistoryState ({ merged, nodeId, excludeTypes }) {
+  return `${merged ? 'merged' : 'unmerged'}-${nodeId}-${excludeTypes.join('+')}`
 }
