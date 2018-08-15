@@ -24,6 +24,23 @@ module.exports = function (trees, opts) {
   })
   const { colors } = flamegraph
 
+  let userZoom = true // false if the last zoom call was initiated by 0x
+  flamegraph.on('zoom', (d) => {
+    if (!userZoom) {
+      userZoom = true
+      return
+    }
+
+    pushState(d)
+  })
+  window.addEventListener('popstate', (event) => {
+    userZoom = false
+    jumpToState(event.state || {
+      merged: true,
+      nodeId: 0
+    })
+  })
+
   window.addEventListener('resize', debounce(() => {
     const width = document.body.clientWidth * 0.89
     flamegraph.width(width).update()
@@ -36,7 +53,24 @@ module.exports = function (trees, opts) {
     morphdom(iface, ui({state, actions}))
   })
   const iface = ui({state, actions})
+  const jumpToState = actions.jumpToState()
+  const pushState = actions.pushState()
 
   document.body.appendChild(chart)
   document.body.appendChild(iface)
+
+  if (window.location.hash) {
+    const st = parseHistoryState(window.location.hash)
+    if (st) {
+      userZoom = false
+      jumpToState(st)
+    }
+  }
+}
+
+function parseHistoryState (str) {
+  const parts = str.replace(/^#/, '').split('-')
+  const merged = parts[0] === 'merged'
+  const nodeId = parseInt(parts[1], 10)
+  return { merged, nodeId }
 }

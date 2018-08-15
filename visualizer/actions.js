@@ -5,8 +5,11 @@ module.exports = createActions
 function createActions ({flamegraph, state}, emit) {
   state.typeFilters.bgs = state.typeFilters.unhighlighted
 
+  const unmergedTags = tagNodesWithIds(state.trees.unmerged)
+  const mergedTags = tagNodesWithIds(state.trees.merged)
+
   return {
-    search, control, zoom, typeFilters
+    search, control, zoom, typeFilters, pushState, jumpToState
   }
 
   function search () {
@@ -103,4 +106,57 @@ function createActions ({flamegraph, state}, emit) {
       emit(state)
     }
   }
+
+  function pushState () {
+    return (d) => {
+      const { merged } = state.control
+      const { nodesToIds } = merged ? mergedTags : unmergedTags
+      const historyState = {
+        merged,
+        nodeId: nodesToIds.get(d),
+      }
+      window.history.pushState(historyState, '', `#${stringifyHistoryState(historyState)}`)
+    }
+  }
+
+  function jumpToState () {
+    return ({merged, nodeId}) => {
+      state.control.merged = merged
+      state.typeFilters.enableInlinable = !merged
+      state.key.enableOptUnopt = !merged
+      if (merged) flamegraph.renderTree(state.trees.merged)
+      else flamegraph.renderTree(state.trees.unmerged)
+      const { idsToNodes } = merged ? mergedTags : unmergedTags
+      flamegraph.zoom(idsToNodes.get(nodeId))
+      emit(state)
+    }
+  }
+}
+
+// This just uses incrementing IDs but it will only
+// be used for a single dataset, and it's deterministic enough for that
+function tagNodesWithIds (data) {
+  let id = 0
+  const idsToNodes = new Map()
+  const nodesToIds = new Map()
+  tagNodes(data)
+
+  return {
+    idsToNodes,
+    nodesToIds
+  }
+
+  function tag (node) {
+    idsToNodes.set(id, node)
+    nodesToIds.set(node, id)
+    id++
+  }
+  function tagNodes (node) {
+    tag(node)
+    if (node.children) node.children.forEach(tagNodes)
+  }
+}
+
+function stringifyHistoryState ({ merged, nodeId }) {
+  return `${merged ? 'merged' : 'unmerged'}-${nodeId}`
 }
