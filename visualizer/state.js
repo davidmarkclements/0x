@@ -5,6 +5,7 @@ const { colorHash } = require('d3-fg')
 
 module.exports = ({colors, trees, exclude, merged = false, kernelTracing, title}) => ({
   trees,
+  focusedNodeId: null,
   key: {
     colors: [
       colorHash({top: 0, name: 'cold'}, 1, 100),

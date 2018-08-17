@@ -31,14 +31,14 @@ module.exports = function (trees, opts) {
       return
     }
 
-    pushState(d)
+    focusNode(d)
   })
   window.addEventListener('popstate', (event) => {
     userZoom = false
     jumpToState(event.state || {
       // No hash anymore, jump to root node (0) but don't change settings
       merged: state.control.merged,
-      exclude: Array.from(state.filterTypes.exclude),
+      exclude: Array.from(state.typeFilters.exclude),
       nodeId: 0,
     })
   })
@@ -55,8 +55,8 @@ module.exports = function (trees, opts) {
     morphdom(iface, ui({state, actions}))
   })
   const iface = ui({state, actions})
+  const focusNode = actions.focusNode()
   const jumpToState = actions.jumpToState()
-  const pushState = actions.pushState()
 
   document.body.appendChild(chart)
   document.body.appendChild(iface)

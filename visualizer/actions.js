@@ -9,7 +9,17 @@ function createActions ({flamegraph, state}, emit) {
   const mergedTags = tagNodesWithIds(state.trees.merged)
 
   return {
-    search, control, zoom, typeFilters, pushState, jumpToState
+    focusNode,
+    search, control, zoom, typeFilters,
+    pushState, jumpToState
+  }
+
+  function focusNode () {
+    const save = pushState()
+    return (id) => {
+      state.focusedNodeId = id
+      save()
+    }
   }
 
   function search () {
@@ -93,6 +103,7 @@ function createActions ({flamegraph, state}, emit) {
   }
 
   function typeFilters () {
+    const save = pushState()
     return ({name}) => {
       const checked = state.typeFilters.exclude.has(name)
       if (checked) {
@@ -103,18 +114,19 @@ function createActions ({flamegraph, state}, emit) {
         state.typeFilters.exclude.add(name)
       }
       if (state.control.tiers) state.typeFilters.bgs = highlightTypeFilters()
+      save()
       emit(state)
     }
   }
 
   function pushState () {
-    return (d) => {
+    return () => {
       const { merged } = state.control
       const excludeTypes = Array.from(state.typeFilters.exclude)
       const { nodesToIds } = merged ? mergedTags : unmergedTags
       const historyState = {
         merged,
-        nodeId: nodesToIds.get(d),
+        nodeId: nodesToIds.get(state.focusedNodeId),
         excludeTypes
       }
       window.history.pushState(historyState, '', `#${stringifyHistoryState(historyState)}`)
@@ -124,26 +136,25 @@ function createActions ({flamegraph, state}, emit) {
   // Jump to a state based on a history entry.
   function jumpToState () {
     return ({merged, nodeId, excludeTypes}) => {
+      state.focusedNodeId = nodeId
       state.control.merged = merged
       state.typeFilters.enableInlinable = !merged
       state.key.enableOptUnopt = !merged
 
-      // Update type exclude state
-      // note that a user changing type exclusion does not add a new history entry,
-      // this is just necessary to make sure the correct types show up when linking
-      // to eg. a v8-internal stack frame.
+      // Diff type exclude state to reach the one described by the entry
       const oldExclude = state.typeFilters.exclude
+      const newExclude = new Set(excludeTypes)
       oldExclude.forEach((name) => {
-        if (!excludeTypes.includes(name)) { // it's still an array here 🙈
+        if (!newExclude.has(name)) {
           flamegraph.typeShow(name)
         }
       })
-      excludeTypes.forEach((name) => {
+      newExclude.forEach((name) => {
         if (!oldExclude.has(name)) {
           flamegraph.typeHide(name)
         }
       })
-      state.typeFilters.exclude = new Set(excludeTypes)
+      state.typeFilters.exclude = newExclude
       state.typeFilters.bgs = state.control.tiers
         ? highlightTypeFilters()
         : state.typeFilters.unhighlighted
