@@ -62,7 +62,7 @@ module.exports = function (trees, opts) {
   document.body.appendChild(iface)
 
   if (window.location.hash) {
-    const st = parseHistoryState(window.location.hash)
+    const st = parseHistoryState(window.location.hash.slice(1))
     if (st) {
       userZoom = false
       jumpToState(st)
@@ -71,9 +71,10 @@ module.exports = function (trees, opts) {
 }
 
 function parseHistoryState (str) {
-  const parts = str.replace(/^#/, '').split('-')
-  const merged = parts[0] === 'merged'
-  const nodeId = parseInt(parts[1], 10)
-  const excludeTypes = parts[2].split('+')
-  return { merged, nodeId, excludeTypes }
+  try {
+    return JSON.parse(str)
+  } catch (err) {
+    // Just ignore if someone used an incorrect hash
+    return null
+  }
 }

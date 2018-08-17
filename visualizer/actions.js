@@ -192,6 +192,7 @@ function tagNodesWithIds (data) {
   }
 }
 
-function stringifyHistoryState ({ merged, nodeId, excludeTypes }) {
-  return `${merged ? 'merged' : 'unmerged'}-${nodeId}-${excludeTypes.join('+')}`
+function stringifyHistoryState (state) {
+  // Just use JSON I guess
+  return JSON.stringify(state)
 }
