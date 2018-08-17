@@ -38,7 +38,7 @@ module.exports = function (trees, opts) {
     jumpToState(event.state || {
       // No hash anymore, jump to root node (0) but don't change settings
       merged: state.control.merged,
-      exclude: Array.from(state.typeFilters.exclude),
+      excludeTypes: Array.from(state.typeFilters.exclude),
       nodeId: 0,
     })
   })
