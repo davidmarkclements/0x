@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "wrk -d 120 -c 100 http://localhost:3000/a & wrk -d 120 -c 100 http://localhost:3000/b & wrk -d 120 -c 100 http://localhost:3000/c"
+    "test": "wrk -d 5 -c 100 http://localhost:3000/a & wrk -d 5 -c 100 http://localhost:3000/b & wrk -d 5 -c 100 http://localhost:3000/c"
   },
   "author": "David Mark Clements",
   "license": "MIT",
