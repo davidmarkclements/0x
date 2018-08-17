@@ -72,7 +72,7 @@ module.exports = function (trees, opts) {
 
 function parseHistoryState (str) {
   try {
-    return JSON.parse(str)
+    return JSON.parse(decodeURIComponent(str))
   } catch (err) {
     // Just ignore if someone used an incorrect hash
     return null
