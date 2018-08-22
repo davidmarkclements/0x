@@ -123,7 +123,16 @@ function collectInliningInfo (sp) {
         inlined[key].push(lastOptimizedFrame)
         cb()
         return
-      } else if (/^--- FUNCTION SOURCE /.test(s)) {
+        // Reading v8 output from the stdout stream is sometimes unreliable. The next
+        // FUNCTION SOURCE can be in the middle of a previous FUNCTION SOURCE, cutting
+        // it off. The impact can be alleviated slightly by accepting FUNCTION SOURCE
+        // identifiers that occur in the middle of a line.
+        // The previous FUNCTION SOURCE block will not have been closed, but END lines
+        // only set `stdoutIsPrintOptSourceOutput` to false, so we don't have to do
+        // anything here. If the END logic changes the below may need to change as well.
+        //
+        // ref: https://github.com/davidmarkclements/0x/issues/122
+      } else if (/--- FUNCTION SOURCE \(.*?\) id\{\d+,-?\d+\} start\{\d+\} ---\n$/.test(s)) {
         stdoutIsPrintOptSourceOutput = true
         const [match, file, fn = '(anonymous)', id, ix, pos] = /\((.+):(.+)?\) id\{(\d+),(-?\d+)\} start\{(\d+)}/.exec(s) || [false]
         if (match === false) return cb()
