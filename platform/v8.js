@@ -43,11 +43,6 @@ async function v8 (args, binary) {
 
   proc.stdio[3].pipe(process.stdout)
 
-  const forceClose = () => {
-    status('Force closing subprocess...')
-    proc.kill()
-  }
-
   let closeTimer
   let softClosed = false
   const softClose = () => {
@@ -62,6 +57,10 @@ async function v8 (args, binary) {
 
     onsigint = forceClose
     process.once('SIGINT', onsigint)
+  }
+  const forceClose = () => {
+    status('Force closing subprocess...')
+    proc.kill()
   }
 
   let onsigint = softClose
