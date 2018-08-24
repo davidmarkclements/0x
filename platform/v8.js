@@ -44,19 +44,56 @@ async function v8 (args, binary) {
 
   proc.stdio[3].pipe(process.stdout)
 
+  let closeTimer
+  let softClosed = false
+  const softClose = () => {
+    if (softClosed) return
+    softClosed = true
+    status('Waiting for subprocess to exit...')
+    closeTimer = setTimeout(() => {
+      status('Closing subprocess is taking a long time, it might have hung. Press Ctrl+C again to force close')
+    }, 3000)
+    // Stop the subprocess; force stop it on the second SIGINT
+    proc.stdio[5].destroy()
+
+    onsigint = forceClose
+    process.once('SIGINT', onsigint)
+  }
+  const forceClose = () => {
+    status('Force closing subprocess...')
+    proc.kill()
+  }
+
+  let onsigint = softClose
+  process.once('SIGINT', onsigint)
+  process.once('SIGTERM', forceClose)
+  process.on('exit', forceClose)
+
   const whenPort = onPort && spawnOnPort(onPort, await when(proc.stdio[5], 'data'))
 
+  let onPortError
+  if (onPort) {
+    // Graceful close once --on-port process ends
+    onPortError = whenPort.then(() => {
+      process.removeListener('SIGINT', onsigint)
+      softClose()
+    }, (err) => {
+      proc.kill()
+      throw err
+    })
+  }
+
   const code = await Promise.race([
-    new Promise((resolve) => process.once('SIGINT', resolve)),
-    new Promise((resolve) => proc.once('exit', (code) => resolve(code))),
-    ...(onPort ? [new Promise((resolve, reject) => {
-      whenPort.then(() => proc.stdio[5].destroy())
-      whenPort.catch((err) => {
-        proc.kill()
-        reject(err)
-      })
-    })] : [])
-  ])
+    when(proc, 'exit'),
+    // This never resolves but may reject.
+    // When the --on-port process ends, we still wait for proc's 'exit'.
+    onPortError
+  ].filter(Boolean))
+
+  clearTimeout(closeTimer)
+  process.removeListener('SIGINT', onsigint)
+  process.removeListener('SIGTERM', forceClose)
+  process.removeListener('exit', forceClose)
 
   if (code|0 !== 0) {
     throw Object.assign(Error('Target subprocess error, code: ' + code), { code })
