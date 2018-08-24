@@ -71,19 +71,23 @@ async function v8 (args, binary) {
 
   const whenPort = onPort && spawnOnPort(onPort, await when(proc.stdio[5], 'data'))
 
+  let onPortError
+  if (onPort) {
+    // Graceful close once --on-port process ends
+    onPortError = whenPort.then(() => {
+      process.removeListener('SIGINT', onsigint)
+      softClose()
+    }, (err) => {
+      proc.kill()
+      throw err
+    })
+  }
+
   const code = await Promise.race([
     when(proc, 'exit'),
-    onPort ? new Promise((resolve, reject) => {
-      // Graceful close once --on-port process ends
-      whenPort.then(() => {
-        process.removeListener('SIGINT', onsigint)
-        softClose()
-      })
-      whenPort.catch((err) => {
-        proc.kill()
-        reject(err)
-      })
-    }) : null
+    // This never resolves but may reject.
+    // When the --on-port process ends, we still wait for proc's 'exit'.
+    onPortError
   ].filter(Boolean))
 
   clearTimeout(closeTimer)
