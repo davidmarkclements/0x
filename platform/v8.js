@@ -29,6 +29,7 @@ async function v8 (args, binary) {
     '--prof',
     `--logfile=%p-v8.log`,
     '--print-opt-source',
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'no-cluster'),
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'redir-stdout'),
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
     ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
