@@ -17,7 +17,7 @@ function v8cats (child) {
 
   if (!/\.m?js/.test(name)) {
     if (/\[CODE:RegExp]$/.test(name)) return {type: 'regexp'}
-    if (/\[CODE:.*?]$/.test(name) || /^v8.*\[CPP]$/.test(name)) return {type: 'v8'}
+    if (/\[CODE:.*?]$/.test(name) || /v8::internal::.*\[CPP]$/.test(name)) return {type: 'v8'}
     if (/\.$/.test(name)) return {type: 'core'}
     if (/\[CPP]$/.test(name) || /\[SHARED_LIB]$/.test(name)) return {type: 'cpp'}
     if (/\[eval]/.test(name)) return {type: 'native'}     // unless we create an eval checkbox
