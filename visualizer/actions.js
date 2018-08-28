@@ -16,8 +16,11 @@ function createActions ({flamegraph, state}, emit) {
 
   function focusNode () {
     const save = pushState()
-    return (id) => {
-      state.focusedNodeId = id
+    return (node) => {
+      const { merged } = state.control
+      const { nodesToIds } = merged ? mergedTags : unmergedTags
+
+      state.focusedNodeId = nodesToIds.get(node)
       save()
     }
   }
@@ -123,10 +126,9 @@ function createActions ({flamegraph, state}, emit) {
     return () => {
       const { merged } = state.control
       const excludeTypes = Array.from(state.typeFilters.exclude)
-      const { nodesToIds } = merged ? mergedTags : unmergedTags
       const historyState = {
         merged,
-        nodeId: nodesToIds.get(state.focusedNodeId),
+        nodeId: state.focusedNodeId,
         excludeTypes
       }
       window.history.pushState(historyState, '', `#${stringifyHistoryState(historyState)}`)
