@@ -25,6 +25,25 @@ module.exports = function (trees, opts) {
   })
   const { colors } = flamegraph
 
+  let userZoom = true // false if the last zoom call was initiated by 0x
+  flamegraph.on('zoom', (d) => {
+    if (!userZoom) {
+      userZoom = true
+      return
+    }
+
+    focusNode(d)
+  })
+  window.addEventListener('popstate', (event) => {
+    userZoom = false
+    jumpToState(event.state || {
+      // No hash anymore, jump to root node (0) but don't change settings
+      merged: state.control.merged,
+      excludeTypes: Array.from(state.typeFilters.exclude),
+      nodeId: 0
+    })
+  })
+
   window.addEventListener('resize', debounce(() => {
     const width = document.body.clientWidth * 0.89
     flamegraph.width(width).update()
@@ -36,7 +55,26 @@ module.exports = function (trees, opts) {
     morphdom(iface, ui({state, actions}))
   })
   const iface = ui({state, actions})
+  const focusNode = actions.focusNode()
+  const jumpToState = actions.jumpToState()
 
   document.body.appendChild(chart)
   document.body.appendChild(iface)
+
+  if (window.location.hash) {
+    const st = parseHistoryState(window.location.hash.slice(1))
+    if (st) {
+      userZoom = false
+      jumpToState(st)
+    }
+  }
+}
+
+function parseHistoryState (str) {
+  try {
+    return JSON.parse(decodeURIComponent(str))
+  } catch (err) {
+    // Just ignore if someone used an incorrect hash
+    return null
+  }
 }
