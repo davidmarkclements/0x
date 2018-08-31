@@ -48,6 +48,7 @@
     "single-line-log": "^1.0.1",
     "split2": "^2.0.1",
     "tachyons": "^4.9.1",
+    "terser": "^3.8.1",
     "through2": "^2.0.1",
     "which": "^1.2.4"
   },
