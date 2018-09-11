@@ -51,7 +51,6 @@ function sun (args, sudo, binary, cb) {
   })
   var folder
   var prof
-  var profExited = false
 
   function start () {
     prof = spawn('sudo', [profile, '-p', proc.pid])
