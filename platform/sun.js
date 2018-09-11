@@ -80,7 +80,7 @@ function sun (args, sudo, binary, cb) {
   else status('Profiling')
 
   start()
-  
+
   if (onPort) when(proc.stdio[5], 'data').then((port) => {
     const whenPort = spawnOnPort(onPort, port)
     whenPort.then(() => proc.kill('SIGINT'))
@@ -122,11 +122,11 @@ function sun (args, sudo, binary, cb) {
             try { process.kill(prof.pid, 'SIGKILL') } catch (e) {}
           }
 
-          try { 
-            translate = sym({silent: true, pid: proc.pid}) 
+          try {
+            translate = sym({silent: true, pid: proc.pid})
             capture(attempts, translate)
           } catch (e) {
-            setTimeout(capture, 300, attempts - 1)  
+            setTimeout(capture, 300, attempts - 1)
           }
         } else {
           status('Unable to find map file!\n')
@@ -137,7 +137,7 @@ function sun (args, sudo, binary, cb) {
         }
         return
       }
-      
+
       translate = translate || sym({silent: true, pid: proc.pid})
 
       if (!translate) {
