@@ -45,6 +45,7 @@ function linux (args, sudo, binary, cb) {
     '--',
     node,
     '--perf-basic-prof',
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'no-cluster'),
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
     ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].filter(Boolean).concat(args.argv), {

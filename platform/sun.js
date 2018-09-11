@@ -33,6 +33,7 @@ function sun (args, sudo, binary, cb) {
 
   args = Object.assign([
     '--perf-basic-prof',
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'no-cluster'),
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
     ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].concat(args.argv), args)
