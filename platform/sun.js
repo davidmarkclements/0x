@@ -33,6 +33,7 @@ function sun (args, sudo, binary, cb) {
 
   args = Object.assign([
     '--perf-basic-prof',
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'no-cluster'),
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
     ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].concat(args.argv), args)
@@ -51,7 +52,6 @@ function sun (args, sudo, binary, cb) {
   })
   var folder
   var prof
-  var profExited = false
 
   function start () {
     prof = spawn('sudo', [profile, '-p', proc.pid])
@@ -80,7 +80,7 @@ function sun (args, sudo, binary, cb) {
   else status('Profiling')
 
   start()
-  
+
   if (onPort) when(proc.stdio[5], 'data').then((port) => {
     const whenPort = spawnOnPort(onPort, port)
     whenPort.then(() => proc.kill('SIGINT'))
@@ -122,11 +122,11 @@ function sun (args, sudo, binary, cb) {
             try { process.kill(prof.pid, 'SIGKILL') } catch (e) {}
           }
 
-          try { 
-            translate = sym({silent: true, pid: proc.pid}) 
+          try {
+            translate = sym({silent: true, pid: proc.pid})
             capture(attempts, translate)
           } catch (e) {
-            setTimeout(capture, 300, attempts - 1)  
+            setTimeout(capture, 300, attempts - 1)
           }
         } else {
           status('Unable to find map file!\n')
@@ -137,7 +137,7 @@ function sun (args, sudo, binary, cb) {
         }
         return
       }
-      
+
       translate = translate || sym({silent: true, pid: proc.pid})
 
       if (!translate) {
