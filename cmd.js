@@ -13,7 +13,7 @@ const { version } = require('./package.json')
 
 const defaultBanner = `
   0x ${version}
-  
+
   0x [flags] -- node [nodeFlags] script.js [scriptFlags]
 
 `
@@ -24,7 +24,9 @@ if (module.parent === null) {
     debug(err)
     process.exit(err.code || 1)
   })
-} else module.exports = cmd
+} else {
+  module.exports = cmd
+}
 
 async function cmd (argv, banner = defaultBanner) {
   var args = minimist(argv, {
@@ -97,7 +99,7 @@ function parseSubprocessCommand (args) {
       0x [flags] -- node [nodeFlags] script.js [scriptFlags]
     `)
   }
-  var pathToNodeBinary = false
+  var pathToNodeBinary = process.argv[0]
   var subprocessArgv = args._
   if (dashDash[0]) {
     if (dashDash[0][0] !== 'node') pathToNodeBinary = dashDash[0]

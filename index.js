@@ -78,7 +78,7 @@ async function generateFlamegraph (opts) {
   }
 }
 
-async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFrames, phase, open, name }) {
+async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFrames, open, name, pathToNodeBinary }) {
   try {
     const folder = isAbsolute(visualizeOnly)
       ? relative(workingDir, visualizeOnly)
@@ -108,7 +108,7 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
     name = name || meta.name
 
     const ticks = (srcType === 'v8')
-      ? await v8LogToTicks(src)
+      ? await v8LogToTicks(src, pathToNodeBinary)
       : traceStacksToTicks(src)
 
     if (treeDebug === true) {

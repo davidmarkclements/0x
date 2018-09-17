@@ -113,7 +113,7 @@ async function v8 (args, binary) {
   const isolateLogPath = path.join(folder, isolateLog)
   await renameSafe(path.join(args.workingDir, isolateLog), isolateLogPath)
   return {
-    ticks: await v8LogToTicks(isolateLogPath),
+    ticks: await v8LogToTicks(isolateLogPath, node),
     inlined: inlined,
     pid: proc.pid,
     folder: folder
