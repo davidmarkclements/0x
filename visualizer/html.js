@@ -19,8 +19,8 @@ function html (opts) {
       <meta charset="utf-8">
       <style> ${tachyons} </style>
       <style>
-        button:focus { outline:0; } 
-        rect:hover {opacity: 0.9} 
+        button:focus { outline:0; }
+        rect:hover {opacity: 0.9}
       </style>
     </head>
     <body class='m0 bg-white sans-serif overflow-hidden'>

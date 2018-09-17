@@ -122,10 +122,9 @@ function parseSubprocessCommand (args) {
 }
 
 function createStatus ({ silent, quiet }) {
-  const statusStream = process.stderr
   if (quiet || silent) {
     return () => {}
   }
-  const status = sll(statusStream)
+  const status = sll(process.stderr)
   return hasUnicode ? (s) => status(`🔥  ${s}`) : status
 }
