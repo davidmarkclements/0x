@@ -4,6 +4,7 @@ const { sun, linux, windows, v8 } = require('./platform')
 const debug = require('debug')('0x')
 const { join, isAbsolute, relative } = require('path')
 const fs = require('fs')
+const { promisify } = require('util')
 const validate = require('./lib/validate')(require('./schema.json'))
 const traceStacksToTicks = require('./lib/trace-stacks-to-ticks')
 const v8LogToTicks = require('./lib/v8-log-to-ticks')
@@ -12,6 +13,8 @@ const render = require('./lib/render')
 
 const platform = process.platform
 const { tidy, noop, isSudo } = require('./lib/util')
+
+const fsWriteFilePromise = promisify(fs.writeFile)
 
 module.exports = zeroEks
 
@@ -26,7 +29,7 @@ async function zeroEks (args) {
 
   if (visualizeOnly) return visualize(args)
 
-  args.title = args.title || 'node ' + args.argv.join(' ')
+  args.title = args.title || `node ${args.argv.join(' ')}`
   const binary = args.pathToNodeBinary
   var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary)
 
@@ -34,8 +37,6 @@ async function zeroEks (args) {
     const tree = await ticksToTree(ticks, args, mapFrames, inlined)
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
   }
-
-  fs.writeFileSync(`${folder}/meta.json`, JSON.stringify({...args, inlined}))
 
   if (collectOnly === true) {
     debug('collect-only mode bailing on rendering')
@@ -45,7 +46,10 @@ async function zeroEks (args) {
   }
 
   try {
-    const file = await generateFlamegraph({...args, ticks, inlined, pid, folder})
+    const [file] = await Promise.all([
+      generateFlamegraph({...args, ticks, inlined, pid, folder}),
+      fsWriteFilePromise(`${folder}/meta.json`, JSON.stringify({...args, inlined}))
+    ])
     return file
   } catch (err) {
     tidy()
@@ -68,14 +72,9 @@ async function startProcessAndCollectTraceData (args, binary) {
 }
 
 async function generateFlamegraph (opts) {
-  try {
-    const file = await render(opts)
-    tidy()
-    return file
-  } catch (err) {
-    tidy()
-    throw err
-  }
+  const file = await render(opts)
+  tidy()
+  return file
 }
 
 async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFrames, open, name, pathToNodeBinary }) {
@@ -134,8 +133,10 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
   } catch (e) {
     if (e.code === 'ENOENT') {
       throw Error('Invalid data path provided (unable to access/does not exist)')
-    } else if (e.code === 'ENOTDIR') {
+    }
+    if (e.code === 'ENOTDIR') {
       throw Error('Invalid data path provided (not a directory)')
-    } else throw e
+    }
+    throw e
   }
 }
