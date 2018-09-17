@@ -29,7 +29,16 @@ if (module.parent === null) {
 }
 
 async function cmd (argv, banner = defaultBanner) {
-  var args = minimist(argv, {
+  if (semver.lt(process.version, '8.5.0') === true) {
+    throw Error(
+      `Node version unsupported. Current Node version is ${process.version}\n` +
+      'Support extends from Node 8.5.0 and above.\n\n' +
+      '  npm i -g 0x@3 for Node 6.x.x – 8.4.0\n' +
+      '  npm i -g 0x@2 for Node 4\n'
+    )
+  }
+
+  const args = minimist(argv, {
     stopEarly: true,
     '--': true,
     boolean: [
@@ -57,36 +66,36 @@ async function cmd (argv, banner = defaultBanner) {
     }
   })
 
-  if (semver.lt(process.version, '8.5.0') === true) {
-    throw Error(
-      'Node version unsupported. Current Node version is ' + process.version + '\n' +
-      'Support extends from Node 8.5.0 and above.\n\n' +
-      '  npm i -g 0x@3 for Node 6.x.x – 8.4.0\n' + 
-      '  npm i -g 0x@2 for Node 4\n'
-    )
-  }
-
   if (args.help || argv.length === 0) {
     process.stdout.write(banner)
     return fs.createReadStream(join(__dirname, 'usage.txt')).pipe(process.stdout)
   }
 
-  if (args.version) return console.log('0x ' + version)
+  if (args.version) {
+    return console.log(`0x ${version}`)
+  }
+
   const status = createStatus(args)
+  const { pathToNodeBinary, subprocessArgv } = parseSubprocessCommand(args)
+
   args.workingDir = process.cwd()
   args.status = status
-  const { pathToNodeBinary, subprocessArgv } = parseSubprocessCommand(args)
   args.argv = subprocessArgv
   args.pathToNodeBinary = pathToNodeBinary
 
-  if (args.visualizeOnly) status(`Creating flamegraph from ${args.visualizeOnly}`)
+  if (args.visualizeOnly) {
+    status(`Creating flamegraph from ${args.visualizeOnly}`)
+  }
 
   const assetPath = await zeroEks(args)
 
-  if (args.collectOnly) status(`Stats collected in folder file://${assetPath}\n`)
-  else {
-    status('Flamegraph generated in\n' + assetPath + '\n')
-    if (args.open) launch(assetPath, {wait: false})
+  if (args.collectOnly) {
+    status(`Stats collected in folder file://${assetPath}\n`)
+  } else {
+    status(`Flamegraph generated in\n${assetPath}\n`)
+    if (args.open) {
+      launch(assetPath, { wait: false })
+    }
   }
 
   return assetPath
@@ -94,24 +103,29 @@ async function cmd (argv, banner = defaultBanner) {
 
 function parseSubprocessCommand (args) {
   const dashDash = args['--']
-  if (dashDash[0] && dashDash[0][0] === '-') {
-    throw Error(`The node binary must immediately follow double dash (--)
-      0x [flags] -- node [nodeFlags] script.js [scriptFlags]
-    `)
-  }
-  var pathToNodeBinary = process.argv[0]
-  var subprocessArgv = args._
-  if (dashDash[0]) {
-    if (dashDash[0][0] !== 'node') pathToNodeBinary = dashDash[0]
+  let pathToNodeBinary = process.argv[0]
+  let subprocessArgv = args._
+
+  if (dashDash.length !== 0) {
+    const dashEntry = dashDash[0][0];
+    if (dashEntry === '-') {
+      throw Error(
+        'The node binary must immediately follow double dash (--)\n' +
+        '0x [flags] -- node [nodeFlags] script.js [scriptFlags]'
+      )
+    }
+    pathToNodeBinary = dashDash[0]
     dashDash.shift()
     subprocessArgv = dashDash
   }
   return { pathToNodeBinary, subprocessArgv }
 }
 
-function createStatus ({silent, quiet}) {
+function createStatus ({ silent, quiet }) {
   const statusStream = process.stderr
-  if (quiet || silent) return () => {}
+  if (quiet || silent) {
+    return () => {}
+  }
   const status = sll(statusStream)
   return hasUnicode ? (s) => status(`🔥  ${s}`) : status
 }
