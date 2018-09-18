@@ -150,12 +150,12 @@ function collectInliningInfo (sp) {
         const [ match, inlinedFn ] = /INLINE \((.*)\)/.exec(s) || [ false ]
         // shouldn't not match though..
         if (match === false) return cb()
-
-        if (lastOptimizedFrame === null) return cb()
+        
+        if (lastOptimizedFrame === null) return cb() 
         const { fn, file } = lastOptimizedFrame
         // could be a big problem if the fn doesn't match
         if (fn !== inlinedFn) return cb()
-
+        
         const key = `${fn} ${file}`
         inlined[key] = inlined[key] || []
         inlined[key].push(lastOptimizedFrame)
@@ -177,7 +177,7 @@ function collectInliningInfo (sp) {
         if (ix === '-1') root = {file, fn, id, ix, pos, key: `${fn} ${file}`}
         else {
           lastOptimizedFrame = {file, fn, id, ix, pos, caller: root}
-        }
+        } 
       } else process.stdout.write(s)
     }
 

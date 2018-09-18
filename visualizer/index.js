@@ -15,12 +15,11 @@ module.exports = function (trees, opts) {
 
   const chart = graph()
   const tree = trees.unmerged // default view
-
   const categorizer = !kernelTracing && graph.v8cats
   const flamegraph = fg({
-    categorizer,
-    tree,
-    exclude: Array.from(exclude),
+    categorizer, 
+    tree, 
+    exclude: Array.from(exclude), 
     element: chart,
     topOffset: 55
   })
