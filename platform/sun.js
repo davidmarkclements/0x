@@ -58,11 +58,7 @@ function sun (args, sudo, binary, cb) {
 
     if (kernelTracingDebug) { prof.stderr.pipe(process.stderr) }
 
-    folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
-
-    prof.on('exit', function (code) {
-      profExited = true
-    })
+    folder = getTargetFolder({ outputDir, workingDir, name, pid: proc.pid })
 
     pump(
       prof.stdout,
