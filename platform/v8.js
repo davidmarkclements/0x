@@ -21,11 +21,11 @@ const {
 
 module.exports = v8
 
-async function v8 (args, binary) {
-  const { status, outputDir, workingDir, name, onPort } = args
+async function v8 (args) {
+  const { status, outputDir, workingDir, name, onPort, pathToNodeBinary } = args
 
-  var node = !binary || binary === 'node' ? await pathTo('node') : binary
-  var proc = spawn(node, [
+  let node = pathToNodeBinary === 'node' ? await pathTo('node') : pathToNodeBinary
+  let proc = spawn(node, [
     '--prof',
     `--logfile=%p-v8.log`,
     '--print-opt-source',
@@ -133,10 +133,10 @@ async function renameSafe (from, to, tries = 0) {
 }
 
 function collectInliningInfo (sp) {
-  var root
-  var stdoutIsPrintOptSourceOutput = false
-  var lastOptimizedFrame = null
-  var inlined = {}
+  let root
+  let stdoutIsPrintOptSourceOutput = false
+  let lastOptimizedFrame = null
+  let inlined = {}
   pump(sp.stdout, split(), through((s, _, cb) => {
     s += '\n'
 

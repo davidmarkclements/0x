@@ -4,7 +4,6 @@ const { sun, linux, windows, v8 } = require('./platform')
 const debug = require('debug')('0x')
 const { join, isAbsolute, relative } = require('path')
 const fs = require('fs')
-const { promisify } = require('util')
 const validate = require('./lib/validate')(require('./schema.json'))
 const traceStacksToTicks = require('./lib/trace-stacks-to-ticks')
 const v8LogToTicks = require('./lib/v8-log-to-ticks')
@@ -19,6 +18,8 @@ module.exports = zeroEks
 async function zeroEks (args) {
   args.name = args.name || 'flamegraph'
   args.status = args.status || noop
+  args.pathToNodeBinary = args.pathToNodeBinary || process.execPath
+
   validate(args)
   const { collectOnly, visualizeOnly, treeDebug, mapFrames } = args
   if (collectOnly && visualizeOnly) {
@@ -28,8 +29,7 @@ async function zeroEks (args) {
   if (visualizeOnly) return visualize(args)
 
   args.title = args.title || `node ${args.argv.join(' ')}`
-  const binary = args.pathToNodeBinary
-  var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary)
+  var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args)
 
   if (treeDebug === true) {
     const tree = await ticksToTree(ticks, args, mapFrames, inlined)
@@ -54,17 +54,17 @@ async function zeroEks (args) {
   }
 }
 
-async function startProcessAndCollectTraceData (args, binary) {
+async function startProcessAndCollectTraceData (args) {
   if (!Array.isArray(args.argv)) {
     throw Error('argv option is required')
   }
   args.name = args.name || 'flamegraph'
 
   switch (args.kernelTracing ? platform : 'v8') {
-    case 'v8': return v8(args, binary)
-    case 'linux': return linux(args, await isSudo(), binary)
+    case 'v8': return v8(args)
+    case 'linux': return linux(args, await isSudo())
     case 'win32': return windows()
-    default: return sun(args, await isSudo(), binary)
+    default: return sun(args, await isSudo())
   }
 }
 

@@ -17,8 +17,8 @@ const {
 
 module.exports = promisify(sun)
 
-function sun (args, sudo, binary, cb) {
-  const { status, outputDir, workingDir, name, onPort } = args
+function sun (args, sudo, cb) {
+  const { status, outputDir, workingDir, name, onPort, pathToNodeBinary } = args
 
   var dtrace = pathTo('dtrace')
   var profile = require.resolve('perf-sym/profile_1ms.d')
@@ -26,9 +26,9 @@ function sun (args, sudo, binary, cb) {
   if (!sudo) {
     status('Stacks are captured using DTrace, which requires sudo access\n')
     return spawn('sudo', ['true'])
-      .on('exit', function () { sun(args, true, binary, cb) })
+      .on('exit', function () { sun(args, true, cb) })
   }
-  var node = !binary || binary === 'node' ? pathTo('node') : binary
+  var node = pathToNodeBinary === 'node' ? pathTo('node') : pathToNodeBinary
   var kernelTracingDebug = args.kernelTracingDebug
 
   args = Object.assign([

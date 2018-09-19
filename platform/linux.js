@@ -16,17 +16,17 @@ const {
 
 module.exports = promisify(linux)
 
-function linux (args, sudo, binary, cb) {
-  const { status, outputDir, workingDir, name, onPort } = args
+function linux (args, sudo, cb) {
+  const { status, outputDir, workingDir, name, onPort, pathToNodeBinary } = args
   var perf = pathTo('perf')
   if (!perf) return void cb(Error('Unable to locate perf - make sure it\'s in your PATH'))
   if (!sudo) {
     status('Stacks are captured using perf(1), which requires sudo access\n')
     return spawn('sudo', ['true'])
-      .on('exit', function () { linux(args, true, binary, cb) })
+      .on('exit', function () { linux(args, true, cb) })
   }
 
-  var node = !binary || binary === 'node' ? pathTo('node') : binary
+  var node = pathToNodeBinary === 'node' ? pathTo('node') : pathToNodeBinary
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
   var kernelTracingDebug = args.kernelTracingDebug
