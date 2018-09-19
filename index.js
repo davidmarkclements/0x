@@ -5,8 +5,6 @@ const debug = require('debug')('0x')
 const { join, isAbsolute, relative } = require('path')
 const fs = require('fs')
 const validate = require('./lib/validate')(require('./schema.json'))
-const traceStacksToTicks = require('./lib/trace-stacks-to-ticks')
-const v8LogToTicks = require('./lib/v8-log-to-ticks')
 const ticksToTree = require('./lib/ticks-to-tree')
 const render = require('./lib/render')
 const { pathTo } = require('./lib/util')
@@ -40,6 +38,7 @@ async function zeroEks (args) {
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
   }
 
+  fs.writeFileSync(`${folder}/ticks.json`, JSON.stringify(ticks))
   fs.writeFileSync(`${folder}/meta.json`, JSON.stringify({ ...args, inlined }))
 
   if (collectOnly === true) {
@@ -103,13 +102,10 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
     const rx = (srcType === 'v8') ? isolateLog : traceFile
     const pid = rx.exec(stacks)[srcType === 'v8' ? 2 : 1]
     const { inlined } = meta
-    const src = join(folder, stacks)
     title = title || meta.title
     name = name || meta.name
 
-    const ticks = (srcType === 'v8')
-      ? await v8LogToTicks(src, pathToNodeBinary)
-      : traceStacksToTicks(src)
+    const ticks = JSON.parse(fs.readFileSync(join(folder, 'ticks.json')))
 
     if (treeDebug === true) {
       const tree = await ticksToTree(ticks, mapFrames, inlined, pathToNodeBinary)
