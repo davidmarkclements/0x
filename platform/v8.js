@@ -95,7 +95,7 @@ async function v8 (args, binary) {
   process.removeListener('SIGTERM', forceClose)
   process.removeListener('exit', forceClose)
 
-  if (code|0 !== 0) {
+  if (code | 0) {
     throw Object.assign(Error('Target subprocess error, code: ' + code), { code })
   }
 
