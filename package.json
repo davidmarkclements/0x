@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "stress-rest-example": "cd examples/rest-api && npm test",
     "start": "./cmd.js --on-port 'npm run stress-rest-example' -- node examples/rest-api",
-    "lint": "standard"
+    "lint": "standard --fix | snazzy"
   },
   "repository": {
     "type": "git",
@@ -25,11 +25,11 @@
   "homepage": "https://github.com/davidmarkclements/0x#readme",
   "dependencies": {
     "ajv": "^6.5.3",
-    "browserify": "^13.0.0",
+    "browserify": "^16.2.2",
     "concat-stream": "^1.5.2",
     "d3-fg": "^6.3.1",
     "debounce": "^1.2.0",
-    "debug": "^2.2.0",
+    "debug": "^4.0.1",
     "end-of-stream": "^1.1.0",
     "env-string": "^1.0.0",
     "execspawn": "^1.0.1",
@@ -43,17 +43,18 @@
     "on-net-listen": "^1.1.0",
     "opn": "^5.2.0",
     "perf-sym": "^2.0.3",
-    "pump": "^1.0.1",
+    "pump": "^3.0.0",
     "pumpify": "^1.4.0",
     "semver": "^5.5.1",
     "single-line-log": "^1.0.1",
-    "split2": "^2.0.1",
+    "split2": "^3.0.0",
     "tachyons": "^4.9.1",
     "through2": "^2.0.1",
     "which": "^1.2.4"
   },
   "devDependencies": {
-    "standard": "^6.0.7"
+    "snazzy": "^8.0.0",
+    "standard": "^12.0.1"
   },
   "browserify-shim": {}
 }

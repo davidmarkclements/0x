@@ -6,7 +6,7 @@ const controlsCmp = require('./controls')
 const zoomCmp = require('./zoom')
 const searchCmp = require('./search')
 const titleCmp = require('./title')
-module.exports = (render) => ({state, actions}) => {
+module.exports = (render) => ({ state, actions }) => {
   const typeFilters = typeFiltersCmp(render)
   const key = keyCmp(render)
   const controls = controlsCmp(render)

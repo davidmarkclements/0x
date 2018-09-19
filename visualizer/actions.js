@@ -2,7 +2,7 @@
 
 module.exports = createActions
 
-function createActions ({flamegraph, state}, emit) {
+function createActions ({ flamegraph, state }, emit) {
   state.typeFilters.bgs = state.typeFilters.unhighlighted
 
   const unmergedTags = tagNodesWithIds(state.trees.unmerged)
@@ -10,8 +10,12 @@ function createActions ({flamegraph, state}, emit) {
 
   return {
     focusNode,
-    search, control, zoom, typeFilters,
-    pushState, jumpToState
+    search,
+    control,
+    zoom,
+    typeFilters,
+    pushState,
+    jumpToState
   }
 
   function focusNode () {
@@ -26,7 +30,7 @@ function createActions ({flamegraph, state}, emit) {
   }
 
   function search () {
-    return ({type, value}) => {
+    return ({ type, value }) => {
       if (type === 'key') {
         if (!value) return flamegraph.clear()
         flamegraph.search(value, 'cyan')
@@ -47,7 +51,7 @@ function createActions ({flamegraph, state}, emit) {
   }
 
   function control () {
-    return ({type}) => {
+    return ({ type }) => {
       switch (type) {
         case 'tiers':
           state.control.tiers = !state.control.tiers
@@ -89,7 +93,7 @@ function createActions ({flamegraph, state}, emit) {
 
   function zoom () {
     var zoomLevel = 1
-    return ({type}) => {
+    return ({ type }) => {
       switch (type) {
         case 'in':
           zoomLevel += 0.3
@@ -107,7 +111,7 @@ function createActions ({flamegraph, state}, emit) {
 
   function typeFilters () {
     const save = pushState()
-    return ({name}) => {
+    return ({ name }) => {
       const checked = state.typeFilters.exclude.has(name)
       if (checked) {
         flamegraph.typeShow(name)
@@ -137,7 +141,7 @@ function createActions ({flamegraph, state}, emit) {
 
   // Jump to a state based on a history entry.
   function jumpToState () {
-    return ({merged, nodeId, excludeTypes}) => {
+    return ({ merged, nodeId, excludeTypes }) => {
       state.focusedNodeId = nodeId
       state.control.merged = merged
       state.typeFilters.enableInlinable = !merged

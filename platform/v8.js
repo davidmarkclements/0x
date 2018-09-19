@@ -95,11 +95,11 @@ async function v8 (args, binary) {
   process.removeListener('SIGTERM', forceClose)
   process.removeListener('exit', forceClose)
 
-  if (code|0 !== 0) {
+  if (code | 0) {
     throw Object.assign(Error('Target subprocess error, code: ' + code), { code })
   }
 
-  const folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
+  const folder = getTargetFolder({ outputDir, workingDir, name, pid: proc.pid })
 
   status('Process exited, generating flamegraph')
 
@@ -150,12 +150,12 @@ function collectInliningInfo (sp) {
         const [ match, inlinedFn ] = /INLINE \((.*)\)/.exec(s) || [ false ]
         // shouldn't not match though..
         if (match === false) return cb()
-        
-        if (lastOptimizedFrame === null) return cb() 
+
+        if (lastOptimizedFrame === null) return cb()
         const { fn, file } = lastOptimizedFrame
         // could be a big problem if the fn doesn't match
         if (fn !== inlinedFn) return cb()
-        
+
         const key = `${fn} ${file}`
         inlined[key] = inlined[key] || []
         inlined[key].push(lastOptimizedFrame)
@@ -174,10 +174,10 @@ function collectInliningInfo (sp) {
         stdoutIsPrintOptSourceOutput = true
         const [match, file, fn = '(anonymous)', id, ix, pos] = /\((.+):(.+)?\) id\{(\d+),(-?\d+)\} start\{(\d+)}/.exec(s) || [false]
         if (match === false) return cb()
-        if (ix === '-1') root = {file, fn, id, ix, pos, key: `${fn} ${file}`}
+        if (ix === '-1') root = { file, fn, id, ix, pos, key: `${fn} ${file}` }
         else {
-          lastOptimizedFrame = {file, fn, id, ix, pos, caller: root}
-        } 
+          lastOptimizedFrame = { file, fn, id, ix, pos, caller: root }
+        }
       } else process.stdout.write(s)
     }
 

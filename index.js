@@ -47,8 +47,8 @@ async function zeroEks (args) {
 
   try {
     const [file] = await Promise.all([
-      generateFlamegraph({...args, ticks, inlined, pid, folder}),
-      fsWriteFilePromise(`${folder}/meta.json`, JSON.stringify({...args, inlined}))
+      generateFlamegraph({ ...args, ticks, inlined, pid, folder }),
+      fsWriteFilePromise(`${folder}/meta.json`, JSON.stringify({ ...args, inlined }))
     ])
     return file
   } catch (err) {

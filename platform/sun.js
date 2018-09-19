@@ -51,18 +51,13 @@ function sun (args, sudo, binary, cb) {
   })
   var folder
   var prof
-  var profExited = false
 
   function start () {
     prof = spawn('sudo', [profile, '-p', proc.pid])
 
     if (kernelTracingDebug) { prof.stderr.pipe(process.stderr) }
 
-    folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
-
-    prof.on('exit', function (code) {
-      profExited = true
-    })
+    folder = getTargetFolder({ outputDir, workingDir, name, pid: proc.pid })
 
     pump(
       prof.stdout,
@@ -80,15 +75,17 @@ function sun (args, sudo, binary, cb) {
   else status('Profiling')
 
   start()
-  
-  if (onPort) when(proc.stdio[5], 'data').then((port) => {
-    const whenPort = spawnOnPort(onPort, port)
-    whenPort.then(() => proc.kill('SIGINT'))
-    whenPort.catch((err) => {
-      proc.kill()
-      cb(err)
+
+  if (onPort) {
+    when(proc.stdio[5], 'data').then((port) => {
+      const whenPort = spawnOnPort(onPort, port)
+      whenPort.then(() => proc.kill('SIGINT'))
+      whenPort.catch((err) => {
+        proc.kill()
+        cb(err)
+      })
     })
-  })
+  }
 
   process.once('SIGINT', analyze)
 
@@ -112,7 +109,6 @@ function sun (args, sudo, binary, cb) {
     try { process.kill(proc.pid, 'SIGINT') } catch (e) {}
     try { process.kill(prof.pid, 'SIGINT') } catch (e) {}
 
-
     capture(10)
     function capture (attempts, translate) {
       if (!translate) {
@@ -122,11 +118,11 @@ function sun (args, sudo, binary, cb) {
             try { process.kill(prof.pid, 'SIGKILL') } catch (e) {}
           }
 
-          try { 
-            translate = sym({silent: true, pid: proc.pid}) 
+          try {
+            translate = sym({ silent: true, pid: proc.pid })
             capture(attempts, translate)
           } catch (e) {
-            setTimeout(capture, 300, attempts - 1)  
+            setTimeout(capture, 300, attempts - 1)
           }
         } else {
           status('Unable to find map file!\n')
@@ -137,8 +133,8 @@ function sun (args, sudo, binary, cb) {
         }
         return
       }
-      
-      translate = translate || sym({silent: true, pid: proc.pid})
+
+      translate = translate || sym({ silent: true, pid: proc.pid })
 
       if (!translate) {
         debug('unable to find map file')

@@ -107,7 +107,7 @@ function parseSubprocessCommand (args) {
   let subprocessArgv = args._
 
   if (dashDash.length !== 0) {
-    const dashEntry = dashDash[0][0];
+    const dashEntry = dashDash[0][0]
     if (dashEntry === '-') {
       throw Error(
         'The node binary must immediately follow double dash (--)\n' +
