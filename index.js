@@ -14,8 +14,6 @@ const render = require('./lib/render')
 const platform = process.platform
 const { tidy, noop, isSudo } = require('./lib/util')
 
-const fsWriteFilePromise = promisify(fs.writeFile)
-
 module.exports = zeroEks
 
 async function zeroEks (args) {
@@ -38,6 +36,8 @@ async function zeroEks (args) {
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
   }
 
+  fs.writeFileSync(`${folder}/meta.json`, JSON.stringify({ ...args, inlined }))
+
   if (collectOnly === true) {
     debug('collect-only mode bailing on rendering')
     tidy()
@@ -46,10 +46,7 @@ async function zeroEks (args) {
   }
 
   try {
-    const [file] = await Promise.all([
-      generateFlamegraph({ ...args, ticks, inlined, pid, folder }),
-      fsWriteFilePromise(`${folder}/meta.json`, JSON.stringify({ ...args, inlined }))
-    ])
+    const file = generateFlamegraph({ ...args, ticks, inlined, pid, folder })
     return file
   } catch (err) {
     tidy()
