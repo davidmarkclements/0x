@@ -36,7 +36,7 @@ async function zeroEks (args) {
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
   }
 
-  fs.writeFileSync(`${folder}/meta.json`, JSON.stringify({...args, inlined}))
+  fs.writeFileSync(`${folder}/meta.json`, JSON.stringify({ ...args, inlined }))
 
   if (collectOnly === true) {
     debug('collect-only mode bailing on rendering')
