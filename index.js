@@ -28,7 +28,7 @@ async function zeroEks (args) {
   if (visualizeOnly) return visualize(args)
 
   args.title = args.title || `node ${args.argv.join(' ')}`
-  const binary = args.pathToNodeBinary
+  const binary = args.pathToNodeBinary || process.execPath
   var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args, binary)
 
   if (treeDebug === true) {
