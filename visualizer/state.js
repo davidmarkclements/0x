@@ -3,15 +3,15 @@
 const hsl = require('hsl-to-rgb-for-reals')
 const { colorHash } = require('d3-fg')
 
-module.exports = ({colors, trees, exclude, merged = false, kernelTracing, title}) => ({
+module.exports = ({ colors, trees, exclude, merged = false, kernelTracing, title }) => ({
   trees,
   focusedNodeId: null,
   key: {
     colors: [
-      colorHash({top: 0, name: 'cold'}, 1, 100),
-      colorHash({top: 1, name: 'luke-warm'}, 1, 100),
-      colorHash({top: 3, name: 'warm'}, 1, 100),
-      colorHash({top: 10, name: 'hot'}, 1, 100)
+      colorHash({ top: 0, name: 'cold' }, 1, 100),
+      colorHash({ top: 1, name: 'luke-warm' }, 1, 100),
+      colorHash({ top: 3, name: 'warm' }, 1, 100),
+      colorHash({ top: 10, name: 'hot' }, 1, 100)
     ],
     enableOptUnopt: !merged
   },

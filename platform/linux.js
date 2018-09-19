@@ -60,19 +60,21 @@ function linux (args, sudo, binary, cb) {
     analyze(true)
   })
 
-  var folder = getTargetFolder({outputDir, workingDir, name, pid: proc.pid})
+  var folder = getTargetFolder({ outputDir, workingDir, name, pid: proc.pid })
 
   if (onPort) status('Profiling\n')
   else status('Profiling')
 
-  if (onPort) when(proc.stdio[5], 'data').then((port) => {
-    const whenPort = spawnOnPort(onPort, port)
-    whenPort.then(() => proc.kill('SIGINT'))
-    whenPort.catch((err) => {
-      proc.kill()
-      cb(err)
+  if (onPort) {
+    when(proc.stdio[5], 'data').then((port) => {
+      const whenPort = spawnOnPort(onPort, port)
+      whenPort.then(() => proc.kill('SIGINT'))
+      whenPort.catch((err) => {
+        proc.kill()
+        cb(err)
+      })
     })
-  })
+  }
 
   process.once('SIGINT', analyze)
 

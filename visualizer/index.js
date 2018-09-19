@@ -17,9 +17,9 @@ module.exports = function (trees, opts) {
   const tree = trees.unmerged // default view
   const categorizer = !kernelTracing && graph.v8cats
   const flamegraph = fg({
-    categorizer, 
-    tree, 
-    exclude: Array.from(exclude), 
+    categorizer,
+    tree,
+    exclude: Array.from(exclude),
     element: chart,
     topOffset: 55
   })
@@ -49,12 +49,12 @@ module.exports = function (trees, opts) {
     flamegraph.width(width).update()
   }, 150))
 
-  const state = createState({colors, trees, exclude, kernelTracing, title: opts.title})
+  const state = createState({ colors, trees, exclude, kernelTracing, title: opts.title })
 
-  const actions = createActions({flamegraph, state}, (state) => {
-    morphdom(iface, ui({state, actions}))
+  const actions = createActions({ flamegraph, state }, (state) => {
+    morphdom(iface, ui({ state, actions }))
   })
-  const iface = ui({state, actions})
+  const iface = ui({ state, actions })
   const focusNode = actions.focusNode()
   const jumpToState = actions.jumpToState()
 

@@ -11,25 +11,25 @@ module.exports = (render) => Object.assign(() => render`
 function v8cats (child) {
   var name = child.name
 
-  if (/\[INIT]$/.test(name)) return {type: 'init'}
+  if (/\[INIT]$/.test(name)) return { type: 'init' }
 
-  if (/\[INLINABLE]$/.test(name)) return {type: 'inlinable'}
+  if (/\[INLINABLE]$/.test(name)) return { type: 'inlinable' }
 
   if (!/\.m?js/.test(name)) {
-    if (/\[CODE:RegExp]$/.test(name)) return {type: 'regexp'}
-    if (/\[CODE:.*?]$/.test(name) || /v8::internal::.*\[CPP]$/.test(name)) return {type: 'v8'}
-    if (/\.$/.test(name)) return {type: 'core'}
-    if (/\[CPP]$/.test(name) || /\[SHARED_LIB]$/.test(name)) return {type: 'cpp'}
-    if (/\[eval]/.test(name)) return {type: 'native'}     // unless we create an eval checkbox
-                                                          // "native" is the next best label since
-                                                          // you cannot tell where the eval comes
-                                                          // from (app, deps, core)
-    return {type: 'v8'}
+    if (/\[CODE:RegExp]$/.test(name)) return { type: 'regexp' }
+    if (/\[CODE:.*?]$/.test(name) || /v8::internal::.*\[CPP]$/.test(name)) return { type: 'v8' }
+    if (/\.$/.test(name)) return { type: 'core' }
+    if (/\[CPP]$/.test(name) || /\[SHARED_LIB]$/.test(name)) return { type: 'cpp' }
+    if (/\[eval]/.test(name)) return { type: 'native' } // unless we create an eval checkbox
+    // "native" is the next best label since
+    // you cannot tell where the eval comes
+    // from (app, deps, core)
+    return { type: 'v8' }
   }
 
-  if (/ native /.test(name)) return {type: 'native'}
-  if (name.indexOf('/') === -1 || (/internal\//.test(name) && !/ \//.test(name))) return {type: 'core'}
-  if (/node_modules/.test(name)) return {type: 'deps'}
+  if (/ native /.test(name)) return { type: 'native' }
+  if (name.indexOf('/') === -1 || (/internal\//.test(name) && !/ \//.test(name))) return { type: 'core' }
+  if (/node_modules/.test(name)) return { type: 'deps' }
 
-  return {type: 'app'}
+  return { type: 'app' }
 }
