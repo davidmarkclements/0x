@@ -9,6 +9,7 @@ const traceStacksToTicks = require('./lib/trace-stacks-to-ticks')
 const v8LogToTicks = require('./lib/v8-log-to-ticks')
 const ticksToTree = require('./lib/ticks-to-tree')
 const render = require('./lib/render')
+const { pathTo } = require('./lib/util')
 
 const platform = process.platform
 const { tidy, noop, isSudo } = require('./lib/util')
@@ -19,6 +20,9 @@ async function zeroEks (args) {
   args.name = args.name || 'flamegraph'
   args.status = args.status || noop
   args.pathToNodeBinary = args.pathToNodeBinary || process.execPath
+  if (args.pathToNodeBinary === 'node') {
+    args.pathToNodeBinary = pathTo('node')
+  }
 
   validate(args)
   const { collectOnly, visualizeOnly, treeDebug, mapFrames } = args

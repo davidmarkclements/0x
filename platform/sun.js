@@ -28,7 +28,6 @@ function sun (args, sudo, cb) {
     return spawn('sudo', ['true'])
       .on('exit', function () { sun(args, true, cb) })
   }
-  var node = pathToNodeBinary === 'node' ? pathTo('node') : pathToNodeBinary
   var kernelTracingDebug = args.kernelTracingDebug
 
   args = Object.assign([
@@ -37,7 +36,7 @@ function sun (args, sudo, cb) {
     ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].concat(args.argv), args)
 
-  var proc = spawn(node, args, {
+  var proc = spawn(pathToNodeBinary, args, {
     stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe']
   }).on('exit', function (code) {
     if (code !== 0) {

@@ -26,7 +26,6 @@ function linux (args, sudo, cb) {
       .on('exit', function () { linux(args, true, cb) })
   }
 
-  var node = pathToNodeBinary === 'node' ? pathTo('node') : pathToNodeBinary
   var uid = parseInt(Math.random() * 1e9, 10).toString(36)
   var perfdat = '/tmp/perf-' + uid + '.data'
   var kernelTracingDebug = args.kernelTracingDebug
@@ -43,7 +42,7 @@ function linux (args, sudo, cb) {
     '-o',
     perfdat,
     '--',
-    node,
+    pathToNodeBinary,
     '--perf-basic-prof',
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
     ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
