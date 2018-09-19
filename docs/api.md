@@ -122,3 +122,26 @@ Default: false
 Show output from DTrace or perf(1) tools.
 
 Default: false
+
+### `require('0x').ticksToTree(ticks) => Object`
+
+Build a stack tree from a list of stack samples (ticks). Useful for building
+custom visualizations. After a `collectOnly` run, the `ticks` data is stored in
+`{pid}.0x/ticks.json`. Read it using:
+
+```js
+const ticks = JSON.parse(fs.readFileSync('{pid}.0x/ticks.json', 'utf8'))
+```
+
+This function returns an object with properties:
+ - `merged` - a tree of stack frames, where each node includes both the
+   optimized and unoptimized calls for that frame.
+ - `unmerged` - a tree of stack frames, where each node refers to either the
+   optimized or unoptimized calls.
+
+Each node has properties:
+ - `name` - The function name.
+ - `value` - The number of `ticks` samples this frame appeared in.
+ - `top` - The number of `ticks` samples where this frame appeared at the top
+   of the stack. (higher count = hotter function)
+ - `children` - An array of child node objects.

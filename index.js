@@ -13,6 +13,8 @@ const platform = process.platform
 const { tidy, noop, isSudo } = require('./lib/util')
 
 module.exports = zeroEks
+// Expose for custom visualizations
+module.exports.ticksToTree = ticksToTree
 
 async function zeroEks (args) {
   args.name = args.name || 'flamegraph'
