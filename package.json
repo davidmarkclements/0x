@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/davidmarkclements/0x#readme",
   "dependencies": {
-    "ajv": "^6.5.3",
+    "ajv": "^6.5.4",
     "browserify": "^16.2.2",
     "concat-stream": "^1.5.2",
     "d3-fg": "^6.3.1",
@@ -41,7 +41,7 @@
     "morphdom": "^2.3.3",
     "nanohtml": "^1.0.1",
     "on-net-listen": "^1.1.0",
-    "opn": "^5.2.0",
+    "opn": "^5.4.0",
     "perf-sym": "^2.0.3",
     "pump": "^3.0.0",
     "pumpify": "^1.4.0",
