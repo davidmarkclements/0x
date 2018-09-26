@@ -123,7 +123,7 @@ Show output from DTrace or perf(1) tools.
 
 Default: false
 
-### `require('0x').ticksToTree(ticks) => Object`
+### `require('0x/lib/ticks-to-tree')(ticks) => Object`
 
 Build a stack tree from a list of stack samples (ticks). Useful for building
 custom visualizations. After a `collectOnly` run, the `ticks` data is stored in
