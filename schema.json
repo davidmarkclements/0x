@@ -38,6 +38,12 @@
     "s": {
       "type": "boolean"
     },
+    "writeTicks": {
+      "type": "boolean"
+    },
+    "write-ticks": {
+      "type": "boolean"
+    },
     "treeDebug": {
       "type": "boolean"
     },

@@ -25,7 +25,7 @@ async function zeroEks (args) {
   }
 
   validate(args)
-  const { collectOnly, visualizeOnly, treeDebug, mapFrames } = args
+  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames } = args
   if (collectOnly && visualizeOnly) {
     throw Error('"collect only" and "visualize only" cannot be used together')
   }
@@ -36,8 +36,14 @@ async function zeroEks (args) {
   var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args)
 
   if (treeDebug === true) {
-    const tree = await ticksToTree(ticks, mapFrames, inlined, args.pathToNodeBinary)
+    const tree = await ticksToTree(ticks, {
+      mapFrames, inlined, pathToNodeBinary: args.pathToNodeBinary
+    })
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
+  }
+
+  if (writeTicks) {
+    fs.writeFileSync(`${folder}/ticks.json`, JSON.stringify(ticks))
   }
 
   fs.writeFileSync(`${folder}/meta.json`, JSON.stringify({ ...args, inlined }))
@@ -112,7 +118,9 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
       : traceStacksToTicks(src)
 
     if (treeDebug === true) {
-      const tree = await ticksToTree(ticks, mapFrames, inlined, pathToNodeBinary)
+      const tree = await ticksToTree(ticks, {
+        mapFrames, inlined, pathToNodeBinary
+      })
       fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
     }
 

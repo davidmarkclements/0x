@@ -45,7 +45,7 @@ async function cmd (argv, banner = defaultBanner) {
     boolean: [
       'open', 'version', 'help', 'quiet',
       'silent', 'treeDebug', 'kernelTracingDebug',
-      'kernelTracing', 'collectOnly'
+      'kernelTracing', 'collectOnly', 'writeTicks'
     ],
     alias: {
       silent: 's',
@@ -62,6 +62,7 @@ async function cmd (argv, banner = defaultBanner) {
       kernelTracing: 'kernel-tracing',
       kernelTracingDebug: 'kernel-tracing-debug',
       treeDebug: 'tree-debug',
+      writeTicks: 'write-ticks',
       onPort: 'on-port',
       P: 'onPort'
     }
