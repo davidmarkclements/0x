@@ -36,7 +36,9 @@ async function zeroEks (args) {
   var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args)
 
   if (treeDebug === true) {
-    const tree = await ticksToTree(ticks, mapFrames, inlined, args.pathToNodeBinary)
+    const tree = await ticksToTree(ticks, {
+      mapFrames, inlined, pathToNodeBinary: args.pathToNodeBinary
+    })
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
   }
 
@@ -116,7 +118,9 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
       : traceStacksToTicks(src)
 
     if (treeDebug === true) {
-      const tree = await ticksToTree(ticks, mapFrames, inlined, pathToNodeBinary)
+      const tree = await ticksToTree(ticks, {
+        mapFrames, inlined, pathToNodeBinary
+      })
       fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
     }
 

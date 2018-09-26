@@ -123,7 +123,7 @@ Show output from DTrace or perf(1) tools.
 
 Default: false
 
-### `require('0x/lib/ticks-to-tree')(ticks) => Object`
+### `require('0x/lib/ticks-to-tree')(ticks, opts) => Object`
 
 Build a stack tree from a list of stack samples (ticks). Useful for building
 custom visualizations. After a `collectOnly` run, the `ticks` data is stored in
@@ -132,6 +132,20 @@ custom visualizations. After a `collectOnly` run, the `ticks` data is stored in
 ```js
 const ticks = JSON.parse(fs.readFileSync('{pid}.0x/ticks.json', 'utf8'))
 ```
+
+`opts` is an object with optional properties:
+
+ - `inlined` - data about inlined functions. 0x stores this in the `meta.json`
+   file, which you can read like:
+
+   ```js
+   const { inlined } = JSON.parse(fs.readFileSync('{pid}.0x/meta.json', 'utf8'))
+   ```
+
+ - `mapFrames(frame)` - See [mapFrames](#mapframes-function).
+ - `pathToNodeBinary` - Path to the Node.js executable. Defaults to
+   `process.execPath`, but it's best to set this to the executable used to
+   generate the ticks data, in case of version differences and the like.
 
 This function returns an object with properties:
  - `merged` - a tree of stack frames, where each node includes both the
