@@ -139,7 +139,7 @@ This function returns an object with properties:
  - `unmerged` - a tree of stack frames, where each node refers to either the
    optimized or unoptimized calls.
 
-Each node has properties:
+Each node is an object with at least the following properties:
  - `name` - The function name.
  - `value` - The number of `ticks` samples this frame appeared in.
  - `top` - The number of `ticks` samples where this frame appeared at the top
