@@ -127,7 +127,8 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
       ticks,
       inlined,
       pid,
-      folder
+      folder,
+      pathToNodeBinary
     })
 
     return file
