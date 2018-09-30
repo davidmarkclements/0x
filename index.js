@@ -71,7 +71,11 @@ async function startProcessAndCollectTraceData (args) {
   args.name = args.name || 'flamegraph'
 
   switch (args.kernelTracing ? platform : 'v8') {
-    case 'v8': return v8(args)
+    case 'v8': return v8(args).catch((err) => {
+      // On error, delete any V8 isolate log left over by the failed process
+      fs.unlinkSync(join(args.workingDir, v8.getIsolateLog(args.workingDir, args.pid)))
+      throw err
+    })
     case 'linux': return linux(args, await isSudo())
     case 'win32': return windows()
     default: return sun(args, await isSudo())
