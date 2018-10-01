@@ -122,9 +122,8 @@ async function v8 (args) {
 
 // Public method so it can be used in external error handlers
 v8.getIsolateLog = function (workingDir, pid) {
-  return fs.readdirSync(workingDir).find(function (f) {
-    return new RegExp(`isolate-0(x)?([0-9A-Fa-f]{2,16})-${pid}-v8.log`).test(f)
-  })
+  const regex = new RegExp(`isolate-0(x)?([0-9A-Fa-f]{2,16})-${pid}-v8.log`)
+  return fs.readdirSync(workingDir).find(regex.test.bind(regex))
 }
 
 async function renameSafe (from, to, tries = 0) {
