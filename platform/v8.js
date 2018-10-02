@@ -35,6 +35,10 @@ async function v8 (args) {
     stdio: ['ignore', 'pipe', 'inherit', 'pipe', 'ignore', 'pipe']
   })
 
+  // Isolate log is created before command is executed
+  // Add pid to original args object so if command errors, external handlers can clean up
+  args.pid = proc.pid
+
   const inlined = collectInliningInfo(proc)
 
   if (onPort) status('Profiling\n')
@@ -102,9 +106,7 @@ async function v8 (args) {
   status('Process exited, generating flamegraph')
 
   debug('moving isolate file into folder')
-  const isolateLog = fs.readdirSync(args.workingDir).find(function (f) {
-    return new RegExp(`isolate-0(x)?([0-9A-Fa-f]{2,16})-${proc.pid}-v8.log`).test(f)
-  })
+  const isolateLog = v8.getIsolateLog(args.workingDir, proc.pid)
 
   if (!isolateLog) throw Error('no isolate logfile found')
 
@@ -116,6 +118,12 @@ async function v8 (args) {
     pid: proc.pid,
     folder: folder
   }
+}
+
+// Public method so it can be used in external error handlers
+v8.getIsolateLog = function (workingDir, pid) {
+  const regex = new RegExp(`isolate-0(x)?([0-9A-Fa-f]{2,16})-${pid}-v8.log`)
+  return fs.readdirSync(workingDir).find(regex.test.bind(regex))
 }
 
 async function renameSafe (from, to, tries = 0) {

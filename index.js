@@ -71,7 +71,20 @@ async function startProcessAndCollectTraceData (args) {
   args.name = args.name || 'flamegraph'
 
   switch (args.kernelTracing ? platform : 'v8') {
-    case 'v8': return v8(args)
+    case 'v8': return v8(args).catch((err) => {
+      const logFilePath = join(args.workingDir, v8.getIsolateLog(args.workingDir, args.pid))
+      let message = 'Fatal error in process observed by 0x. Incomplete V8 isolate log '
+
+      if (process.env.DEBUG && process.env.DEBUG.includes('0x')) {
+        message += `is readable for debugging at ${logFilePath}`
+      } else {
+        fs.unlinkSync(logFilePath)
+        message += 'deleted. To preserve these logs, enable debugging (e.g. `DEBUG=0x* 0x my-app.js`)'
+      }
+
+      if (!args.quiet && !args.silent) console.warn(message)
+      throw err
+    })
     case 'linux': return linux(args, await isSudo())
     case 'win32': return windows()
     default: return sun(args, await isSudo())
