@@ -26,15 +26,9 @@ async function zeroEks (args) {
   }
 
   validate(args)
-  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames, visualizeCpuProfile } = args
-
-  let incompatibleOptions = 0
-  if (collectOnly) incompatibleOptions += 1
-  if (visualizeOnly) incompatibleOptions += 1
-  if (visualizeCpuProfile) incompatibleOptions += 1
-
-  if (incompatibleOptions > 1) {
-    throw Error('Only one of "collect only", "visualize only", "visualize cpu profile" can be used')
+  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames, sourceMaps, relativePath, visualizeCpuProfile } = args
+  if (collectOnly && visualizeOnly) {
+    throw Error('"collect only" and "visualize only" cannot be used together')
   }
 
   if (visualizeOnly) return visualize(args)
@@ -45,7 +39,7 @@ async function zeroEks (args) {
 
   if (treeDebug === true) {
     const tree = await ticksToTree(ticks, {
-      mapFrames, inlined, pathToNodeBinary: args.pathToNodeBinary
+      mapFrames, inlined, sourceMaps, relativePath, pathToNodeBinary: args.pathToNodeBinary
     })
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
   }
@@ -117,7 +111,7 @@ async function cpuProfileVisualization (opts) {
   return file
 }
 
-async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFrames, open, name, pathToNodeBinary }) {
+async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFrames, open, name, sourceMaps, relativePath, pathToNodeBinary }) {
   try {
     const folder = getFolder(visualizeOnly, workingDir)
     const ls = fs.readdirSync(folder)
@@ -150,7 +144,7 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
 
     if (treeDebug === true) {
       const tree = await ticksToTree(ticks, {
-        mapFrames, inlined, pathToNodeBinary
+        mapFrames, inlined, pathToNodeBinary, sourceMaps, relativePath
       })
       fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
     }
@@ -167,6 +161,8 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
       inlined,
       pid,
       folder,
+      sourceMaps,
+      relativePath,
       pathToNodeBinary
     })
 
