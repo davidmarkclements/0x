@@ -45,17 +45,26 @@
     "perf-sym": "^2.0.3",
     "pump": "^3.0.0",
     "pumpify": "^1.4.0",
+    "read-last-lines": "^1.6.0",
     "semver": "^5.5.1",
     "single-line-log": "^1.0.1",
+    "source-map": "^0.7.3",
     "split2": "^3.0.0",
     "tachyons": "^4.9.1",
     "through2": "^2.0.1",
     "which": "^1.2.4"
   },
   "devDependencies": {
+    "rollup": "^0.66.2",
+    "rollup-plugin-terser": "^3.0.0",
     "snazzy": "^8.0.0",
     "standard": "^12.0.1",
     "tap": "^12.0.1"
   },
-  "browserify-shim": {}
+  "browserify-shim": {},
+  "standard": {
+    "ignore": [
+      "index2.min-map.js"
+    ]
+  }
 }

@@ -4,7 +4,7 @@ const ticksToTree = require('../lib/ticks-to-tree')
 // A very small sample
 const cryptoTicks = require('./fixtures/crypto-ticks.json')
 
-test('ticksToTree - snapshot', (t) => {
-  t.matchSnapshot(ticksToTree(cryptoTicks), 'crypto-ticks')
+test('ticksToTree - snapshot', async (t) => {
+  t.matchSnapshot(await ticksToTree(cryptoTicks), 'crypto-ticks')
   t.end()
 })

@@ -25,7 +25,7 @@ async function zeroEks (args) {
   }
 
   validate(args)
-  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames } = args
+  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames, sourceMaps, relativePath } = args
   if (collectOnly && visualizeOnly) {
     throw Error('"collect only" and "visualize only" cannot be used together')
   }
@@ -37,7 +37,7 @@ async function zeroEks (args) {
 
   if (treeDebug === true) {
     const tree = await ticksToTree(ticks, {
-      mapFrames, inlined, pathToNodeBinary: args.pathToNodeBinary
+      mapFrames, inlined, sourceMaps, relativePath, pathToNodeBinary: args.pathToNodeBinary
     })
     fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
   }
@@ -97,7 +97,7 @@ async function generateFlamegraph (opts) {
   return file
 }
 
-async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFrames, open, name, pathToNodeBinary }) {
+async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFrames, open, name, sourceMaps, relativePath, pathToNodeBinary }) {
   try {
     const folder = isAbsolute(visualizeOnly)
       ? relative(workingDir, visualizeOnly)
@@ -132,7 +132,7 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
 
     if (treeDebug === true) {
       const tree = await ticksToTree(ticks, {
-        mapFrames, inlined, pathToNodeBinary
+        mapFrames, inlined, pathToNodeBinary, sourceMaps, relativePath
       })
       fs.writeFileSync(`${folder}/stacks.${pid}.json`, JSON.stringify(tree, 0, 2))
     }
@@ -149,6 +149,8 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
       inlined,
       pid,
       folder,
+      sourceMaps,
+      relativePath,
       pathToNodeBinary
     })
 

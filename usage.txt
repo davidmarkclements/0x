@@ -60,6 +60,19 @@
                           
                           Default: false
 
+  --source-maps <file>    If a javascript library has a source map (a sourceMappingUrl
+                          comment on the last line), list the source file and position
+                          instead of the original file.
+
+                          <file> can be used to define source maps which can not be
+                          resolved automatically. It should be a JSON file of an object
+                          with <library name> as key and <source map file> as value.
+
+  --relative-path <dir>   Make the listed file names relative to this dir.
+
+                          When no <dir> is specified, the file names will be relative
+                          to the current working directory
+
   --tree-debug            Output a JSON file of stacks as {outputDir}/stacks.{pid}.json
                           
                           Default: false
