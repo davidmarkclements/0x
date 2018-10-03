@@ -65,10 +65,5 @@
     "standard": "^12.0.1",
     "tap": "^12.5.3"
   },
-  "browserify-shim": {},
-  "standard": {
-    "ignore": [
-      "index2.min-map.js"
-    ]
-  }
+  "browserify-shim": {}
 }

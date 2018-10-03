@@ -1,15 +1,4 @@
 const { terser } = require('rollup-plugin-terser')
-const { copyFileSync } = require('fs')
-
-const after = () => {
-  return {
-    generateBundle (outputOptions, bundle, isWrite) {
-      setTimeout(() => {
-        copyFileSync('./index1.min.js.map', './index2.min-map.js')
-      }, 1)
-    }
-  }
-}
 
 module.exports = [{
   input: '../simple/index.js',
@@ -29,7 +18,6 @@ module.exports = [{
     sourcemap: false
   },
   plugins: [
-    terser(),
-    after()
+    terser()
   ]
 }]
