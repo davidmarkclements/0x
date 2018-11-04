@@ -2,7 +2,7 @@
 
 const { sun, linux, windows, v8 } = require('./platform')
 const debug = require('debug')('0x')
-const { join, isAbsolute, relative } = require('path')
+const { join, isAbsolute, relative, dirname } = require('path')
 const fs = require('fs')
 const validate = require('./lib/validate')(require('./schema.json'))
 const traceStacksToTicks = require('./lib/trace-stacks-to-ticks')
@@ -27,11 +27,18 @@ async function zeroEks (args) {
 
   validate(args)
   const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames } = args
-  if (collectOnly && visualizeOnly) {
-    throw Error('"collect only" and "visualize only" cannot be used together')
+
+  let incompatibleOptions = 0
+  if (collectOnly) incompatibleOptions += 1
+  if (visualizeOnly) incompatibleOptions += 1
+  if (visualizeV8Profile) incompatibleOptions += 1
+
+  if (incompatibleOptions > 1) {
+    throw Error('Only one of "collect only", "visualize only", "visualize v8 profile" can be used')
   }
 
   if (visualizeOnly) return visualize(args)
+  if (visualizeV8Profile) return visualizeV8Profile(args)
 
   args.title = args.title || `node ${args.argv.join(' ')}`
   var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args)
@@ -98,11 +105,21 @@ async function generateFlamegraph (opts) {
   return file
 }
 
+function getFolder (file, workingDir) {
+  return isAbsolute(file)
+    ? relative(workingDir, file)
+    : file
+}
+
+async function visualizeV8Profile (opts) {
+  const folder = dirname(opts.visualizeV8Profile)
+  const file = await render({ ...opts, folder })
+  return file
+}
+
 async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFrames, open, name, pathToNodeBinary }) {
   try {
-    const folder = isAbsolute(visualizeOnly)
-      ? relative(workingDir, visualizeOnly)
-      : visualizeOnly
+    const folder = getFolder(visualizeOnly, workingDir)
     const ls = fs.readdirSync(folder)
     const traceFile = /^stacks\.(.*)\.out$/
     const isolateLog = /^isolate-((0x)?[0-9A-Fa-f]{2,16})-(.*)-v8\.(log|json)$/
