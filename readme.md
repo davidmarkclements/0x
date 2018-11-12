@@ -16,7 +16,7 @@ on any platform which Node runs on (macOs, Linux, Windows, Android...).
 * Node v8.5.0 and above
 * Default usage supports any Operating System that Node runs on!
 * Chrome
-  * Other browsers may open flamegraphs in a degraded, but functional form 
+  * Other browsers may open flamegraphs in a degraded, but functional form
 
 ## Legacy
 
@@ -82,12 +82,12 @@ generates a profile folder (`<pid>.0x`), containing `flamegraph.html`.
 
 ## The UI
 
-The `flamegraph.html` file contains the 0x UI, which is explained in 
+The `flamegraph.html` file contains the 0x UI, which is explained in
 [docs/ui.md](docs/ui.md).
 
 ## Production Servers
 
-A lightweight, production server friendly, approach to generating a 
+A lightweight, production server friendly, approach to generating a
 flamegraph is described in [docs/production-servers.md](docs/production-servers.md).
 
 ## The Profile Folder
@@ -125,30 +125,30 @@ Print usage info.
 Open the flamegraph in the browser using `open` or `xdg-open` (see
 https://www.npmjs.com/package/open for details).
 
-### --on-port | -P          
+### --on-port | -P
 
-Run a given command and then generate the flamegraph. 
-The command as specified has access to a `$PORT` variable. 
-The `$PORT` variable is set according to the first port that 
-profiled process opens. 
+Run a given command and then generate the flamegraph.
+The command as specified has access to a `$PORT` variable.
+The `$PORT` variable is set according to the first port that
+profiled process opens.
 
-For instance, here's an example of using [autocannon](http://npm.im/autocannon) 
+For instance, here's an example of using [autocannon](http://npm.im/autocannon)
 to load-test the process:
 
 ```sh
 0x -P 'autocannon localhost:$PORT' app.js
 ```
 
-When the load-test completes, the profiled processed will be 
-sent a SIGINT and the flamegraph will be automatically generated.  
+When the load-test completes, the profiled processed will be
+sent a SIGINT and the flamegraph will be automatically generated.
 
 Remember to use single quotes to avoid bash interpolation,
 or else escape variable (e.g. `0x -P "autocannon localhost:$PORT" app.js`
 won't work wheras `0x -P "autocannon localhost:\$PORT" app.js` will).
 
 Note: On Windows interpolation usually occurs with `%PORT%`, however
-in this case the dollar-prefix `$PORT` is the correct syntax 
-(because the interpolation is not shell based). 
+in this case the dollar-prefix `$PORT` is the correct syntax
+(because the interpolation is not shell based).
 
 Default: ''
 
@@ -156,24 +156,24 @@ Default: ''
 
 The name of the HTML file, without the .html extension
 Can be set to - to write HTML to STDOUT (note
-due to the nature of CLI argument parsing, this must be set using `=`, 
+due to the nature of CLI argument parsing, this must be set using `=`,
 e.g. `--name=-`).
 
-If either this flag or `--output-html-file` is set to `-` 
+If either this flag or `--output-html-file` is set to `-`
 then the HTML will go to STDOUT.
 
 Default: flamegraph
 
-### ---title 
+### ---title
 
 Set the title to display in the flamegraph UI.
 
-Default: the command that 0x ran to start the process 
+Default: the command that 0x ran to start the process
 
 ### --output-dir | -D
 
 Specify artifact output directory. This can be specified in template
-form with possible variables being `{pid}`, `{timestamp}`, `{name}` 
+form with possible variables being `{pid}`, `{timestamp}`, `{name}`
 (based on the `--name` flag) and `{outputDir}`(variables
 must be specified without whitespace, e.g. `{ pid }` is not supported).
 
@@ -181,34 +181,34 @@ Default: `{pid}.0x`
 
 ### --output-html | -F
 
-Specify destination of the generated flamegraph HTML file. 
-This can be specified in template form with possible variables 
-being `{pid}`, `{timestamp}`, `{name}` (based on the `--name` flag) and 
-`{outputDir}` (variables must be specified without whitespace, 
-e.g. `{ pid }` is not supported). It can also be set to `-` to 
+Specify destination of the generated flamegraph HTML file.
+This can be specified in template form with possible variables
+being `{pid}`, `{timestamp}`, `{name}` (based on the `--name` flag) and
+`{outputDir}` (variables must be specified without whitespace,
+e.g. `{ pid }` is not supported). It can also be set to `-` to
 send the HTML output to STDOUT (note
-due to the nature of CLI argument parsing, this must be set using `=`, 
+due to the nature of CLI argument parsing, this must be set using `=`,
 e.g. `--output-html=-`).
 
-If either this flag or `--name` is set to `-` 
+If either this flag or `--name` is set to `-`
 then the HTML will go to STDOUT.
 
 Default: `{outputDir}/{name}.html`
 
 ### --kernel-tracing
 
-Use an OS kernel tracing tool (perf on Linux or 
-dtrace on macOS and SmartOS). This will capture 
-native stack frames (C++ modules and Libuv I/O), 
+Use an OS kernel tracing tool (perf on Linux or
+dtrace on macOS and SmartOS). This will capture
+native stack frames (C++ modules and Libuv I/O),
 but may result in missing stacks on Node 8.
 
 See [docs/kernel-tracing.md](docs/kernel-tracing.md) for more information.
 
-Default: false 
+Default: false
 
-### --quiet | -q 
+### --quiet | -q
 
-Limit output, the only output will be fatal errors or 
+Limit output, the only output will be fatal errors or
 the path to the `flamegraph.html` upon successful generation.
 
 Default: false
@@ -226,10 +226,19 @@ with relevant outputs.
 
 Default: false
 
-### --visualize-only 
+### --visualize-only
 
-Supply a path to a profile folder to build or rebuild visualization 
+Supply a path to a profile folder to build or rebuild visualization
 from original stacks.
+
+Default: undefined
+
+### --visualize-v8-profile
+
+Supply a path to a profile recorded by
+[v8-profiler](https://github.com/node-inspector/v8-profiler)
+or [v8-profiler-next](https://github.com/hyj1991/v8-profiler-next) to build a
+flamegraph. See `examples/v8-profiler` for an example.
 
 Default: undefined
 
@@ -246,7 +255,7 @@ file.
 
 Default: false
 
-## Programmatic API 
+## Programmatic API
 
 0x can also be required as a Node module and scripted:
 
@@ -277,9 +286,9 @@ The Programmatic API is detailed in [docs/api.md](docs/api.md).
 
 ### Memory Issues
 
-Very complex applications with lots of stacks may hit memory issues. 
+Very complex applications with lots of stacks may hit memory issues.
 
-The `--stack-size` flag can be used to set the memory to the maximum 8GB 
+The `--stack-size` flag can be used to set the memory to the maximum 8GB
 in order to work around this when profiling:
 
 ```
@@ -288,7 +297,7 @@ node --stack-size=8024 $(which 0x) my-app.js
 
 There may still be a problem opening the flamegraph in Chrome. The same work
 around can be used by opening Chrome from the command line (platform dependent)
-and nesting the `--stack-size` flag within the `--js-flags` flag: 
+and nesting the `--stack-size` flag within the `--js-flags` flag:
 `--js-flags="--stack-size 8024"`.
 
 ## Debugging
@@ -306,7 +315,7 @@ and nesting the `--stack-size` flag within the `--js-flags` flag:
 Sponsored by [nearForm](http://nearform.com)
 
 This tool is inspired from various info and code sources
-and would have taken much longer without the following people and 
+and would have taken much longer without the following people and
 their Open Source/Info Sharing efforts:
 
 * Thorsten Lorenz (<http://thlorenz.com/>)
