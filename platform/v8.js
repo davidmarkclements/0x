@@ -98,7 +98,7 @@ async function v8 (args) {
   process.removeListener('exit', forceClose)
 
   if (code | 0) {
-    throw Object.assign(Error('Target subprocess error, code: ' + code), { code })
+    console.error('Target subprocess error, code: ' + code)
   }
 
   const folder = getTargetFolder({ outputDir, workingDir, name, pid: proc.pid })
