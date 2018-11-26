@@ -41,9 +41,7 @@ function sun (args, sudo, cb) {
   }).on('exit', function (code) {
     if (code !== 0) {
       tidy()
-      const err = Error('Target subprocess error, code: ' + code)
-      err.code = code
-      cb(err)
+      console.error('Target subprocess error, code: ' + code)
       return
     }
     analyze(true)
