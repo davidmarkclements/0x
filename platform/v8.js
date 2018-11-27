@@ -97,6 +97,7 @@ async function v8 (args) {
   process.removeListener('SIGTERM', forceClose)
   process.removeListener('exit', forceClose)
 
+  args.onProcessExit(code)
   if (code | 0) {
     console.error('Target subprocess error, code: ' + code)
   }
