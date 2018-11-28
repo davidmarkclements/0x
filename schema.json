@@ -117,6 +117,7 @@
     "argv": {
       "type": "array",
       "items": {}
-    }
+    },
+    "onProcessExit": {}
   }
 }

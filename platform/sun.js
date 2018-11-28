@@ -39,6 +39,7 @@ function sun (args, sudo, cb) {
   var proc = spawn(pathToNodeBinary, args, {
     stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe']
   }).on('exit', function (code) {
+    args.onProcessExit(code)
     if (code !== 0) {
       tidy()
       console.error('Target subprocess error, code: ' + code)
