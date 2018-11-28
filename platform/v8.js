@@ -143,48 +143,78 @@ function collectInliningInfo (sp) {
   let stdoutIsPrintOptSourceOutput = false
   let lastOptimizedFrame = null
   let inlined = {}
+
+  // Try to parse an INLINE() item from the optimization log,
+  // returning the length of the parsed code.
+  // Returns 0 if it doesn't match and the line may be user output
+  // Returns -1 if it doesn't match and the line should be ignored
+  function tryParseInline (s) {
+    if (/INLINE/.test(s)) {
+      // Use non greedy match so that INLINE and FUNCTION SOURCE items
+      // on the same line don't interfere, else the INLINE function name
+      // would contain everything up to the ) in FUNCTION SOURCE ()
+      const [ match, inlinedFn ] = /INLINE \((.*?)\) id\{/.exec(s) || [ false ]
+      // shouldn't not match though..
+      if (match === false) return -1
+
+      if (lastOptimizedFrame === null) return -1
+      const { fn, file } = lastOptimizedFrame
+      // could be a big problem if the fn doesn't match
+      if (fn !== inlinedFn) return -1
+
+      const key = `${fn} ${file}`
+      inlined[key] = inlined[key] || []
+      inlined[key].push(lastOptimizedFrame)
+      return match.length
+    }
+    return 0
+  }
+
   pump(sp.stdout, split(), through((s, _, cb) => {
+    let handled = false
+
     s += '\n'
 
     if (stdoutIsPrintOptSourceOutput === true && /^--- END ---/.test(s)) {
       stdoutIsPrintOptSourceOutput = false
       return cb()
     }
+
     // trace data
     if (stdoutIsPrintOptSourceOutput === false) {
-      if (/INLINE/.test(s)) {
-        const [ match, inlinedFn ] = /INLINE \((.*)\)/.exec(s) || [ false ]
-        // shouldn't not match though..
-        if (match === false) return cb()
+      const inlineLength = tryParseInline(s)
+      if (inlineLength !== 0) { // may be -1 for invalid INLINE() stmt
+        handled = true
+        // Continue parsing this line, it may contain more optimization information
+        // if the log output is funny (see also the FUNCTION SOURCE comment)
+        if (inlineLength > 0) {
+          s = s.slice(inlineLength)
+        }
+      }
 
-        if (lastOptimizedFrame === null) return cb()
-        const { fn, file } = lastOptimizedFrame
-        // could be a big problem if the fn doesn't match
-        if (fn !== inlinedFn) return cb()
-
-        const key = `${fn} ${file}`
-        inlined[key] = inlined[key] || []
-        inlined[key].push(lastOptimizedFrame)
-        cb()
-        return
-        // Reading v8 output from the stdout stream is sometimes unreliable. The next
-        // FUNCTION SOURCE can be in the middle of a previous FUNCTION SOURCE, cutting
-        // it off. The impact can be alleviated slightly by accepting FUNCTION SOURCE
-        // identifiers that occur in the middle of a line.
-        // The previous FUNCTION SOURCE block will not have been closed, but END lines
-        // only set `stdoutIsPrintOptSourceOutput` to false, so we don't have to do
-        // anything here. If the END logic changes the below may need to change as well.
-        //
-        // ref: https://github.com/davidmarkclements/0x/issues/122
-      } else if (/--- FUNCTION SOURCE \(.*?\) id\{\d+,-?\d+\} start\{\d+\} ---\n$/.test(s)) {
+      // Reading v8 output from the stdout stream is sometimes unreliable. The next
+      // FUNCTION SOURCE can be in the middle of a previous FUNCTION SOURCE, cutting
+      // it off. The impact can be alleviated slightly by accepting FUNCTION SOURCE
+      // identifiers that occur in the middle of a line.
+      // The previous FUNCTION SOURCE block will not have been closed, but END lines
+      // only set `stdoutIsPrintOptSourceOutput` to false, so we don't have to do
+      // anything here. If the END logic changes the below may need to change as well.
+      //
+      // ref: https://github.com/davidmarkclements/0x/issues/122
+      if (/--- FUNCTION SOURCE \(.*?\) id\{\d+,-?\d+\} start\{\d+\} ---\n$/.test(s)) {
         stdoutIsPrintOptSourceOutput = true
-        const [match, file, fn = '(anonymous)', id, ix, pos] = /\((.+):(.+)?\) id\{(\d+),(-?\d+)\} start\{(\d+)}/.exec(s) || [false]
+        const [match, file, fn = '(anonymous)', id, ix, pos] = /\((.+):(.+)?\) id\{(\d+),(-?\d+)\} start\{(\d+)\}/.exec(s) || [false]
         if (match === false) return cb()
         if (ix === '-1') root = { file, fn, id, ix, pos, key: `${fn} ${file}` }
         else {
           lastOptimizedFrame = { file, fn, id, ix, pos, caller: root }
         }
-      } else process.stdout.write(s)
+        handled = true
+      }
+
+      if (!handled) {
+        process.stdout.write(s)
+      }
     }
 
     cb()
