@@ -49,11 +49,10 @@ function linux (args, sudo, cb) {
   ].filter(Boolean).concat(args.argv), {
     stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe']
   }).on('exit', function (code) {
+    args.onProcessExit(code)
     if (code !== null && code !== 0 && code !== 143 && code !== 130) {
       tidy(args)
-      const err = Error('Tracing subprocess error, code: ' + code)
-      err.code = code
-      cb(Error(err))
+      console.error('Tracing subprocess error, code: ' + code)
       return
     }
     analyze(true)

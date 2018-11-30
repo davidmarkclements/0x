@@ -18,6 +18,7 @@ module.exports = zeroEks
 
 async function zeroEks (args) {
   args.name = args.name || 'flamegraph'
+  args.onProcessExit = args.onProcessExit || noop
   args.status = args.status || noop
   args.pathToNodeBinary = args.pathToNodeBinary || process.execPath
   if (args.pathToNodeBinary === 'node') {
