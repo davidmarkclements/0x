@@ -8,7 +8,7 @@
 const init1 = { name: 'NativeModule.compile internal/bootstrap/loaders.js:236:44', type: 'JS' }
 const init2 = { name: 'bootstrapNodeJSCore internal/bootstrap/node.js:12:24', type: 'JS' }
 const cpp1 = { name: '/usr/bin/node', type: 'SHARED_LIB' }
-const cpp2 =  { name: 'C:\\Program Files\\nodejs\\node.exe', type: 'SHARED_LIB' }
+const cpp2 = { name: 'C:\\Program Files\\nodejs\\node.exe', type: 'SHARED_LIB' }
 const v81 = { name: 'v8::internal::Runtime_CompileLazy(int, v8::internal::Object**, v8::internal::Isolate*)', type: 'CPP' }
 const v82 = { name: 'Call_ReceiverIsNotNullOrUndefined', type: 'CODE', kind: 'BuiltIn' }
 const regexp1 = { name: '[\u0000zA-Z\u0000#$%&\'*+.|~]+$', type: 'CODE', kind: 'RegExp' }

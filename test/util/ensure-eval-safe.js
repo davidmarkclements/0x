@@ -32,7 +32,7 @@ function stringSafetyCheck (str, escapedRegex = false) {
     compare = escapeRegex(compare)
   }
 
-  assert.equal(compare, str)
+  assert.strictEqual(compare, str)
 }
 
 function regexSafetyCheck (str) {

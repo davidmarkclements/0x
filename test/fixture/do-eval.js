@@ -34,7 +34,7 @@ function appOuterFunc () {
     // Method names defined from a variable show up as (anonymous)
     // but crazy method names written in as strings still show up in output
     'method: \\μИاκهよΞ\\ [CODE:RegExp] / native / [SHARED_LIB]': function () {
-      global.eval(evalCode)
+      global.eval(evalCode) // eslint-disable-line
       regexStringTarget.repeat(reps).replace(new RegExp(nonPathRegex), stringPosixPaths)
     }
   }

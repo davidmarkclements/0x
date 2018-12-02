@@ -44,7 +44,7 @@ const regexWindowsPaths = '/' + depsEsmWindows + ' ' + sharedLibWindows + ' ' + 
 const stringPosixPaths = `${depsCommonUnix} ${sharedLibUnix} ${appUnix} ${allTags}`
 
 // Contains \\ outside of complete paths, a :\\ with \\ both before and after it, and \\u.... patterns which aren't unicode character codes
-const nonPathRegex = '/[\/\\] \.js native \.mjs \\ \/ :\\ \/ \\ \\\\server (\\users\\u2fan\\node_modules\\|\/node_modules\/) \[eval].js:1:2/'
+const nonPathRegex = '/[\/\\] \.js native \.mjs \\ \/ :\\ \/ \\ \\\\server (\\users\\u2fan\\node_modules\\|\/node_modules\/) \[eval].js:1:2/' // eslint-disable-line
 
 module.exports = {
   allTags,

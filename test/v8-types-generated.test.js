@@ -34,35 +34,34 @@ test('Ensure eval sanitising works as expected before using fixture', function (
   }, { actual: 'BinaryExpression', expected: 'Literal' })
 
   t.throws(function () {
-    evalSafeString("`some string${ console.log('>>> Do bad things') }`")
+    evalSafeString("`some string${ console.log('>>> Do bad things') }`") // eslint-disable-line
   }, { actual: 'TemplateLiteral', expected: 'Literal' })
 
   // Simulate redefining 'RegExp' to be malicious when it is called later by an innocent 'new RegExp()'
   t.throws(function () {
     evalSafeString("function RegExp () { console.log('>>> Do bad things') }")
-  }, { actual: 'FunctionDeclaration' , expected: 'ExpressionStatement' })
+  }, { actual: 'FunctionDeclaration', expected: 'ExpressionStatement' })
 
   t.throws(function () {
     evalSafeString("RegExp = function () { console.log('>>> Do bad things') }")
-  }, { actual: 'AssignmentExpression' , expected: 'Literal' })
+  }, { actual: 'AssignmentExpression', expected: 'Literal' })
 
   t.throws(function () {
-    evalSafeString("`some string${ function RegExp () { console.log('>>> Do bad things') } }`")
-  }, { actual: 'TemplateLiteral' , expected: 'Literal' })
+    evalSafeString("`some string${ function RegExp () { console.log('>>> Do bad things') } }`") // eslint-disable-line
+  }, { actual: 'TemplateLiteral', expected: 'Literal' })
 
   t.throws(function () {
     evalSafeString("'/abc/' && (RegExp = function () { console.log('>>> Do bad things') })")
-  }, { actual: 'LogicalExpression' , expected: 'Literal' })
+  }, { actual: 'LogicalExpression', expected: 'Literal' })
 
   t.throws(function () {
     evalSafeString("(RegExp = function () { console.log('>>> Do bad things') }) && '/abc/'")
-    global.eval(str + "; new RegExp('/abc/');")
-  }, { actual: 'LogicalExpression' , expected: 'Literal' })
+  }, { actual: 'LogicalExpression', expected: 'Literal' })
 
   // Test regex creation
   t.throws(function () {
     evalSafeRegexDef("'/abc'; console.log('>>> Do bad things');")
-  }, { actual: 2 , expected: 1 })
+  }, { actual: 2, expected: 1 })
 
   t.throws(function () {
     evalSafeRegexDef("'/abc' + console.log('>>> Do bad things')")
@@ -70,19 +69,19 @@ test('Ensure eval sanitising works as expected before using fixture', function (
 
   t.throws(function () {
     evalSafeRegexDef("(RegExp = function () { console.log('>>> Do bad things') }) && '/abc/'")
-  }, { actual: 'LogicalExpression' , expected: 'Literal' })
+  }, { actual: 'LogicalExpression', expected: 'Literal' })
 
   t.throws(function () {
     evalSafeRegexDef("'/abc/' && (RegExp = function () { console.log('>>> Do bad things') })")
-  }, { actual: 'LogicalExpression' , expected: 'Literal' })
+  }, { actual: 'LogicalExpression', expected: 'Literal' })
 
   t.throws(function () {
-    evalSafeRegexDef("`/abc${ console.log('>>> Do bad things') }/`")
-  }, { actual: 'TemplateLiteral' , expected: 'Literal' })
+    evalSafeRegexDef("`/abc${ console.log('>>> Do bad things') }/`") // eslint-disable-line
+  }, { actual: 'TemplateLiteral', expected: 'Literal' })
 
   t.throws(function () {
-    evalSafeRegexDef("`/abc${ function RegExp () { console.log('>>> Do bad things') } }/`")
-  }, { actual: 'TemplateLiteral' , expected: 'Literal' })
+    evalSafeRegexDef("`/abc${ function RegExp () { console.log('>>> Do bad things') } }/`") // eslint-disable-line
+  }, { actual: 'TemplateLiteral', expected: 'Literal' })
 
   t.end()
 })
