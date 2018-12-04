@@ -26,7 +26,7 @@ async function zeroEks (args) {
   }
 
   validate(args)
-  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames } = args
+  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames, visualizeV8Profile } = args
 
   let incompatibleOptions = 0
   if (collectOnly) incompatibleOptions += 1
@@ -38,7 +38,7 @@ async function zeroEks (args) {
   }
 
   if (visualizeOnly) return visualize(args)
-  if (visualizeV8Profile) return visualizeV8Profile(args)
+  if (visualizeV8Profile) return v8ProfileVisualization(args)
 
   args.title = args.title || `node ${args.argv.join(' ')}`
   var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args)
@@ -111,7 +111,7 @@ function getFolder (file, workingDir) {
     : file
 }
 
-async function visualizeV8Profile (opts) {
+async function v8ProfileVisualization (opts) {
   const folder = dirname(opts.visualizeV8Profile)
   const file = await render({ ...opts, folder })
   return file
