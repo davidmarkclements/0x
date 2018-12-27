@@ -23,6 +23,7 @@ module.exports = function (trees, opts) {
     element: chart,
     topOffset: 55
   })
+  flamegraph.sort(false)
   const { colors } = flamegraph
 
   let userZoom = true // false if the last zoom call was initiated by 0x
