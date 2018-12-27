@@ -18,12 +18,13 @@ module.exports = function (trees, opts) {
   const categorizer = !kernelTracing && graph.v8cats
   const flamegraph = fg({
     categorizer,
-    tree,
+    tree: [],
     exclude: Array.from(exclude),
     element: chart,
     topOffset: 55
   })
   flamegraph.sort(false)
+  flamegraph.renderTree(tree)
   const { colors } = flamegraph
 
   let userZoom = true // false if the last zoom call was initiated by 0x
