@@ -4,8 +4,8 @@ const render = require('nanohtml')
 const ticksToTree = require('../../lib/ticks-to-tree.js')
 const { v8cats } = require('../../visualizer/cmp/graph.js')(render)
 
-function getType (frame, inlined) {
-  const processedFrame = Object.assign({}, frame, { name: getProcessedName(frame, inlined) })
+async function getType (frame, inlined) {
+  const processedFrame = Object.assign({}, frame, { name: await getProcessedName(frame, inlined) })
   return getTypeProcessed(processedFrame)
 }
 
@@ -13,7 +13,7 @@ function getTypeProcessed (frame) {
   return v8cats(frame).type
 }
 
-function getProcessedName (frame, inlined) {
+async function getProcessedName (frame, inlined) {
   const { name } = frame
 
   if (inlined) {
@@ -27,10 +27,10 @@ function getProcessedName (frame, inlined) {
       caller: { key: parentName.split(':')[0] }
     }]
 
-    const tree = ticksToTree([[{ name: parentName }, frame]], options)
+    const tree = await ticksToTree([[{ name: parentName }, frame]], options)
     return tree.unmerged.children[0].children[0].name
   } else {
-    const tree = ticksToTree([[frame]])
+    const tree = await ticksToTree([[frame]])
     return tree.unmerged.children[0].name
   }
 }
