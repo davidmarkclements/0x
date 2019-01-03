@@ -108,17 +108,17 @@
       "type": "boolean"
     },
     "sourceMaps": {
-      "type": ["object", "null"],
+      "type": ["object", "boolean", "null"],
       "default": null
     },
     "source-maps": {
-      "type": "string"
+      "type": ["string", "boolean"]
     },
     "relativePath": {
       "type": "string"
     },
     "relative-path": {
-      "type": "string"
+      "type": ["string", "boolean"]
     },
     "pathToNodeBinary": {},
     "path-to-node-binary": {},

@@ -1,0 +1,16 @@
+{
+  "name": "0x-example-source-maps",
+  "version": "1.0.0",
+  "description": "0x example with source maps",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "0x1": "0x --source-maps index1.min.js",
+    "0x2": "0x --source-maps --source-maps-json=./sourcemaps.json index2.min.js"
+  },
+  "dependencies": {
+    "rollup": "^1.0.1",
+    "rollup-plugin-terser": "^4.0.1"
+  }
+}

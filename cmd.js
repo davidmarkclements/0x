@@ -45,9 +45,7 @@ async function cmd (argv, banner = defaultBanner) {
     boolean: [
       'open', 'version', 'help', 'quiet',
       'silent', 'treeDebug', 'kernelTracingDebug',
-      'kernelTracing', 'collectOnly', 'writeTicks'
-    ],
-    string: [
+      'kernelTracing', 'collectOnly', 'writeTicks',
       'sourceMaps', 'relativePath'
     ],
     alias: {
@@ -90,21 +88,16 @@ async function cmd (argv, banner = defaultBanner) {
   args.argv = subprocessArgv
   args.pathToNodeBinary = pathToNodeBinary
 
-  if (typeof args.sourceMaps === 'undefined') {
-    args.sourceMaps = null
-  } else {
-    if (args.sourceMaps !== '') {
-      const sourceMapFile = resolve('.', args.sourceMaps)
-      if (fs.existsSync(sourceMapFile)) {
-        args.sourceMaps = JSON.parse(fs.readFileSync(sourceMapFile))
-      }
-    }
-    if (typeof args.sourceMaps !== 'object') {
-      args.sourceMaps = {}
+  if (typeof args.sourceMaps === 'string') {
+    const sourceMapFile = resolve('.', args.sourceMaps)
+    if (fs.existsSync(sourceMapFile)) {
+      args.sourceMaps = JSON.parse(fs.readFileSync(sourceMapFile))
     }
   }
 
-  if (typeof args.relativePath !== 'undefined' && args.relativePath === '') {
+  if (!args.relativePath) {
+    args.relativePath = ''
+  } else if (args.relativePath === true) {
     args.relativePath = args.workingDir
   }
 
