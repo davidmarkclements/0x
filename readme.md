@@ -247,16 +247,16 @@ Show output from DTrace or perf(1) tools.
 
 Default: false
 
-### --source-maps
+### --source-maps(=_./path/to/sourcemaps.json_)
 
-If a javascript library has a source map (a sourceMappingUrl comment on the last
+If a JavaScript library has a source map (a sourceMappingUrl comment on the last
 line), list the source file and position instead of the original file.
 
-A path to a json file can be supplied to define source maps which can not be
+A path to a JSON file can be supplied to define source maps which can not be
 resolved automatically. The JSON file should list an object with library name as
 key and the source map file as value.
 
-### --relative-path
+### --relative-path(=_/a/path_)
 
 Supply a path to display listed file names relative to this dir.
 
