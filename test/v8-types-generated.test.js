@@ -138,26 +138,26 @@ test('Generate profile and test its output', async function (t) {
 
   // Test 0x json contents are logged and classified as expected
   t.ok(app)
-  t.equal(getType(app), 'app')
+  t.equal(await getType(app), 'app')
 
   t.ok(appUnicode)
-  t.equal(getType(appUnicode), 'app')
+  t.equal(await getType(appUnicode), 'app')
 
   t.ok(appLongMethod)
-  t.equal(getType(appLongMethod), 'app')
+  t.equal(await getType(appLongMethod), 'app')
 
   t.ok(deps)
-  t.equal(getType(deps), 'deps')
+  t.equal(await getType(deps), 'deps')
 
   t.ok(regexPaths)
-  t.equal(getType(regexPaths), 'regexp')
+  t.equal(await getType(regexPaths), 'regexp')
 
   t.ok(regexNonPath)
-  t.equal(getType(regexNonPath), 'regexp')
+  t.equal(await getType(regexNonPath), 'regexp')
 
   t.ok(evalFunc)
-  t.equal(getType(evalFunc), 'native')
-  t.ok(getProcessedName(evalFunc).includes('[eval]'))
+  t.equal(await getType(evalFunc), 'native')
+  t.ok((await getProcessedName(evalFunc)).includes('[eval]'))
 
   cleanup()
 })
