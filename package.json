@@ -1,6 +1,6 @@
 {
   "name": "0x",
-  "version": "4.5.0",
+  "version": "4.7.2",
   "description": "🔥 single-command flamegraph profiling 🔥",
   "main": "index.js",
   "bin": "./cmd.js",
@@ -32,6 +32,7 @@
     "debug": "^4.0.1",
     "end-of-stream": "^1.1.0",
     "env-string": "^1.0.0",
+    "escape-string-regexp": "^1.0.5",
     "execspawn": "^1.0.1",
     "has-unicode": "^2.0.1",
     "hsl-to-rgb-for-reals": "^1.1.0",

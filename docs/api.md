@@ -71,6 +71,12 @@ The `frames` parameter is an array of objects containing a `name` property.
 Return `false` to remove the whole stack from the output, or return a 
 modified array to change the output.
 
+#### `onProcessExit` (function)
+
+Called with the exit code when the observed process exits.
+
+Default: ()=>{} (noop)
+
 #### `status` (function)
 
 Is called with status messages from 0x internals - useful for logging
