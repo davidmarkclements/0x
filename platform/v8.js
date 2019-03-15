@@ -123,7 +123,7 @@ async function v8 (args) {
 
 // Public method so it can be used in external error handlers
 v8.getIsolateLog = function (workingDir, pid) {
-  const regex = new RegExp(`isolate-0(x)?([0-9A-Fa-f]{2,16})-${pid}-v8.log`)
+  const regex = new RegExp(`isolate-0(x)?([0-9A-Fa-f]{2,16})(-${pid})?-${pid}-v8.log`)
   return fs.readdirSync(workingDir).find(regex.test.bind(regex))
 }
 
