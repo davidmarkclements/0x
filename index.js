@@ -105,7 +105,7 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
       : visualizeOnly
     const ls = fs.readdirSync(folder)
     const traceFile = /^stacks\.(.*)\.out$/
-    const isolateLog = /^isolate-((0x)?[0-9A-Fa-f]{2,16})-(.*)-v8\.(log|json)$/
+    const isolateLog = /^isolate-((0x)?[0-9A-Fa-f]{2,16})(?:-\d*)?-(\d*)-v8\.(log|json)$/
     const stacks = ls.find((f) => isolateLog.test(f) || traceFile.test(f))
     if (!stacks) {
       throw Error('Invalid data path provided (no stacks or v8 log file found)')
