@@ -3,7 +3,7 @@
 const hsl = require('hsl-to-rgb-for-reals')
 const { colorHash } = require('d3-fg')
 
-module.exports = ({ colors, trees, exclude, merged = false, kernelTracing, title, visualizeV8Profile }) => ({
+module.exports = ({ colors, trees, exclude, merged = false, kernelTracing, title }) => ({
   trees,
   focusedNodeId: null,
   key: {
@@ -21,7 +21,6 @@ module.exports = ({ colors, trees, exclude, merged = false, kernelTracing, title
     optimized: false,
     unoptimized: false,
     renderMergedBtn: !kernelTracing,
-    visualizeV8Profile,
     merged: merged
   },
   typeFilters: {

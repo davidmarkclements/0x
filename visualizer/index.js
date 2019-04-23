@@ -10,7 +10,7 @@ const ui = require('./cmp/ui')(render)
 
 module.exports = function (trees, opts) {
   opts = opts || {}
-  const { kernelTracing, visualizeV8Profile } = opts
+  const { kernelTracing } = opts
   const exclude = new Set(['cpp', 'regexp', 'v8', 'native', 'init'])
 
   const chart = graph()
@@ -49,7 +49,7 @@ module.exports = function (trees, opts) {
     flamegraph.width(width).update()
   }, 150))
 
-  const state = createState({ colors, trees, exclude, kernelTracing, title: opts.title, visualizeV8Profile })
+  const state = createState({ colors, trees, exclude, kernelTracing, title: opts.title })
 
   const actions = createActions({ flamegraph, state }, (state) => {
     morphdom(iface, ui({ state, actions }))

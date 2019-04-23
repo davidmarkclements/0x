@@ -1,13 +1,13 @@
 'use strict'
 
 const button = (render) => ({ label, pressed, disabled, width }, action) => render`
-  <button
+  <button 
     class="f6 pointer br2 ba ph3 pv1 dib black mb2 mt1 ml1 mr1 ${disabled ? 'o-50 bg-silver' : ''}"
     ${disabled ? 'disabled' : ''}
     style="
       ${pressed ? 'box-shadow: 0 0 0 .125em black;' : ''}
       ${width ? 'width: ' + width + ';' : ''}
-    "
+    " 
     onclick=${action}
   >
     ${label}
@@ -16,17 +16,17 @@ const button = (render) => ({ label, pressed, disabled, width }, action) => rend
 
 module.exports = (render) => (state, action) => {
   const tiers = button(render)({ label: 'Tiers', pressed: state.tiers }, () => action({ type: 'tiers' }))
-  const view = state.renderMergedBtn && !state.visualizeV8Profile ? button(render)({
+  const view = state.renderMergedBtn ? button(render)({
     label: state.merged ? 'Unmerge' : 'Merge',
     width: '6.85em',
     pressed: state.merged
   }, () => action({ type: 'view' })) : ''
-  const optimized = state.visualizeV8Profile ? '' : button(render)({
+  const optimized = button(render)({
     label: 'Optimized',
     pressed: !state.merged && state.optimized,
     disabled: state.merged
   }, () => action({ type: 'optimized' }))
-  const unoptimized = state.visualizeV8Profile ? '' : button(render)({
+  const unoptimized = button(render)({
     label: 'Unoptimized',
     pressed: !state.merged && state.unoptimized,
     disabled: state.merged

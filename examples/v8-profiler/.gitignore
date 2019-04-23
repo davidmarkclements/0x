@@ -1,9 +1,0 @@
-.DS_Store
-node_modules
-*.0x
-.__browserify_string_empty.js
-win
-todo
-.vscode
-flamegraph.html
-v8-profile.json
