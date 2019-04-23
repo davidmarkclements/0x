@@ -58,6 +58,7 @@ async function cmd (argv, banner = defaultBanner) {
       version: 'v',
       help: 'h',
       visualizeOnly: 'visualize-only',
+      visualizeV8Profile: 'visualize-v8-profile',
       collectOnly: 'collect-only',
       kernelTracing: 'kernel-tracing',
       kernelTracingDebug: 'kernel-tracing-debug',
@@ -87,6 +88,10 @@ async function cmd (argv, banner = defaultBanner) {
 
   if (args.visualizeOnly) {
     status(`Creating flamegraph from ${args.visualizeOnly}`)
+  }
+
+  if (args.visualizeV8Profile) {
+    status(`Creating flamegraph from v8 profile ${args.visualizeV8Profile}`)
   }
 
   const assetPath = await zeroEks(args)

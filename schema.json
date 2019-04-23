@@ -80,6 +80,12 @@
     "visualizeOnly": {
       "type": "string"
     },
+    "visualize-v8-profile": {
+      "type": "string"
+    },
+    "visualizeV8Profile": {
+      "type": "string"
+    },
     "collect-only": {
       "type": "boolean"
     },
@@ -94,7 +100,7 @@
     },
     "P": {
       "type": "string"
-    },    
+    },
      "kernelTracing": {
       "type": "boolean"
     },
