@@ -15,17 +15,24 @@ const createHoc = (render) => ({ bg, exclude, name, lbl, disabled = false }, act
   `
 }
 
-module.exports = (render) => ({ bgs, exclude, enableInlinable, renderInlinable }, action) => {
+module.exports = (render) => ({ bgs, exclude, enableInlinable, renderInlinable, visualizeCpuProfile }, action) => {
   const hoc = createHoc(render)
   const app = hoc({ bg: bgs.app, exclude, name: 'app' }, action)
   const deps = hoc({ bg: bgs.deps, exclude, name: 'deps' }, action)
   const core = hoc({ bg: bgs.core, exclude, name: 'core' }, action)
+  const v8 = hoc({ bg: bgs.v8, exclude, name: 'v8' }, action)
+  const init = hoc({ bg: bgs.init, exclude, name: 'init' }, action)
+  if (visualizeCpuProfile) {
+    return render`
+    <div style='margin-left:-.25rem'>
+      ${app}${deps}${core}${v8}${init}
+    </div>
+  `
+  }
   const inlinable = renderInlinable ? hoc({ bg: bgs['inlinable'], exclude, name: 'inlinable', disabled: !enableInlinable }, action) : ''
   const native = hoc({ bg: bgs.native, exclude, name: 'native' }, action)
   const regexp = hoc({ bg: bgs.regexp, exclude, name: 'regexp', lbl: 'rx' }, action)
-  const v8 = hoc({ bg: bgs.v8, exclude, name: 'v8' }, action)
   const cpp = hoc({ bg: bgs.cpp, exclude, name: 'cpp' }, action)
-  const init = hoc({ bg: bgs.init, exclude, name: 'init' }, action)
 
   return render`
     <div style='margin-left:-.25rem'>

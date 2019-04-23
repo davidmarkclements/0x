@@ -25,7 +25,7 @@ function isInternalPath (name) {
 
 function v8cats (child) {
   var name = child.name
-
+  if (child.type) return { type: child.type }
   // RegExp and Eval can contain anything (a method name defined in eval could be any string)
   if (/\[CODE:RegExp]$/.test(name)) return { type: 'regexp' }
   // Unless we create an eval checkbox, "native" is the next best label - cannot tell if the eval is from app, deps, core
@@ -38,7 +38,7 @@ function v8cats (child) {
 
   // Match like `~someFunction /some/path to/file.js:1:2`
   // not like `C:\\Program Files\node.js\node.exe`
-  if (!/\.m?js:\d+:\d+?$/.test(name)) {
+  if (!/\.m?js:\d+(:\d+?)?$/.test(name)) {
     return (/\.$/.test(name)) ? { type: 'core' } : { type: 'v8' }
   }
 

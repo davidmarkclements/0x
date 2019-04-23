@@ -22,7 +22,7 @@ router.get('/start-profiling', (ctx, next) => {
 router.get('/stop-profiling', async (ctx, next) => {
   const result = v8Profiler.stopProfiling('p1')
   if (result) {
-    await writeFile('./v8-profile.json', JSON.stringify(result))
+    await writeFile('./samples.cpuprofile', JSON.stringify(result))
     ctx.body = 'saved profile'
   } else {
     ctx.body = 'nothing to show'

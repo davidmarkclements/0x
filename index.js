@@ -26,19 +26,19 @@ async function zeroEks (args) {
   }
 
   validate(args)
-  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames, visualizeV8Profile } = args
+  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames, visualizeCpuProfile } = args
 
   let incompatibleOptions = 0
   if (collectOnly) incompatibleOptions += 1
   if (visualizeOnly) incompatibleOptions += 1
-  if (visualizeV8Profile) incompatibleOptions += 1
+  if (visualizeCpuProfile) incompatibleOptions += 1
 
   if (incompatibleOptions > 1) {
-    throw Error('Only one of "collect only", "visualize only", "visualize v8 profile" can be used')
+    throw Error('Only one of "collect only", "visualize only", "visualize cpu profile" can be used')
   }
 
   if (visualizeOnly) return visualize(args)
-  if (visualizeV8Profile) return v8ProfileVisualization(args)
+  if (visualizeCpuProfile) return cpuProfileVisualization(args)
 
   args.title = args.title || `node ${args.argv.join(' ')}`
   var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args)
@@ -111,8 +111,8 @@ function getFolder (file, workingDir) {
     : file
 }
 
-async function v8ProfileVisualization (opts) {
-  const folder = dirname(opts.visualizeV8Profile)
+async function cpuProfileVisualization (opts) {
+  const folder = dirname(opts.visualizeCpuProfile)
   const file = await render({ ...opts, folder })
   return file
 }

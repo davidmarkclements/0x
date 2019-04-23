@@ -80,10 +80,10 @@
     "visualizeOnly": {
       "type": "string"
     },
-    "visualize-v8-profile": {
+    "visualize-cpu-profile": {
       "type": "string"
     },
-    "visualizeV8Profile": {
+    "visualizeCpuProfile": {
       "type": "string"
     },
     "collect-only": {

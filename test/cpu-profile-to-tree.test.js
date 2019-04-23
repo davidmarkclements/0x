@@ -1,5 +1,5 @@
 const { test } = require('tap')
-const { convertV8Profile } = require('../lib/convert-v8-profile-to-tree')
+const cpuProfile = require('../lib/cpu-profile-to-tree')
 
 const exampleProfile = {
   'typeId': 'CPU',
@@ -77,7 +77,7 @@ const _expected = {
       'S': 0
     }
   ],
-  'name': '(root) :0',
+  'name': '(root)',
   'top': 0,
   'value': 10,
   'S': 0
@@ -89,7 +89,7 @@ const expected = {
 }
 
 test('v8 profile converter works', function (t) {
-  const result = convertV8Profile(exampleProfile)
+  const result = cpuProfile(exampleProfile)
   t.same(result, expected)
   t.end()
 })

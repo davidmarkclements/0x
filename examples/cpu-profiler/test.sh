@@ -14,4 +14,4 @@ curl -v http://localhost:3000/stop-profiling
 sleep 3
 kill -KILL $first_pid
 
-node node_modules/.bin/0x --visualize-v8-profile v8-profile.json
+node node_modules/.bin/0x --visualize-cpu-profile samples.cpuprofile

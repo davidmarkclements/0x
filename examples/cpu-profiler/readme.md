@@ -1,4 +1,4 @@
-# 0x-visualize-v8-profile-example
+# visualize .cpuprofile example
 
 You need curl installed. This will probably work on linux and macOS.
 
@@ -9,6 +9,6 @@ npm i
 ./test.sh
 ```
 
-Then open flamegraph.html, click on `v8` button and you should see something like this:
+Then open flamegraph.html and you should see something like this:
 
 ![flamegraph](flamegraph.png)
