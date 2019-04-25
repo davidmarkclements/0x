@@ -9,7 +9,8 @@ function getType (frame, inlined) {
   return getTypeProcessed(processedFrame)
 }
 
-function getTypeProcessed (frame) {
+function getTypeProcessed (frame, rmFrameType = true) {
+  if (rmFrameType) delete frame.type
   return v8cats(frame).type
 }
 
