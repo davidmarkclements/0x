@@ -22,7 +22,7 @@ module.exports = ({ colors, trees, exclude, merged = false, kernelTracing, title
     unoptimized: false,
     renderMergedBtn: !kernelTracing,
     merged: merged,
-    visualizeCpuProfile,
+    visualizeCpuProfile
   },
   typeFilters: {
     visualizeCpuProfile,
