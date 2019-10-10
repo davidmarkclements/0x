@@ -27,7 +27,7 @@
     "ajv": "^6.9.2",
     "browserify": "^16.2.3",
     "concat-stream": "^1.5.2",
-    "d3-fg": "^6.13.1",
+    "d3-fg": "^6.14.0",
     "debounce": "^1.2.0",
     "debug": "^4.1.1",
     "end-of-stream": "^1.1.0",
