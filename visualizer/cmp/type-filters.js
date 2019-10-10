@@ -20,6 +20,7 @@ module.exports = (render) => ({ bgs, exclude, enableInlinable, renderInlinable, 
   const app = hoc({ bg: bgs.app, exclude, name: 'app' }, action)
   const deps = hoc({ bg: bgs.deps, exclude, name: 'deps' }, action)
   const core = hoc({ bg: bgs.core, exclude, name: 'core' }, action)
+  const wasm = hoc({ bg: bgs.wasm, exclude, name: 'wasm' }, action)
   const v8 = hoc({ bg: bgs.v8, exclude, name: 'v8' }, action)
   const init = hoc({ bg: bgs.init, exclude, name: 'init' }, action)
   if (visualizeCpuProfile) {
@@ -36,7 +37,7 @@ module.exports = (render) => ({ bgs, exclude, enableInlinable, renderInlinable, 
 
   return render`
     <div style='margin-left:-.25rem'>
-      ${app}${deps}${core}${inlinable}${native}${regexp}${v8}${cpp}${init}
+      ${app}${deps}${core}${wasm}${inlinable}${native}${regexp}${v8}${cpp}${init}
     </div>
   `
 }

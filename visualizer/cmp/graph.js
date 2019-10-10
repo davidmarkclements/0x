@@ -30,7 +30,8 @@ function v8cats (child) {
   if (/\[CODE:RegExp]$/.test(name)) return { type: 'regexp' }
   // Unless we create an eval checkbox, "native" is the next best label - cannot tell if the eval is from app, deps, core
   if (/\[eval]:\d+:\d+$/.test(name)) return { type: 'native' }
-  if (/\[WASM:\w+]$/.test(name)) return { type: 'native' }
+  // wasm has no location data either, but typically has lots more frames than [eval], so it gets its very own category
+  if (/\[WASM:\w+]$/.test(name)) return { type: 'wasm' }
 
   if (/\[INIT]$/.test(name)) return { type: 'init' }
   if (/\[INLINABLE]$/.test(name)) return { type: 'inlinable' }
