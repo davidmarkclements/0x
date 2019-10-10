@@ -33,6 +33,7 @@ module.exports = ({ colors, trees, exclude, merged = false, kernelTracing, title
       app: '#fff',
       deps: '#fff',
       core: '#fff',
+      wasm: '#fff',
       native: '#fff',
       cpp: '#fff',
       regexp: '#fff',
@@ -59,6 +60,11 @@ module.exports = ({ colors, trees, exclude, merged = false, kernelTracing, title
         colors.core.h,
         colors.core.s / 100 * 1.2,
         colors.core.l / 100 * 1.2
+      )})`,
+      wasm: `rgb(${hsl(
+        colors.wasm.h,
+        colors.wasm.s / 100,
+        colors.wasm.l / 100
       )})`,
       native: `rgb(${hsl(
         colors.native.h,
