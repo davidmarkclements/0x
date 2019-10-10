@@ -1,6 +1,6 @@
 {
   "name": "0x",
-  "version": "4.8.2",
+  "version": "4.9.0",
   "description": "🔥 single-command flamegraph profiling 🔥",
   "main": "index.js",
   "bin": "./cmd.js",
