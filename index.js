@@ -24,9 +24,11 @@ async function zeroEks (args) {
   if (args.pathToNodeBinary === 'node') {
     args.pathToNodeBinary = pathTo('node')
   }
+  
+  args.collectDelay = args.collectDelay || 0
 
   validate(args)
-  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames, visualizeCpuProfile } = args
+  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames, visualizeCpuProfile, collectDelay } = args
 
   let incompatibleOptions = 0
   if (collectOnly) incompatibleOptions += 1
@@ -61,6 +63,10 @@ async function zeroEks (args) {
     tidy()
     debug('done')
     return folder
+  }
+
+  if (collectDelay) {
+    debug('data collection will be delayed by '+timeoutDelay+' ms')
   }
 
   try {

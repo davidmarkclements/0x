@@ -65,7 +65,8 @@ async function cmd (argv, banner = defaultBanner) {
       treeDebug: 'tree-debug',
       writeTicks: 'write-ticks',
       onPort: 'on-port',
-      P: 'onPort'
+      P: 'onPort',
+      collectDelay: 'on-timeout'
     }
   })
 
