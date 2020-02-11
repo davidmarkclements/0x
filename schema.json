@@ -101,6 +101,9 @@
     "P": {
       "type": "string"
     },
+    "collectDelay": {
+      "type": "number"
+    },
      "kernelTracing": {
       "type": "boolean"
     },
