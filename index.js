@@ -24,7 +24,7 @@ async function zeroEks (args) {
   if (args.pathToNodeBinary === 'node') {
     args.pathToNodeBinary = pathTo('node')
   }
-  
+
   args.collectDelay = args.collectDelay || 0
 
   validate(args)
@@ -66,7 +66,7 @@ async function zeroEks (args) {
   }
 
   if (collectDelay) {
-    debug('data collection will be delayed by '+timeoutDelay+' ms')
+    debug('data collection will be delayed by ' + collectDelay + ' ms')
   }
 
   try {
