@@ -105,12 +105,6 @@ async function generateFlamegraph (opts) {
   return file
 }
 
-function getFolder (file, workingDir) {
-  return isAbsolute(file)
-    ? relative(workingDir, file)
-    : file
-}
-
 async function cpuProfileVisualization (opts) {
   const folder = dirname(opts.visualizeCpuProfile)
   const file = await render({ ...opts, folder })
@@ -119,7 +113,7 @@ async function cpuProfileVisualization (opts) {
 
 async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFrames, open, name, pathToNodeBinary }) {
   try {
-    const folder = getFolder(visualizeOnly, workingDir)
+    const folder = visualizeOnly
     const ls = fs.readdirSync(folder)
     const traceFile = /^stacks\.(.*)\.out$/
     const isolateLog = /^isolate-((0x)?[0-9A-Fa-f]{2,16})(?:-\d*)?-(\d*)-v8\.(log|json)$/
