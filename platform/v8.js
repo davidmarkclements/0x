@@ -21,7 +21,7 @@ const {
 module.exports = v8
 
 async function v8 (args) {
-  const { status, outputDir, workingDir, name, onPort, pathToNodeBinary } = args
+  const { status, outputDir, workingDir, name, onPort, pathToNodeBinary, collectDelay } = args
 
   let proc = spawn(pathToNodeBinary, [
     '--prof',
@@ -114,7 +114,7 @@ async function v8 (args) {
   const isolateLogPath = path.join(folder, isolateLog)
   await renameSafe(path.join(args.workingDir, isolateLog), isolateLogPath)
   return {
-    ticks: await v8LogToTicks(isolateLogPath, pathToNodeBinary),
+    ticks: await v8LogToTicks(isolateLogPath, { pathToNodeBinary, collectDelay }),
     inlined: inlined,
     pid: proc.pid,
     folder: folder
