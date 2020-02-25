@@ -59,6 +59,12 @@ with relevant outputs.
 
 Default: false
 
+#### `collectDelay` (number)
+
+Specify a delay(ms) before collecting data.
+
+Default: 0
+
 #### `mapFrames` (function)
 
 A custom mapping function that receives 
