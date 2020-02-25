@@ -151,7 +151,7 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
     name = name || meta.name
 
     const ticks = (srcType === 'v8')
-      ? await v8LogToTicks(src, pathToNodeBinary)
+      ? await v8LogToTicks(src, { pathToNodeBinary })
       : traceStacksToTicks(src)
 
     if (treeDebug === true) {
