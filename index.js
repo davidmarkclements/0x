@@ -26,7 +26,7 @@ async function zeroEks (args) {
   }
 
   if (checkForTranspiledCode(args.argv[0])) {
-    throw Error('Transpiled code is not supported')
+    console.warn('Transpiled code is not supported')
   }
 
   validate(args)
