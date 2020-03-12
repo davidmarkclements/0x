@@ -111,7 +111,7 @@ async function generateFlamegraph (opts) {
 
 function checkForTranspiledCode (filename) {
   const readFile = fs.readFileSync(filename, 'utf8')
-  const regex = /function\s+(?<functionName>\w+)/g
+  const regex = /function\s+(\w+)/g
   let matchedObj
   let isTranspiled = false
 
