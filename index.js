@@ -10,7 +10,6 @@ const v8LogToTicks = require('./lib/v8-log-to-ticks')
 const ticksToTree = require('./lib/ticks-to-tree')
 const render = require('./lib/render')
 const { pathTo } = require('./lib/util')
-
 const platform = process.platform
 const { tidy, noop, isSudo } = require('./lib/util')
 
