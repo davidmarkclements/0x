@@ -96,11 +96,7 @@ async function cmd (argv, banner = defaultBanner) {
     if (args.sourceMaps !== '') {
       const sourceMapFile = resolve('.', args.sourceMaps)
       if (fs.existsSync(sourceMapFile)) {
-        try {
-          args.sourceMaps = JSON.parse(fs.readFileSync(sourceMapFile))
-        } catch (err) {
-          console.error(`Couldn't parse source map file ${sourceMapFile}, is it valid json?`)
-        }
+        args.sourceMaps = JSON.parse(fs.readFileSync(sourceMapFile))
       }
     }
     if (typeof args.sourceMaps !== 'object') {
