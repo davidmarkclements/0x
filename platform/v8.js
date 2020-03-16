@@ -25,7 +25,7 @@ async function v8 (args) {
 
   let proc = spawn(pathToNodeBinary, [
     '--prof',
-    `--logfile=%p-v8.log`,
+    `--logfile=${workingDir ? `${args.workingDir}/` : ''}%p-v8.log`,
     '--print-opt-source',
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'no-cluster'),
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'redir-stdout'),
