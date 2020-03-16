@@ -80,12 +80,6 @@
     "visualizeOnly": {
       "type": "string"
     },
-    "visualize-cpu-profile": {
-      "type": "string"
-    },
-    "visualizeCpuProfile": {
-      "type": "string"
-    },
     "collect-only": {
       "type": "boolean"
     },
@@ -100,7 +94,7 @@
     },
     "P": {
       "type": "string"
-    },
+    },    
      "kernelTracing": {
       "type": "boolean"
     },
@@ -113,6 +107,19 @@
     "kernel-tracing-debug": {
       "type": "boolean"
     },
+    "sourceMaps": {
+      "type": ["object", "null"],
+      "default": null
+    },
+    "source-maps": {
+      "type": "string"
+    },
+    "relativePath": {
+      "type": "string"
+    },
+    "relative-path": {
+      "type": "string"
+    },
     "pathToNodeBinary": {},
     "path-to-node-binary": {},
     "status": {},
@@ -123,7 +130,6 @@
     "argv": {
       "type": "array",
       "items": {}
-    },
-    "onProcessExit": {}
+    }
   }
 }

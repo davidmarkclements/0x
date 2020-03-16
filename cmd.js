@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs')
-const { join } = require('path')
+const { join, resolve } = require('path')
 const minimist = require('minimist')
 const semver = require('semver')
 const debug = require('debug')('0x')
@@ -47,6 +47,9 @@ async function cmd (argv, banner = defaultBanner) {
       'silent', 'treeDebug', 'kernelTracingDebug',
       'kernelTracing', 'collectOnly', 'writeTicks'
     ],
+    string: [
+      'sourceMaps', 'relativePath'
+    ],
     alias: {
       silent: 's',
       quiet: 'q',
@@ -58,12 +61,13 @@ async function cmd (argv, banner = defaultBanner) {
       version: 'v',
       help: 'h',
       visualizeOnly: 'visualize-only',
-      visualizeCpuProfile: 'visualize-cpu-profile',
       collectOnly: 'collect-only',
       kernelTracing: 'kernel-tracing',
       kernelTracingDebug: 'kernel-tracing-debug',
       treeDebug: 'tree-debug',
       writeTicks: 'write-ticks',
+      sourceMaps: 'source-maps',
+      relativePath: 'relative-path',
       onPort: 'on-port',
       P: 'onPort'
     }
@@ -86,12 +90,30 @@ async function cmd (argv, banner = defaultBanner) {
   args.argv = subprocessArgv
   args.pathToNodeBinary = pathToNodeBinary
 
-  if (args.visualizeOnly) {
-    status(`Creating flamegraph from ${args.visualizeOnly}`)
+  if (typeof args.sourceMaps === 'undefined') {
+    args.sourceMaps = null
+  } else {
+    if (args.sourceMaps !== '') {
+      const sourceMapFile = resolve('.', args.sourceMaps)
+      if (fs.existsSync(sourceMapFile)) {
+        try {
+          args.sourceMaps = JSON.parse(fs.readFileSync(sourceMapFile))
+        } catch (err) {
+          console.error(`Couldn't parse source map file ${sourceMapFile}, is it valid json?`)
+        }
+      }
+    }
+    if (typeof args.sourceMaps !== 'object') {
+      args.sourceMaps = {}
+    }
   }
 
-  if (args.visualizeCpuProfile) {
-    status(`Creating flamegraph from v8 profile ${args.visualizeCpuProfile}`)
+  if (typeof args.relativePath !== 'undefined' && args.relativePath === '') {
+    args.relativePath = args.workingDir
+  }
+
+  if (args.visualizeOnly) {
+    status(`Creating flamegraph from ${args.visualizeOnly}`)
   }
 
   const assetPath = await zeroEks(args)
