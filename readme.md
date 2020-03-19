@@ -226,6 +226,12 @@ with relevant outputs.
 
 Default: false
 
+### --collect-delay
+
+Delay the collection of stacks by a specified time(ms) relative to the first entry.
+
+Default: 0
+
 ### --visualize-only
 
 Supply a path to a profile folder to build or rebuild visualization
