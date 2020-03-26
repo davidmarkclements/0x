@@ -24,10 +24,6 @@ async function zeroEks (args) {
     args.pathToNodeBinary = pathTo('node')
   }
 
-  if (checkForTranspiledCode(args.argv[0])) {
-    console.warn('Transpiled code is not supported')
-  }
-
   validate(args)
   const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames, visualizeCpuProfile } = args
 
@@ -44,6 +40,11 @@ async function zeroEks (args) {
   if (visualizeCpuProfile) return cpuProfileVisualization(args)
 
   args.title = args.title || `node ${args.argv.join(' ')}`
+
+  if (checkForTranspiledCode(args.argv[0])) {
+    console.warn('0x does not support transpiled code yet.')
+  }
+
   var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args)
 
   if (treeDebug === true) {
