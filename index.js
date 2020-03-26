@@ -41,7 +41,7 @@ async function zeroEks (args) {
 
   args.title = args.title || `node ${args.argv.join(' ')}`
 
-  if (checkForTranspiledCode(args.argv[0])) {
+  if (args.argv && checkForTranspiledCode(args.argv[0])) {
     console.warn('0x does not support transpiled code yet.')
   }
 
@@ -110,7 +110,12 @@ async function generateFlamegraph (opts) {
 }
 
 function checkForTranspiledCode (filename) {
-  const readFile = fs.readFileSync(filename, 'utf8')
+  let readFile = null
+  try {
+    readFile = fs.readFileSync(filename, 'utf8')
+  } catch (err) {
+    return false
+  }
   const regex = /function\s+(\w+)/g
   let matchedObj
   let isTranspiled = false
