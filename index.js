@@ -41,7 +41,7 @@ async function zeroEks (args) {
 
   args.title = args.title || `node ${args.argv.join(' ')}`
 
-  if (args.argv && checkForTranspiledCode(args.argv[0])) {
+  if (Array.isArray(args.argv) && args.argv.length > 0 && checkForTranspiledCode(args.argv[0])) {
     console.warn('0x does not support transpiled code yet.')
   }
 
