@@ -31,11 +31,6 @@ test('Generate profile and test its output', async function (t) {
 
   const htmlFile = htmlLink.replace(/^file:\/\//, '')
 
-  // Test 0x output exists as expected
-  t.ok(htmlFile.includes('flamegraph.html'))
-  t.ok(fs.existsSync(htmlFile))
-  t.ok(fs.statSync(htmlFile).size > 10000)
-
   dir = htmlFile.replace('flamegraph.html', '')
   const jsonFile = fs.readdirSync(dir).find(name => name.match(/\.json$/))
 
@@ -43,6 +38,9 @@ test('Generate profile and test its output', async function (t) {
 
   const jsonArray = JSON.parse(content).functions
   console.log(jsonArray[0].name)
+  for (var i = jsonArray.length - 1; i >= 0; i--) {
+    console.log(jsonArray[i].name)
+  }
 
   cleanup()
 })
