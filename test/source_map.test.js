@@ -26,7 +26,8 @@ test('Generate profile and test its output', async function (t) {
     argv: [ resolve(__dirname, './fixture/sourcemap.min.js') ],
     workingDir: resolve('./'),
     collectOnly: true,
-    treeDebug: true
+    treeDebug: true,
+    sourceMaps: true
   }).catch(onError)
 
   const htmlFile = htmlLink.replace(/^file:\/\//, '')
@@ -37,10 +38,14 @@ test('Generate profile and test its output', async function (t) {
   const content = await readFile(path.resolve(dir, jsonFile)).catch(onError)
 
   const jsonArray = JSON.parse(content).functions
-  console.log(jsonArray[0].name)
-  for (var i = jsonArray.length - 1; i >= 0; i--) {
-    console.log(jsonArray[i].name)
-  }
+
+  // Check the line number by matching known fn name
+  const fnObj = jsonArray.filter(function (obj) {
+    return obj.name.includes('testInterval')
+  })
+  const numRegex = /[-]{0,1}[\d]*[.]{0,1}[\d]+/g
+  const str = fnObj[0].name.substring(fnObj[0].name.indexOf('.js:'), fnObj[0].name.length)
+  console.log(str.match(numRegex))
 
   cleanup()
 })
