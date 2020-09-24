@@ -1,4 +1,4 @@
-const path = require('path')
+const { resolve } = require('path')
 const { test } = require('tap')
 
 test('module loads', function (t) {
@@ -10,8 +10,8 @@ test('module loads', function (t) {
 test('accepts different workingDir', async t => {
   const zeroEks = require('../')
   const opts = {
-    argv: [path.join(__dirname, 'fixture', 'do-eval.js')],
-    workingDir: path.join(__dirname, '..', 'test.0x')
+    argv: [ resolve(__dirname, './fixture/do-eval.js') ],
+    workingDir: resolve('../test.0x')
   }
   const file = zeroEks(opts)
   t.resolves(file)
