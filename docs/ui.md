@@ -34,7 +34,7 @@ like so:
 Optimization status is represented by '*' (optimized) or '~' unoptimized.
 This only applies to JavaScript frames. 
 
-Posssible `{tag}` values are covered in the buttons listed under [Tiers](#tiers). 
+Possible `{tag}` values are covered in the buttons listed under [Tiers](#tiers). 
 
 ## Buttons
 
@@ -72,7 +72,7 @@ Each category has a button that hide or show the particular frame-type
 in the flamegraph.
 
 Pressing the Tiers button will result in the categories being highlighted
-according to the colouring of the category buttons,
+according to the colouring of the category buttons as follows.
 
 #### app
 
