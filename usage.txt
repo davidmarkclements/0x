@@ -66,6 +66,9 @@
 
   --collect-only          Do not process captured stacks into a flamegraph.
 
+  --collect-delay         Specify a delay(ms) before collecting data.
+
+
   --visualize-only <dir>  Build or rebuild flamegraph using the output dir.
                           Counterpart to --collect-only.
 
