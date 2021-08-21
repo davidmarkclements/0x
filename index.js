@@ -25,8 +25,10 @@ async function zeroEks (args) {
     args.pathToNodeBinary = pathTo('node')
   }
 
+  args.collectDelay = args.collectDelay || 0
+
   validate(args)
-  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames, visualizeCpuProfile } = args
+  const { collectOnly, visualizeOnly, writeTicks, treeDebug, mapFrames, visualizeCpuProfile, collectDelay } = args
 
   let incompatibleOptions = 0
   if (collectOnly) incompatibleOptions += 1
@@ -61,6 +63,10 @@ async function zeroEks (args) {
     tidy()
     debug('done')
     return folder
+  }
+
+  if (collectDelay) {
+    debug('data collection will be delayed by ' + collectDelay + ' ms')
   }
 
   try {
@@ -145,7 +151,7 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
     name = name || meta.name
 
     const ticks = (srcType === 'v8')
-      ? await v8LogToTicks(src, pathToNodeBinary)
+      ? await v8LogToTicks(src, { pathToNodeBinary })
       : traceStacksToTicks(src)
 
     if (treeDebug === true) {

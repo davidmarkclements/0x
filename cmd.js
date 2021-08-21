@@ -60,6 +60,7 @@ async function cmd (argv, banner = defaultBanner) {
       visualizeOnly: 'visualize-only',
       visualizeCpuProfile: 'visualize-cpu-profile',
       collectOnly: 'collect-only',
+      collectDelay: 'collect-delay',
       kernelTracing: 'kernel-tracing',
       kernelTracingDebug: 'kernel-tracing-debug',
       treeDebug: 'tree-debug',
