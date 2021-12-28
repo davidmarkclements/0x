@@ -74,7 +74,11 @@ function linux (args, sudo, cb) {
     })
   }
 
-  process.once('SIGINT', analyze)
+  process.once('SIGINT', () => {
+    spawn('sudo', ['kill', '-SIGINT', '' + proc.pid], {
+      stdio: 'inherit'
+    })
+  })
 
   function analyze (manual) {
     if (analyze.called) { return }
@@ -107,9 +111,5 @@ function linux (args, sudo, cb) {
         })
       })
     }
-
-    spawn('sudo', ['kill', '-SIGINT', '' + proc.pid], {
-      stdio: 'inherit'
-    })
   }
 }
