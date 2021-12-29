@@ -107,7 +107,8 @@ function linux (args, sudo, cb) {
         cb(null, {
           ticks: traceStacksToTicks(folder + '/stacks.' + proc.pid + '.out'),
           pid: proc.pid,
-          folder: folder
+          folder: folder,
+          inlined: []
         })
       })
     }
