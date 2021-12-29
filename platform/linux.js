@@ -112,15 +112,15 @@ function linux (args, sudo, cb) {
     }
   }
 
-  function filterInternalFunctions(perfFile) {
+  function filterInternalFunctions (perfFile) {
     // Filtering out Node.js internal functions
     const sed = spawn('sudo', [
       'sed',
       '-i',
       '-e',
-      '/( __libc_start| LazyCompile | v8::internal::| Builtin:| Stub:| LoadIC:|\[unknown\]| LoadPolymorphicIC:)/d',
+      '/( __libc_start| LazyCompile | v8::internal::| Builtin:| Stub:| LoadIC:|[unknown]| LoadPolymorphicIC:)/d',
       '-e',
-      's/ LazyCompile:[*~]\?/ /',
+      's/ LazyCompile:[*~]?/ /',
       perfFile
     ], {
       stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe']
