@@ -6,7 +6,7 @@ This means native frames are omitted. This means calls made by libuv
 (Node's I/O library) are omitted.
 
 Capturing these stacks requires kernel level tracing, which `0x` supports
-on Linux and macOS. 
+on Linux. 
 
 ## Requirements
 
@@ -33,7 +33,7 @@ This is due to the interpreter (Ignition) and optimizing compiler (Turbofan)
 used by the V8 engine version that was integrated into Node 8.5.0 and above. 
 Any frames that do not get optimized will appear in kernel level tracing output 
 as bytecode handlers. In order to resolve this, the kernel tracing software 
-(perf and DTrace) has to be able to jump to another memory address where the name 
+(perf) has to be able to jump to another memory address where the name 
 of the JavaScript function is held, however the memory address that it the kernel 
 profiler should jump to is not exposed by the V8 engine to the kernel profiler. 
 This is one of the main reasons why 0x v4 uses V8 profiling instead of kernel 
