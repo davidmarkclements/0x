@@ -35,9 +35,7 @@ function linux (args, sudo, cb) {
     'perf',
     'record',
     !kernelTracingDebug ? '-q' : '',
-    '-e',
-    'cpu-clock',
-    '-F 1000', // 1000 samples per sec === 1ms profiling like dtrace
+    '-F 99',
     '-g',
     '-o',
     perfdat,
@@ -55,7 +53,7 @@ function linux (args, sudo, cb) {
       console.error('Tracing subprocess error, code: ' + code)
       return
     }
-    analyze(true)
+    filterInternalFunctions(perfdat)
   })
 
   var folder = getTargetFolder({ outputDir, workingDir, name, pid: proc.pid })
@@ -74,7 +72,11 @@ function linux (args, sudo, cb) {
     })
   }
 
-  process.once('SIGINT', analyze)
+  process.once('SIGINT', () => {
+    spawn('sudo', ['kill', '-SIGINT', '' + proc.pid], {
+      stdio: 'inherit'
+    })
+  })
 
   function analyze (manual) {
     if (analyze.called) { return }
@@ -103,13 +105,33 @@ function linux (args, sudo, cb) {
         cb(null, {
           ticks: traceStacksToTicks(folder + '/stacks.' + proc.pid + '.out'),
           pid: proc.pid,
-          folder: folder
+          folder: folder,
+          inlined: []
         })
       })
     }
+  }
 
-    spawn('sudo', ['kill', '-SIGINT', '' + proc.pid], {
-      stdio: 'inherit'
+  function filterInternalFunctions (perfFile) {
+    // Filtering out Node.js internal functions
+    const sed = spawn('sudo', [
+      'sed',
+      '-i',
+      '-e',
+      '/( __libc_start| LazyCompile | v8::internal::| Builtin:| Stub:| LoadIC:|[unknown]| LoadPolymorphicIC:)/d',
+      '-e',
+      's/ LazyCompile:[*~]?/ /',
+      perfFile
+    ], {
+      stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe']
+    })
+
+    sed.on('exit', function (code) {
+      if (code !== null && code !== 0) {
+        console.error('`sed` subprocess error, code: ' + code)
+        return
+      }
+      analyze(true)
     })
   }
 }
