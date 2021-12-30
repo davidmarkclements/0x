@@ -3,5 +3,5 @@
 module.exports = windows
 
 async function windows () {
-  throw Error(`0x: Windows kernel tracing is not currently supported`)
+  throw Error('0x: Windows kernel tracing is not currently supported')
 }

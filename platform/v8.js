@@ -23,7 +23,7 @@ module.exports = v8
 async function v8 (args) {
   const { status, outputDir, workingDir, name, onPort, pathToNodeBinary, collectDelay } = args
 
-  let proc = spawn(pathToNodeBinary, [
+  const proc = spawn(pathToNodeBinary, [
     '--prof',
     `--logfile=${workingDir ? `${args.workingDir}/` : ''}%p-v8.log`,
     '--print-opt-source',
@@ -143,7 +143,7 @@ function collectInliningInfo (sp) {
   let root
   let stdoutIsPrintOptSourceOutput = false
   let lastOptimizedFrame = null
-  let inlined = {}
+  const inlined = {}
 
   // Try to parse an INLINE() item from the optimization log,
   // returning the length of the parsed code.
@@ -154,7 +154,7 @@ function collectInliningInfo (sp) {
       // Use non greedy match so that INLINE and FUNCTION SOURCE items
       // on the same line don't interfere, else the INLINE function name
       // would contain everything up to the ) in FUNCTION SOURCE ()
-      const [ match, inlinedFn ] = /INLINE \((.*?)\) id\{/.exec(s) || [ false ]
+      const [match, inlinedFn] = /INLINE \((.*?)\) id\{/.exec(s) || [false]
       // shouldn't not match though..
       if (match === false) return -1
 

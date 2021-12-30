@@ -16,21 +16,27 @@ const button = (render) => ({ label, pressed, disabled, width }, action) => rend
 
 module.exports = (render) => (state, action) => {
   const tiers = button(render)({ label: 'Tiers', pressed: state.tiers }, () => action({ type: 'tiers' }))
-  const view = state.renderMergedBtn && !state.visualizeCpuProfile ? button(render)({
-    label: state.merged ? 'Unmerge' : 'Merge',
-    width: '6.85em',
-    pressed: state.merged
-  }, () => action({ type: 'view' })) : ''
-  const optimized = state.visualizeCpuProfile ? '' : button(render)({
-    label: 'Optimized',
-    pressed: !state.merged && state.optimized,
-    disabled: state.merged
-  }, () => action({ type: 'optimized' }))
-  const unoptimized = state.visualizeCpuProfile ? '' : button(render)({
-    label: 'Unoptimized',
-    pressed: !state.merged && state.unoptimized,
-    disabled: state.merged
-  }, () => action({ type: 'not-optimized' }))
+  const view = state.renderMergedBtn && !state.visualizeCpuProfile
+    ? button(render)({
+        label: state.merged ? 'Unmerge' : 'Merge',
+        width: '6.85em',
+        pressed: state.merged
+      }, () => action({ type: 'view' }))
+    : ''
+  const optimized = state.visualizeCpuProfile
+    ? ''
+    : button(render)({
+      label: 'Optimized',
+      pressed: !state.merged && state.optimized,
+      disabled: state.merged
+    }, () => action({ type: 'optimized' }))
+  const unoptimized = state.visualizeCpuProfile
+    ? ''
+    : button(render)({
+      label: 'Unoptimized',
+      pressed: !state.merged && state.unoptimized,
+      disabled: state.merged
+    }, () => action({ type: 'not-optimized' }))
 
   return render`
     <div style="">

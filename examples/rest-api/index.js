@@ -1,12 +1,12 @@
-var etag = require('./etag')
-var pkg = JSON.stringify(require('./package.json'))
+const etag = require('./etag')
+const pkg = JSON.stringify(require('./package.json'))
 
-var restify = require('restify')
-var server = restify.createServer()
-var count = 1
+const restify = require('restify')
+const server = restify.createServer()
+let count = 1
 
 server.get('/a', function (req, res, next) {
-  var tag = etag(pkg + ++count)
+  const tag = etag(pkg + ++count)
 
   if (!(tag instanceof Error)) {
     res.setHeader('ETag', tag)
@@ -17,7 +17,7 @@ server.get('/a', function (req, res, next) {
 })
 
 server.get('/b', function (req, res, next) {
-  var tag = etag({ entity: pkg + ++count, algorithm: 'sha256' })
+  const tag = etag({ entity: pkg + ++count, algorithm: 'sha256' })
   if (!(tag instanceof Error)) {
     res.setHeader('ETag', tag)
   }
@@ -27,7 +27,7 @@ server.get('/b', function (req, res, next) {
 })
 
 server.get('/c', function (req, res, next) {
-  var tag = etag(pkg + ++count, { algorithm: 'sha512WithRsaEncryption' })
+  const tag = etag(pkg + ++count, { algorithm: 'sha512WithRsaEncryption' })
 
   if (!(tag instanceof Error)) {
     res.setHeader('ETag', tag)

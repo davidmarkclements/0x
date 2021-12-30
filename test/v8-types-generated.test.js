@@ -88,8 +88,7 @@ test('Ensure eval sanitising works as expected before using fixture', function (
 
 test('Generate profile and test its output', async function (t) {
   const readFile = promisify(fs.readFile)
-  let dir
-  const cleanup = function () {
+  function cleanup () {
     if (dir) {
       t.ok(fs.existsSync(dir))
       rimraf.sync(dir)
@@ -97,13 +96,13 @@ test('Generate profile and test its output', async function (t) {
     }
     t.end()
   }
-  const onError = function (err) {
+  function onError (err) {
     cleanup()
     throw err
   }
 
   const htmlLink = await zeroX({
-    argv: [ resolve(__dirname, './fixture/do-eval.js') ],
+    argv: [resolve(__dirname, './fixture/do-eval.js')],
     workingDir: resolve('./')
   }).catch(onError)
 
@@ -114,7 +113,7 @@ test('Generate profile and test its output', async function (t) {
   t.ok(fs.existsSync(htmlFile))
   t.ok(fs.statSync(htmlFile).size > 10000)
 
-  dir = htmlFile.replace('flamegraph.html', '')
+  const dir = htmlFile.replace('flamegraph.html', '')
   const jsonFile = fs.readdirSync(dir).find(name => name.match(/\.json$/))
 
   const content = await readFile(path.resolve(dir, jsonFile)).catch(onError)

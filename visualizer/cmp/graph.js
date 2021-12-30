@@ -24,7 +24,7 @@ function isInternalPath (name) {
 }
 
 function v8cats (child) {
-  var name = child.name
+  const name = child.name
   if (child.type) return { type: child.type }
   // RegExp and Eval can contain anything (a method name defined in eval could be any string)
   if (/\[CODE:RegExp]$/.test(name)) return { type: 'regexp' }

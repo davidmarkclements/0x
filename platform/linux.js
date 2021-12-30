@@ -18,19 +18,22 @@ module.exports = promisify(linux)
 
 function linux (args, sudo, cb) {
   const { status, outputDir, workingDir, name, onPort, pathToNodeBinary } = args
-  var perf = pathTo('perf')
-  if (!perf) return void cb(Error('Unable to locate perf - make sure it\'s in your PATH'))
+  const perf = pathTo('perf')
+  if (!perf) {
+    cb(Error('Unable to locate perf - make sure it\'s in your PATH'))
+    return
+  }
   if (!sudo) {
     status('Stacks are captured using perf(1), which requires sudo access\n')
     return spawn('sudo', ['true'])
       .on('exit', function () { linux(args, true, cb) })
   }
 
-  var uid = parseInt(Math.random() * 1e9, 10).toString(36)
-  var perfdat = '/tmp/perf-' + uid + '.data'
-  var kernelTracingDebug = args.kernelTracingDebug
+  const uid = parseInt(Math.random() * 1e9, 10).toString(36)
+  const perfdat = '/tmp/perf-' + uid + '.data'
+  const kernelTracingDebug = args.kernelTracingDebug
 
-  var proc = spawn('sudo', [
+  const proc = spawn('sudo', [
     '-E',
     'perf',
     'record',
@@ -56,7 +59,7 @@ function linux (args, sudo, cb) {
     filterInternalFunctions(perfdat)
   })
 
-  var folder = getTargetFolder({ outputDir, workingDir, name, pid: proc.pid })
+  const folder = getTargetFolder({ outputDir, workingDir, name, pid: proc.pid })
 
   if (onPort) status('Profiling\n')
   else status('Profiling')
@@ -93,7 +96,7 @@ function linux (args, sudo, cb) {
     }
 
     function generate () {
-      var stacks = spawn('sudo', ['perf', 'script', '-i', perfdat], {
+      const stacks = spawn('sudo', ['perf', 'script', '-i', perfdat], {
         stdio: [
           'ignore',
           fs.openSync(folder + '/stacks.' + proc.pid + '.out', 'w'),

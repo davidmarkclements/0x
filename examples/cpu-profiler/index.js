@@ -6,8 +6,8 @@ const { promisify } = require('util')
 
 const writeFile = promisify(fs.writeFile)
 
-let app = new Koa()
-let router = new Router()
+const app = new Koa()
+const router = new Router()
 
 router.get('/', (ctx, next) => {
   // ctx.router available
