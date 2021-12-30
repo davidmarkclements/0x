@@ -20,15 +20,18 @@ module.exports = promisify(sun)
 function sun (args, sudo, cb) {
   const { status, outputDir, workingDir, name, onPort, pathToNodeBinary } = args
 
-  var dtrace = pathTo('dtrace')
-  var profile = require.resolve('perf-sym/profile_1ms.d')
-  if (!dtrace) return void cb(Error('Unable to locate dtrace - make sure it\'s in your PATH'))
+  const dtrace = pathTo('dtrace')
+  const profile = require.resolve('perf-sym/profile_1ms.d')
+  if (!dtrace) {
+    cb(Error('Unable to locate dtrace - make sure it\'s in your PATH'))
+    return
+  }
   if (!sudo) {
     status('Stacks are captured using DTrace, which requires sudo access\n')
     return spawn('sudo', ['true'])
       .on('exit', function () { sun(args, true, cb) })
   }
-  var kernelTracingDebug = args.kernelTracingDebug
+  const kernelTracingDebug = args.kernelTracingDebug
 
   args = Object.assign([
     '--perf-basic-prof',
@@ -36,7 +39,7 @@ function sun (args, sudo, cb) {
     ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].concat(args.argv), args)
 
-  var proc = spawn(pathToNodeBinary, args, {
+  const proc = spawn(pathToNodeBinary, args, {
     stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe']
   }).on('exit', function (code) {
     args.onProcessExit(code)
@@ -47,8 +50,8 @@ function sun (args, sudo, cb) {
     }
     analyze(true)
   })
-  var folder
-  var prof
+  let folder
+  let prof
 
   function start () {
     prof = spawn('sudo', [profile, '-p', proc.pid])
@@ -152,7 +155,7 @@ function sun (args, sudo, cb) {
         translate,
         fs.createWriteStream(folder + '/stacks.' + proc.pid + '.out'),
         (err) => {
-          if (err) return void cb(err)
+          if (err) return cb(err)
           cb(null, {
             ticks: traceStacksToTicks(folder + '/stacks.' + proc.pid + '.out'),
             pid: proc.pid,

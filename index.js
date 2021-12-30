@@ -43,7 +43,7 @@ async function zeroEks (args) {
   if (visualizeCpuProfile) return cpuProfileVisualization(args)
 
   args.title = args.title || `node ${args.argv.join(' ')}`
-  var { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args)
+  const { ticks, pid, folder, inlined } = await startProcessAndCollectTraceData(args)
 
   if (treeDebug === true) {
     const tree = await ticksToTree(ticks, {
@@ -134,7 +134,7 @@ async function visualize ({ visualizeOnly, treeDebug, workingDir, title, mapFram
       throw Error('Invalid data path provided (no stacks or v8 log file found)')
     }
 
-    var meta
+    let meta
     try {
       meta = JSON.parse(fs.readFileSync(join(folder, 'meta.json')))
     } catch (e) {

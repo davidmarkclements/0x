@@ -78,7 +78,7 @@ function createActions ({ flamegraph, state }, emit) {
           state.control.unoptimized = false
           emit(state)
           if (!state.control.optimized) return flamegraph.clear('yellow')
-          flamegraph.search(RegExp('^\\*'), 'yellow')
+          flamegraph.search(/^\\*/, 'yellow')
           return
         case 'not-optimized':
           state.control.unoptimized = !state.control.unoptimized
@@ -92,7 +92,7 @@ function createActions ({ flamegraph, state }, emit) {
   }
 
   function zoom () {
-    var zoomLevel = 1
+    let zoomLevel = 1
     return ({ type }) => {
       switch (type) {
         case 'in':

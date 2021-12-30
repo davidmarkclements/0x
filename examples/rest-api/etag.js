@@ -1,4 +1,4 @@
-var crypto = require('crypto')
+const crypto = require('crypto')
 
 module.exports = etag
 
@@ -8,13 +8,13 @@ function etag (entity, opts) {
     entity = opts.entity
   }
 
-  var error = false
+  let error = false
   opts = opts || {}
   opts.algorithm = opts.algorithm || 'md5'
   opts.encoding = opts.encoding || 'utf8'
   opts.output = opts.output || 'base64'
 
-  var hash
+  let hash
 
   try {
     hash = crypto

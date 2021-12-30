@@ -30,7 +30,7 @@ module.exports = (render) => ({ bgs, exclude, enableInlinable, renderInlinable, 
     </div>
   `
   }
-  const inlinable = renderInlinable ? hoc({ bg: bgs['inlinable'], exclude, name: 'inlinable', disabled: !enableInlinable }, action) : ''
+  const inlinable = renderInlinable ? hoc({ bg: bgs.inlinable, exclude, name: 'inlinable', disabled: !enableInlinable }, action) : ''
   const native = hoc({ bg: bgs.native, exclude, name: 'native' }, action)
   const regexp = hoc({ bg: bgs.regexp, exclude, name: 'regexp', lbl: 'rx' }, action)
   const cpp = hoc({ bg: bgs.cpp, exclude, name: 'cpp' }, action)

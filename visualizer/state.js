@@ -42,9 +42,9 @@ module.exports = ({ colors, trees, exclude, merged = false, kernelTracing, title
     },
     highlighted: {
       inlinable: `rgb(${hsl(
-        colors['inlinable'].h,
-        colors['inlinable'].s / 100 * 1.2,
-        colors['inlinable'].l / 100 * 1.2
+        colors.inlinable.h,
+        colors.inlinable.s / 100 * 1.2,
+        colors.inlinable.l / 100 * 1.2
       )})`,
       app: `rgb(${hsl(
         colors.app.h,

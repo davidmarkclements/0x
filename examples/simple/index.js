@@ -1,7 +1,7 @@
 'use strict'
-var count = 0
-var max = 10
-var res = 0
+let count = 0
+const max = 10
+let res = 0
 
 console.log(`Starting process(${process.pid}) with simple example.`)
 setTimeout(() => {

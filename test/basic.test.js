@@ -10,7 +10,7 @@ test('module loads', function (t) {
 test('accepts different workingDir', async t => {
   const zeroEks = require('../')
   const opts = {
-    argv: [ resolve(__dirname, './fixture/do-eval.js') ],
+    argv: [resolve(__dirname, './fixture/do-eval.js')],
     workingDir: resolve('./')
   }
   const file = zeroEks(opts)

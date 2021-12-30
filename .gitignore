@@ -5,4 +5,5 @@ node_modules
 win
 package-lock.json
 todo
-.vscode
+.vscode.nyc_output
+.nyc_output
