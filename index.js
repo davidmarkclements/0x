@@ -1,6 +1,6 @@
 'use strict'
 
-const { sun, linux, windows, v8 } = require('./platform')
+const { linux, v8 } = require('./platform')
 const debug = require('debug')('0x')
 const { join, isAbsolute, relative, dirname } = require('path')
 const fs = require('fs')
@@ -100,8 +100,8 @@ async function startProcessAndCollectTraceData (args) {
       throw err
     })
     case 'linux': return linux(args, await isSudo())
-    case 'win32': return windows()
-    default: return sun(args, await isSudo())
+    default:
+      throw Error(`0x: ${platform} kernel tracing is not currently supported`)
   }
 }
 
