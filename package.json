@@ -43,7 +43,6 @@
     "nanohtml": "^1.4.0",
     "on-net-listen": "^1.1.0",
     "opn": "^5.4.0",
-    "perf-sym": "^2.0.3",
     "pump": "^3.0.0",
     "pumpify": "^2.0.1",
     "semver": "^7.3.5",

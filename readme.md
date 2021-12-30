@@ -13,20 +13,10 @@ on any platform which Node runs on (macOs, Linux, Windows, Android...).
 
 ## Support
 
-* Node v8.5.0 and above
+* Node v12.x and above
 * Default usage supports any Operating System that Node runs on!
 * Chrome
   * Other browsers may open flamegraphs in a degraded, but functional form
-
-## Legacy
-
-Older versions of Node are supported via previous 0x versions:
-
-| 0x | Node       | macOS/SmartOS | Linux | Windows |
-|----|------------|-------|-------|---------|
-| v4 | v8.5.0+    | ☑️    | ☑️     | ☑️      |
-| v3 | v6 – v8.4.0| ☑️    | ☑️     | ⤬      |
-| v2 | v4         | ☑️    | ☑️     | ⤬      |
 
 ## Demo
 
@@ -197,10 +187,9 @@ Default: `{outputDir}/{name}.html`
 
 ### --kernel-tracing
 
-Use an OS kernel tracing tool (perf on Linux or
-dtrace on macOS and SmartOS). This will capture
+Use an OS kernel tracing tool (perf on Linux). This will capture
 native stack frames (C++ modules and Libuv I/O),
-but may result in missing stacks on Node 8.
+but may result in missing stacks from Node.js due to the optimizing compiler.
 
 See [docs/kernel-tracing.md](docs/kernel-tracing.md) for more information.
 
@@ -249,7 +238,7 @@ Default: undefined
 
 ### --kernel-tracing-debug
 
-Show output from DTrace or perf(1) tools.
+Show output from perf(1) tools.
 
 Default: false
 
