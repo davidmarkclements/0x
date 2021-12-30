@@ -109,6 +109,7 @@ function linux (args, sudo, cb) {
           ticks: traceStacksToTicks(folder + '/stacks.' + proc.pid + '.out'),
           pid: proc.pid,
           folder: folder,
+          // TODO: Inlined functions through linux_perf was not implemented yet
           inlined: []
         })
       })
