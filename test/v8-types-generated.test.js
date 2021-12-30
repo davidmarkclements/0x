@@ -122,7 +122,9 @@ test('Generate profile and test its output', async function (t) {
 
   const app = jsonArray.find(item => item.name.match(/^appOuterFunc /))
   const appUnicode = jsonArray.find(item => item.name.match(/^doFunc.+μИاκهよΞ[/\\]unicode-in-path\.js/))
-  const appLongMethod = jsonArray.find(item => item.type === 'JS' && item.name.match(/^method: \\μИاκهよΞ\\ \[CODE:RegExp] \/ native \/ \[SHARED_LIB]/))
+  // const appLongMethod = jsonArray.find(item => item.type === 'JS' && item.name.match(/^method: wlμИاκهよΞ\\ \[CODE:RegExp] \/ native \/ \[SHARED_LIB]/))
+  const appLongMethod = jsonArray.find(item => item.type === 'JS' && item.name.match(/^method: \[CODE:RegExp] \/ native \/ \[SHARED_LIB]/))
+  jsonArray.filter(item => item.type === 'JS')
 
   const deps = jsonArray.find(item => item.name.match(/node_modules[/\\]debounce/))
 
