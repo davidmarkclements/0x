@@ -6,6 +6,8 @@ const debug = require('debug')('0x')
 const traceStacksToTicks = require('../lib/trace-stacks-to-ticks')
 const { promisify } = require('util')
 
+const { SOFT_EXIT_SIGNALS } = require('../lib/preload/soft-exit')
+
 const {
   getTargetFolder,
   tidy,
@@ -75,19 +77,23 @@ function linux (args, sudo, cb) {
     })
   }
 
-  process.once('SIGINT', () => {
+  const handleExit = () => {
     spawn('sudo', ['kill', '-SIGINT', '' + proc.pid], {
       stdio: 'inherit'
     })
-  })
+  }
+
+  for (let i = 0; i < SOFT_EXIT_SIGNALS.length; i++) {
+    process.once(SOFT_EXIT_SIGNALS[i], handleExit)
+  }
 
   function analyze (manual) {
     if (analyze.called) { return }
     analyze.called = true
 
     if (!manual) {
-      debug('Caught SIGINT, generating flamegraph')
-      status('Caught SIGINT, generating flamegraph')
+      debug('Caught SOFT_EXIT_SIGNAL, generating flamegraph')
+      status('Caught SOFT_EXIT_SIGNAL, generating flamegraph')
       proc.on('exit', generate)
     } else {
       debug('Process exited, generating flamegraph')
