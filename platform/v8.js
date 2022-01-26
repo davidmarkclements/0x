@@ -12,6 +12,8 @@ const { promisify } = require('util')
 const rename = promisify(fs.rename)
 const sleep = promisify(setTimeout)
 
+const { SOFT_EXIT_SIGNALS } = require('../lib/preload/soft-exit')
+
 const {
   getTargetFolder,
   spawnOnPort,
@@ -58,17 +60,23 @@ async function v8 (args) {
     // Stop the subprocess; force stop it on the second SIGINT
     proc.stdio[5].destroy()
 
-    onsigint = forceClose
-    process.once('SIGINT', onsigint)
+    onsoftexit = forceClose
+
+    for (let i = 0; i < SOFT_EXIT_SIGNALS.length; i++) {
+      process.once(SOFT_EXIT_SIGNALS[i], onsoftexit)
+    }
   }
   const forceClose = () => {
     status('Force closing subprocess...')
     proc.kill()
   }
 
-  let onsigint = softClose
-  process.once('SIGINT', onsigint)
-  process.once('SIGTERM', forceClose)
+  let onsoftexit = softClose
+
+  for (let i = 0; i < SOFT_EXIT_SIGNALS.length; i++) {
+    process.once(SOFT_EXIT_SIGNALS[i], onsoftexit)
+  }
+
   process.on('exit', forceClose)
 
   const whenPort = onPort && spawnOnPort(onPort, await when(proc.stdio[5], 'data'))
@@ -77,7 +85,9 @@ async function v8 (args) {
   if (onPort) {
     // Graceful close once --on-port process ends
     onPortError = whenPort.then(() => {
-      process.removeListener('SIGINT', onsigint)
+      for (let i = 0; i < SOFT_EXIT_SIGNALS.length; i++) {
+        process.removeListener(SOFT_EXIT_SIGNALS[i], onsoftexit)
+      }
       softClose()
     }, (err) => {
       proc.kill()
@@ -93,8 +103,10 @@ async function v8 (args) {
   ].filter(Boolean))
 
   clearTimeout(closeTimer)
-  process.removeListener('SIGINT', onsigint)
-  process.removeListener('SIGTERM', forceClose)
+
+  for (let i = 0; i < SOFT_EXIT_SIGNALS.length; i++) {
+    process.removeListener(SOFT_EXIT_SIGNALS[i], onsoftexit)
+  }
   process.removeListener('exit', forceClose)
 
   args.onProcessExit(code)

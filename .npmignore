@@ -11,3 +11,4 @@ win
 *.0x
 todo
 .vscode
+.nyc_output
