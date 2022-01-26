@@ -63,11 +63,11 @@ Pass custom arguments to node:
 
 ## Generating
 
-When ready to generate a flamegraph, send a SIGINT.
+When ready to generate a flamegraph, send a SIGINT or a SIGTERM.
 
 The simplest way to do this is pressing CTRL+C.
 
-When `0x` catches the SIGINT, it process the stacks and
+When `0x` catches the SIGINT or the SIGTERM, it process the stacks and
 generates a profile folder (`<pid>.0x`), containing `flamegraph.html`.
 
 ## The UI
