@@ -12,8 +12,6 @@ const { promisify } = require('util')
 const rename = promisify(fs.rename)
 const sleep = promisify(setTimeout)
 
-const { SOFT_EXIT_SIGNALS } = require('../lib/preload/soft-exit')
-
 const {
   getTargetFolder,
   spawnOnPort,
@@ -21,6 +19,8 @@ const {
 } = require('../lib/util')
 
 module.exports = v8
+
+const SOFT_EXIT_SIGNALS = ['SIGINT', 'SIGTERM']
 
 async function v8 (args) {
   const { status, outputDir, workingDir, name, onPort, pathToNodeBinary, collectDelay } = args

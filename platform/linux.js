@@ -6,8 +6,6 @@ const debug = require('debug')('0x')
 const traceStacksToTicks = require('../lib/trace-stacks-to-ticks')
 const { promisify } = require('util')
 
-const { SOFT_EXIT_SIGNALS } = require('../lib/preload/soft-exit')
-
 const {
   getTargetFolder,
   tidy,
@@ -17,6 +15,8 @@ const {
 } = require('../lib/util')
 
 module.exports = promisify(linux)
+
+const SOFT_EXIT_SIGNALS = ['SIGINT', 'SIGTERM']
 
 function linux (args, sudo, cb) {
   const { status, outputDir, workingDir, name, onPort, pathToNodeBinary } = args
