@@ -29,8 +29,12 @@ router.get('/stop-profiling', async (ctx, next) => {
   }
 })
 
+router.get('/stop-server', (ctx, next) => {
+  server.close()
+})
+
 app
   .use(router.routes())
   .use(router.allowedMethods())
 
-app.listen(3000)
+const server = app.listen(3000)
