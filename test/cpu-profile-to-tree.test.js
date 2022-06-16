@@ -93,3 +93,97 @@ test('v8 profile converter works', function (t) {
   t.same(result, expected)
   t.end()
 })
+
+const exampleCpuProfProfile = {
+  nodes: [
+    {
+      id: 4,
+      callFrame: {
+        functionName: 'second_function',
+        scriptId: 2,
+        url: 'two.js',
+        lineNumber: 64,
+        columnNumber: 30
+      },
+      hitCount: 7,
+      children: []
+    },
+    {
+      id: 1,
+      callFrame: {
+        functionName: '(root)',
+        scriptId: 0,
+        url: '',
+        lineNumber: -1,
+        columnNumber: -1
+      },
+      hitCount: 0,
+      children: [2]
+    },
+    {
+      id: 3,
+      callFrame: {
+        functionName: 'first_function',
+        scriptId: 2,
+        url: 'two.js',
+        lineNumber: 32,
+        columnNumber: 31
+      },
+      hitCount: 3
+    },
+    {
+      id: 2,
+      callFrame: {
+        functionName: 'main',
+        scriptId: 1,
+        url: 'one.js',
+        lineNumber: 63,
+        columnNumber: 28
+      },
+      hitCount: 2,
+      children: [3, 4]
+    }
+  ]
+}
+
+const _expectedCpuProf = {
+  children: [
+    {
+      children: [
+        {
+          children: [],
+          name: 'first_function two.js:32',
+          top: 3,
+          value: 3,
+          S: 0
+        },
+        {
+          children: [],
+          name: 'second_function two.js:64',
+          top: 7,
+          value: 7,
+          S: 0
+        }
+      ],
+      name: 'main one.js:63',
+      top: 2,
+      value: 12,
+      S: 0
+    }
+  ],
+  name: '(root)',
+  top: 0,
+  value: 12,
+  S: 0
+}
+
+const expectedCpuProf = {
+  merged: _expectedCpuProf,
+  unmerged: _expectedCpuProf
+}
+
+test('v8 --cpu-prof profile converter works', function (t) {
+  const result = cpuProfile(exampleCpuProfProfile)
+  t.same(result, expectedCpuProf)
+  t.end()
+})
