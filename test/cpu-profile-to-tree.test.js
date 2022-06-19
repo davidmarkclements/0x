@@ -47,6 +47,17 @@ const exampleProfile = {
             children: []
           }
         ]
+      },
+      {
+        functionName: '(idle)',
+        url: '',
+        lineNumber: 0,
+        callUID: 249,
+        bailoutReason: '',
+        id: 39,
+        scriptId: 0,
+        hitCount: 3678,
+        children: []
       }
     ]
   }
@@ -74,6 +85,13 @@ const _expected = {
       name: 'first_function one.js:64',
       top: 0,
       value: 10,
+      S: 0
+    },
+    {
+      children: [],
+      name: '(idle)',
+      top: 0,
+      value: 0,
       S: 0
     }
   ],
@@ -118,7 +136,7 @@ const exampleCpuProfProfile = {
         columnNumber: -1
       },
       hitCount: 0,
-      children: [2]
+      children: [2, 5]
     },
     {
       id: 3,
@@ -142,6 +160,17 @@ const exampleCpuProfProfile = {
       },
       hitCount: 2,
       children: [3, 4]
+    },
+    {
+      id: 5,
+      callFrame: {
+        functionName: '(garbage collector)',
+        scriptId: 0,
+        url: '',
+        lineNumber: -1,
+        columnNumber: -1
+      },
+      hitCount: 766
     }
   ]
 }
@@ -168,6 +197,13 @@ const _expectedCpuProf = {
       name: 'main one.js:63',
       top: 2,
       value: 12,
+      S: 0
+    },
+    {
+      children: [],
+      name: '(garbage collector)',
+      top: 0,
+      value: 0,
       S: 0
     }
   ],
