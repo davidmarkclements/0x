@@ -1,15 +1,15 @@
   --open | -o             Automatically open after finishing
-                          
+
                           Default: false
 
   --on-port | -P          Run a given command and then generate
                           the flamegraph. The command as specified
-                          has access to a $PORT variable. 
+                          has access to a $PORT variable.
                           The $PORT variable is set according
-                          to the first port that profiled process 
-                          opens. 
+                          to the first port that profiled process
+                          opens.
 
-                          Example: 
+                          Example:
                           0x -P 'autocannon localhost:$PORT' app.js
 
                           Note: Remember to use single quotes or else
@@ -19,49 +19,49 @@
 
 
   -q | --quiet            Only output flamegraph URI, and fatal errors.
-                          
+
                           Default: false
 
   -s | --silent           Complete silence, 0x will not output anything,
                           other than fatal errors.
-                          
+
                           Default: false
 
-  --kernel-tracing        Use an OS kernel tracing tool (perf on Linux or 
-                          dtrace on macOs and Solaris). This will capture 
-                          native stack frames (C++ modules and Libuv I/O), 
+  --kernel-tracing        Use an OS kernel tracing tool (perf on Linux or
+                          dtrace on macOs and Solaris). This will capture
+                          native stack frames (C++ modules and Libuv I/O),
                           but may result in missing stacks on Node 8.
-                          
+
                           Default: false
 
 
 
   --output-dir | -D       Specify artifact output directory.
                           Template variables {outputDir}, {pid}, {timestamp}, {cwd}
-                          (current working directory) and {name} 
+                          (current working directory) and {name}
                           (based on the --name flag) are supported.
 
                           Default: '{pid}.0x'
 
   --output-html | -F      Specify destination path for the flamegraph HTML file.
                           Template variables {outputDir}, {pid}, {timestamp}, {cwd}
-                          (current working directory) and {name} 
-                          (based on the --name flag) are supported. 
+                          (current working directory) and {name}
+                          (based on the --name flag) are supported.
                           May also be set to - to send HTML file to STDOUT (note
-                          due to the nature of CLI argument parsing, this must be 
+                          due to the nature of CLI argument parsing, this must be
                           set using =, e.g. --output-html=-).
 
-                          If either this flag or --name is set to - then the HTML 
-                          will go to STDOUT. 
-                           
+                          If either this flag or --name is set to - then the HTML
+                          will go to STDOUT.
+
                           Default: '{outputDir}/{name}.html'
 
-  --kernel-tracing-debug  Show output from dtrace or perf tools. 
-                          
+  --kernel-tracing-debug  Show output from dtrace or perf tools.
+
                           Default: false
 
   --tree-debug            Output a JSON file of stacks as {outputDir}/stacks.{pid}.json
-                          
+
                           Default: false
 
   --collect-only          Do not process captured stacks into a flamegraph.
@@ -72,18 +72,21 @@
   --visualize-only <dir>  Build or rebuild flamegraph using the output dir.
                           Counterpart to --collect-only.
 
+  --visualize-cpu-profile Visualize a .cpuprofile file. See examples at
+                          `examples/cpu-profile`.
+
   --name                  The name of the HTML file, without the .html extension
                           Can be set to - to write HTML to STDOUT (note
-                          due to the nature of CLI argument parsing, this must 
+                          due to the nature of CLI argument parsing, this must
                           be set using =, e.g. --name=-)
 
-                          If either this flag or --output-html is set to - 
+                          If either this flag or --output-html is set to -
                           then the HTML will go to STDOUT.
 
                           Default: flamegraph
 
   --title                 Set the title to display in the flamegraph UI
-                          
+
                           Default: node [nodeFlags] script.js
 
   -v | --version          Output the 0x version
