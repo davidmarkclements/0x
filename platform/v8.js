@@ -147,7 +147,7 @@ async function renameSafe (from, to, tries = 0) {
       throw e
     }
     await sleep(1000)
-    await renameSafe(from, to, tries++)
+    await renameSafe(from, to, tries + 1)
   }
 }
 
