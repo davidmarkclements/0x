@@ -1,6 +1,6 @@
 'use strict'
 
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
 const { spawn } = require('child_process')
 const pump = require('pump')
@@ -9,7 +9,6 @@ const through = require('through2')
 const debug = require('debug')('0x')
 const v8LogToTicks = require('../lib/v8-log-to-ticks')
 const { promisify } = require('util')
-const rename = promisify(fs.rename)
 const sleep = promisify(setTimeout)
 
 const {
@@ -124,7 +123,7 @@ async function v8 (args) {
   if (!isolateLog) throw Error('no isolate logfile found')
 
   const isolateLogPath = path.join(folder, isolateLog)
-  await renameSafe(path.join(args.workingDir, isolateLog), isolateLogPath)
+  await moveSafe(path.join(args.workingDir, isolateLog), isolateLogPath)
   return {
     ticks: await v8LogToTicks(isolateLogPath, { pathToNodeBinary, collectDelay }),
     inlined: inlined,
@@ -139,15 +138,15 @@ v8.getIsolateLog = function (workingDir, pid) {
   return fs.readdirSync(workingDir).find(regex.test.bind(regex))
 }
 
-async function renameSafe (from, to, tries = 0) {
+async function moveSafe (from, to, tries = 0) {
   try {
-    await rename(from, to)
+    await fs.move(from, to)
   } catch (e) {
     if (tries > 5) {
       throw e
     }
     await sleep(1000)
-    await renameSafe(from, to, tries + 1)
+    await moveSafe(from, to, tries + 1)
   }
 }
 
