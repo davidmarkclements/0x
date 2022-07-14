@@ -130,9 +130,9 @@ test('Generate profile and test its output', async function (t) {
 
   // We get into multi-level escape character hell if we try to escape then match against the original strings
   // Duplicate stubs long enough to check it's a) correctly classified, and b) unicode etc isn't mangled
-  const matchRegexPaths = /^\/D:\u005cDocuments and Settings\u005cАлександра ǂǐ-sì\u005cinternal\u005capp native internal\u005cnode_modules\u005csome-module\u005cesm.mjs:1:1/
+  const matchRegexPaths = /\/D:\u005cDocuments and Settings\u005cАлександра ǂǐ-sì\u005cinternal\u005capp native internal\u005cnode_modules\u005csome-module\u005cesm.mjs:1:1/
   const regexPaths = jsonArray.find(item => item.name.match(matchRegexPaths))
-  const matchRegexNonPath = /^\/\[\/\u005c] \.js native \.mjs \u005c \/ :\u005c \/ \u005c \u005c\u005cserver \(\u005cusers\u005cu2fan\u005cnode_modules\u005c\|\/node_modules\/\) \[eval].js:1:2/
+  const matchRegexNonPath = /\/\[\/\u005c] \.js native \.mjs \u005c \/ :\u005c \/ \u005c \u005c\u005cserver \(\u005cusers\u005cu2fan\u005cnode_modules\u005c\|\/node_modules\/\) \[eval].js:1:2/
   const regexNonPath = jsonArray.find(item => item.name.match(matchRegexNonPath))
 
   const evalFunc = jsonArray.find(item => item.type === 'JS' && item.name.match(/^evalInnerFunc /))
