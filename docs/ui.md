@@ -82,7 +82,7 @@ Enabled by default.
 
 #### deps
 
-Functions in dependencies. That is, functions that are in files within the `node_modules` folder).
+Functions in dependencies. That is, functions that are in files within the `node_modules` folder.
 
 Enabled by default.
 
