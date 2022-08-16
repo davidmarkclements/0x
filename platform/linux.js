@@ -10,8 +10,6 @@ const {
   getTargetFolder,
   tidy,
   pathTo,
-  spawnOnPort,
-  when
 } = require('../lib/util')
 
 module.exports = promisify(linux)
@@ -20,6 +18,11 @@ const SOFT_EXIT_SIGNALS = ['SIGINT', 'SIGTERM']
 
 function linux (args, sudo, cb) {
   const { status, outputDir, workingDir, name, onPort, pathToNodeBinary } = args
+  if (onPort) {
+    cb(Error('--on-port couldn\'t be used with Linux profiling. Run it in a separate terminal'))
+    return
+  }
+
   const perf = pathTo('perf')
   if (!perf) {
     cb(Error('Unable to locate perf - make sure it\'s in your PATH'))
@@ -47,8 +50,7 @@ function linux (args, sudo, cb) {
     '--',
     pathToNodeBinary,
     '--perf-basic-prof',
-    '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
-    ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit.js'),
   ].filter(Boolean).concat(args.argv), {
     stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe']
   }).on('exit', function (code) {
@@ -63,19 +65,7 @@ function linux (args, sudo, cb) {
 
   const folder = getTargetFolder({ outputDir, workingDir, name, pid: proc.pid })
 
-  if (onPort) status('Profiling\n')
-  else status('Profiling')
-
-  if (onPort) {
-    when(proc.stdio[5], 'data').then((port) => {
-      const whenPort = spawnOnPort(onPort, port)
-      whenPort.then(() => proc.kill('SIGINT'))
-      whenPort.catch((err) => {
-        proc.kill()
-        cb(err)
-      })
-    })
-  }
+  status('Profiling')
 
   const handleExit = () => {
     spawn('sudo', ['kill', '-SIGINT', '' + proc.pid], {

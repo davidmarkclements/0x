@@ -20,6 +20,10 @@ enabled on macOS.
 0x --kernel-tracing my-app.js
 ```
 
+> Note: `0x` uses `linux_perf` for kernel tracing, which requires spawning a non-nodejs process
+directly, for this reason, one can't use `--kernel-tracing` together with `--on-port`. Instead,
+run it in a separate terminal.
+
 ## Troubleshooting
 
 ### Missing JavaScript Frames
