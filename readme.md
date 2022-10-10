@@ -61,6 +61,12 @@ Pass custom arguments to node:
 0x -- node --zero-fill-buffers my-app.js
 ```
 
+> for pwsh users, switch to CMD at first or run with `npx` 
+> 
+```
+npx 0x -o my-app.js
+```
+
 ## Generating
 
 When ready to generate a flamegraph, send a SIGINT or a SIGTERM.
