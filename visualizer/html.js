@@ -21,9 +21,21 @@ function html (opts) {
       <style>
         button:focus { outline:0; }
         rect:hover {opacity: 0.9}
+
+        :root {
+          --background: white;
+        }
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --background: #000;
+          }
+        }
+        .background {
+          background: var(--background);
+        }
       </style>
     </head>
-    <body class='m0 bg-white sans-serif overflow-hidden'>
+    <body class='m0 background sans-serif overflow-hidden'>
       <script> ${script} </script>
     </body>
     </html>
