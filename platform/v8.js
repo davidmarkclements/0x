@@ -33,7 +33,7 @@ async function v8 (args) {
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
     ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].concat(args.argv), {
-    stdio: ['ignore', 'pipe', 'inherit', 'pipe', 'ignore', 'pipe']
+    stdio: ['inherit', 'pipe', 'inherit', 'pipe', 'ignore', 'pipe']
   })
 
   // Isolate log is created before command is executed
