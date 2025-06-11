@@ -73,7 +73,7 @@ async function v8 (args) {
   let onsoftexit = softClose
 
   for (let i = 0; i < SOFT_EXIT_SIGNALS.length; i++) {
-    process.once(SOFT_EXIT_SIGNALS[i], onsoftexit)
+    process.on(SOFT_EXIT_SIGNALS[i], onsoftexit)
   }
 
   process.on('exit', forceClose)
