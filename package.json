@@ -5,7 +5,7 @@
   "main": "index.js",
   "bin": "./cmd.js",
   "scripts": {
-    "test": "npm run lint && tap test/*.test.js",
+    "test": "npm run lint && node --test test/*.test.js",
     "stress-rest-example": "cd examples/rest-api && npm test",
     "start": "./cmd.js --on-port 'npm run stress-rest-example' -- node examples/rest-api",
     "lint": "standard --fix | snazzy"
@@ -56,8 +56,7 @@
   "devDependencies": {
     "rimraf": "^3.0.2",
     "snazzy": "^9.0.0",
-    "standard": "^16.0.0",
-    "tap": "^15.0.0"
+    "standard": "^16.0.0"
   },
   "browserify-shim": {}
 }

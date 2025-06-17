@@ -1,19 +1,18 @@
 const { resolve } = require('path')
-const { test } = require('tap')
+const { test } = require('node:test')
+const assert = require('node:assert')
 
-test('module loads', function (t) {
+test('module loads', () => {
   require('../')
-  t.pass('0x loaded')
-  t.end()
+  assert.ok(true, '0x loaded')
 })
 
-test('accepts different workingDir', async t => {
+test('accepts different workingDir', async () => {
   const zeroEks = require('../')
   const opts = {
     argv: [resolve(__dirname, './fixture/do-eval.js')],
     workingDir: resolve('./')
   }
   const file = zeroEks(opts)
-  t.resolves(file)
-  t.end()
+  await assert.doesNotReject(file)
 })
