@@ -1,6 +1,7 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
+const assert = require('node:assert')
 
 const {
   init1,
@@ -34,36 +35,32 @@ const {
 
 const { getType } = require('./util/classify-frames.js')
 
-test('Test typical examples - frontend types from names', function (t) {
-  t.equal(getType(init1), 'init')
-  t.equal(getType(init2), 'init')
-  t.equal(getType(cpp1), 'cpp')
-  t.equal(getType(cpp2), 'cpp')
-  t.equal(getType(v81), 'v8')
-  t.equal(getType(v82), 'v8')
-  t.equal(getType(regexp1), 'regexp')
-  t.equal(getType(regexp2), 'regexp')
-  t.equal(getType(native1), 'native')
-  t.equal(getType(native2), 'native')
-  t.equal(getType(core1), 'core')
-  t.equal(getType(core2), 'core')
-  t.equal(getType(deps1), 'deps')
-  t.equal(getType(deps2), 'deps')
-  t.equal(getType(app1), 'app')
-  t.equal(getType(app2), 'app')
-  t.equal(getType(inlinable, true), 'inlinable')
-
-  t.end()
+test('Test typical examples - frontend types from names', () => {
+  assert.strictEqual(getType(init1), 'init')
+  assert.strictEqual(getType(init2), 'init')
+  assert.strictEqual(getType(cpp1), 'cpp')
+  assert.strictEqual(getType(cpp2), 'cpp')
+  assert.strictEqual(getType(v81), 'v8')
+  assert.strictEqual(getType(v82), 'v8')
+  assert.strictEqual(getType(regexp1), 'regexp')
+  assert.strictEqual(getType(regexp2), 'regexp')
+  assert.strictEqual(getType(native1), 'native')
+  assert.strictEqual(getType(native2), 'native')
+  assert.strictEqual(getType(core1), 'core')
+  assert.strictEqual(getType(core2), 'core')
+  assert.strictEqual(getType(deps1), 'deps')
+  assert.strictEqual(getType(deps2), 'deps')
+  assert.strictEqual(getType(app1), 'app')
+  assert.strictEqual(getType(app2), 'app')
+  assert.strictEqual(getType(inlinable, true), 'inlinable')
 })
 
-test('Test awkward edge cases', function (t) {
-  t.equal(getType({ name: appUnix, type: 'JS' }), 'app')
-  t.equal(getType({ name: appWindows, type: 'JS' }), 'app')
-  t.equal(getType({ name: depsEsmWindows, type: 'JS' }), 'deps')
-  t.equal(getType({ name: depsCommonUnix, type: 'JS' }), 'deps')
-  t.equal(getType({ name: sharedLibUnix, type: 'SHARED_LIB' }), 'cpp')
-  t.equal(getType({ name: sharedLibWindows, type: 'SHARED_LIB' }), 'cpp')
-  t.equal(getType({ name: regexWindowsPaths, type: 'CODE', kind: 'RegExp' }), 'regexp')
-
-  t.end()
+test('Test awkward edge cases', () => {
+  assert.strictEqual(getType({ name: appUnix, type: 'JS' }), 'app')
+  assert.strictEqual(getType({ name: appWindows, type: 'JS' }), 'app')
+  assert.strictEqual(getType({ name: depsEsmWindows, type: 'JS' }), 'deps')
+  assert.strictEqual(getType({ name: depsCommonUnix, type: 'JS' }), 'deps')
+  assert.strictEqual(getType({ name: sharedLibUnix, type: 'SHARED_LIB' }), 'cpp')
+  assert.strictEqual(getType({ name: sharedLibWindows, type: 'SHARED_LIB' }), 'cpp')
+  assert.strictEqual(getType({ name: regexWindowsPaths, type: 'CODE', kind: 'RegExp' }), 'regexp')
 })

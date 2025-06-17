@@ -13,14 +13,10 @@ on any platform which Node runs on (macOs, Linux, Windows, Android...).
 
 ## Support
 
-* Node v12.x and above
+* Node v20.x and above
 * Default usage supports any Operating System that Node runs on!
 * Chrome
   * Other browsers may open flamegraphs in a degraded, but functional form
-
-## Demo
-
-An example interactive flamegraph can be viewed at <http://davidmarkclements.github.io/0x-demo/>
 
 ## Install
 
@@ -312,7 +308,7 @@ and nesting the `--stack-size` flag within the `--js-flags` flag:
 
 ## Acknowledgements
 
-Sponsored by [nearForm](http://nearform.com)
+The original sponsor of this work was [nearForm](http://nearform.com)
 
 This tool is inspired from various info and code sources
 and would have taken much longer without the following people and

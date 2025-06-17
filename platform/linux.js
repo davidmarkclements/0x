@@ -9,7 +9,7 @@ const { promisify } = require('util')
 const {
   getTargetFolder,
   tidy,
-  pathTo,
+  pathTo
 } = require('../lib/util')
 
 module.exports = promisify(linux)
@@ -50,7 +50,7 @@ function linux (args, sudo, cb) {
     '--',
     pathToNodeBinary,
     '--perf-basic-prof',
-    '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit.js'),
+    '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit.js')
   ].filter(Boolean).concat(args.argv), {
     stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe']
   }).on('exit', function (code) {
@@ -104,7 +104,7 @@ function linux (args, sudo, cb) {
         cb(null, {
           ticks: traceStacksToTicks(folder + '/stacks.' + proc.pid + '.out'),
           pid: proc.pid,
-          folder: folder,
+          folder,
           // TODO: Inlined functions through linux_perf was not implemented yet
           inlined: []
         })

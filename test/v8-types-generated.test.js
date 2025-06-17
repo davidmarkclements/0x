@@ -1,6 +1,7 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
+const assert = require('node:assert')
 
 const { resolve } = require('path')
 const fs = require('fs')
@@ -24,99 +25,85 @@ const {
 // mistaken "incorrect number of tests" errors if run time is > ~25s.
 
 // We only have input from our own module, but still, the strings are complex, check they can't contain surprises
-test('Ensure eval sanitising works as expected before using fixture', function (t) {
-  t.throws(function () {
+test('Ensure eval sanitising works as expected before using fixture', () => {
+  assert.throws(function () {
     evalSafeString("'some string'; console.log('>>> Do bad things');")
   }, { actual: 2, expected: 1 })
 
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeString("'some string' + console.log('>>> Do bad things');")
   }, { actual: 'BinaryExpression', expected: 'Literal' })
 
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeString("`some string${ console.log('>>> Do bad things') }`") // eslint-disable-line
   }, { actual: 'TemplateLiteral', expected: 'Literal' })
 
   // Simulate redefining 'RegExp' to be malicious when it is called later by an innocent 'new RegExp()'
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeString("function RegExp () { console.log('>>> Do bad things') }")
   }, { actual: 'FunctionDeclaration', expected: 'ExpressionStatement' })
 
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeString("RegExp = function () { console.log('>>> Do bad things') }")
   }, { actual: 'AssignmentExpression', expected: 'Literal' })
 
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeString("`some string${ function RegExp () { console.log('>>> Do bad things') } }`") // eslint-disable-line
   }, { actual: 'TemplateLiteral', expected: 'Literal' })
 
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeString("'/abc/' && (RegExp = function () { console.log('>>> Do bad things') })")
   }, { actual: 'LogicalExpression', expected: 'Literal' })
 
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeString("(RegExp = function () { console.log('>>> Do bad things') }) && '/abc/'")
   }, { actual: 'LogicalExpression', expected: 'Literal' })
 
   // Test regex creation
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeRegexDef("'/abc'; console.log('>>> Do bad things');")
   }, { actual: 2, expected: 1 })
 
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeRegexDef("'/abc' + console.log('>>> Do bad things')")
   }, { actual: 'BinaryExpression', expected: 'Literal' })
 
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeRegexDef("(RegExp = function () { console.log('>>> Do bad things') }) && '/abc/'")
   }, { actual: 'LogicalExpression', expected: 'Literal' })
 
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeRegexDef("'/abc/' && (RegExp = function () { console.log('>>> Do bad things') })")
   }, { actual: 'LogicalExpression', expected: 'Literal' })
 
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeRegexDef("`/abc${ console.log('>>> Do bad things') }/`") // eslint-disable-line
   }, { actual: 'TemplateLiteral', expected: 'Literal' })
 
-  t.throws(function () {
+  assert.throws(function () {
     evalSafeRegexDef("`/abc${ function RegExp () { console.log('>>> Do bad things') } }/`") // eslint-disable-line
   }, { actual: 'TemplateLiteral', expected: 'Literal' })
-
-  t.end()
 })
 
-test('Generate profile and test its output', async function (t) {
+test('Generate profile and test its output', async () => {
   const readFile = promisify(fs.readFile)
-  function cleanup () {
-    if (dir) {
-      t.ok(fs.existsSync(dir))
-      rimraf.sync(dir)
-      t.notOk(fs.existsSync(dir))
-    }
-    t.end()
-  }
-  function onError (err) {
-    cleanup()
-    throw err
-  }
 
   const htmlLink = await zeroX({
     argv: [resolve(__dirname, './fixture/do-eval.js')],
     workingDir: resolve('./')
-  }).catch(onError)
+  })
 
   const htmlFile = htmlLink.replace(/^file:\/\//, '')
 
   // Test 0x output exists as expected
-  t.ok(htmlFile.includes('flamegraph.html'))
-  t.ok(fs.existsSync(htmlFile))
-  t.ok(fs.statSync(htmlFile).size > 10000)
+  assert.ok(htmlFile.includes('flamegraph.html'))
+  assert.ok(fs.existsSync(htmlFile))
+  assert.ok(fs.statSync(htmlFile).size > 10000)
 
   const dir = htmlFile.replace('flamegraph.html', '')
   const jsonFile = fs.readdirSync(dir).find(name => name.match(/\.json$/))
 
-  const content = await readFile(path.resolve(dir, jsonFile)).catch(onError)
+  const content = await readFile(path.resolve(dir, jsonFile))
 
   const jsonArray = JSON.parse(content).code
 
@@ -138,27 +125,32 @@ test('Generate profile and test its output', async function (t) {
   const evalFunc = jsonArray.find(item => item.type === 'JS' && item.name.match(/^evalInnerFunc /))
 
   // Test 0x json contents are logged and classified as expected
-  t.ok(app)
-  t.equal(getType(app), 'app')
+  assert.ok(app)
+  assert.strictEqual(getType(app), 'app')
 
-  t.ok(appUnicode)
-  t.equal(getType(appUnicode), 'app')
+  assert.ok(appUnicode)
+  assert.strictEqual(getType(appUnicode), 'app')
 
-  t.ok(appLongMethod)
-  t.equal(getType(appLongMethod), 'app')
+  assert.ok(appLongMethod)
+  assert.strictEqual(getType(appLongMethod), 'app')
 
-  t.ok(deps)
-  t.equal(getType(deps), 'deps')
+  assert.ok(deps)
+  assert.strictEqual(getType(deps), 'deps')
 
-  t.ok(regexPaths)
-  t.equal(getType(regexPaths), 'regexp')
+  assert.ok(regexPaths)
+  assert.strictEqual(getType(regexPaths), 'regexp')
 
-  t.ok(regexNonPath)
-  t.equal(getType(regexNonPath), 'regexp')
+  assert.ok(regexNonPath)
+  assert.strictEqual(getType(regexNonPath), 'regexp')
 
-  t.ok(evalFunc)
-  t.equal(getType(evalFunc), 'native')
-  t.ok(getProcessedName(evalFunc).includes('[eval]'))
+  assert.ok(evalFunc)
+  assert.strictEqual(getType(evalFunc), 'native')
+  assert.ok(getProcessedName(evalFunc).includes('[eval]'))
 
-  cleanup()
+  // Cleanup
+  if (dir) {
+    assert.ok(fs.existsSync(dir))
+    rimraf.sync(dir)
+    assert.ok(!fs.existsSync(dir))
+  }
 })

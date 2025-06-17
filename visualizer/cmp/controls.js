@@ -18,10 +18,10 @@ module.exports = (render) => (state, action) => {
   const tiers = button(render)({ label: 'Tiers', pressed: state.tiers }, () => action({ type: 'tiers' }))
   const view = state.renderMergedBtn && !state.visualizeCpuProfile
     ? button(render)({
-        label: state.merged ? 'Unmerge' : 'Merge',
-        width: '6.85em',
-        pressed: state.merged
-      }, () => action({ type: 'view' }))
+      label: state.merged ? 'Unmerge' : 'Merge',
+      width: '6.85em',
+      pressed: state.merged
+    }, () => action({ type: 'view' }))
     : ''
   const optimized = state.visualizeCpuProfile
     ? ''
