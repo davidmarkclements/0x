@@ -8,7 +8,7 @@
     "test": "npm run lint && node --test test/*.test.js",
     "stress-rest-example": "cd examples/rest-api && npm test",
     "start": "./cmd.js --on-port 'npm run stress-rest-example' -- node examples/rest-api",
-    "lint": "standard --fix | snazzy"
+    "lint": "eslint --fix"
   },
   "repository": {
     "type": "git",
@@ -54,9 +54,9 @@
     "which": "^2.0.2"
   },
   "devDependencies": {
-    "rimraf": "^3.0.2",
-    "snazzy": "^9.0.0",
-    "standard": "^16.0.0"
+    "eslint": "^9.29.0",
+    "neostandard": "^0.12.1",
+    "rimraf": "^3.0.2"
   },
   "browserify-shim": {}
 }
