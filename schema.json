@@ -53,6 +53,12 @@
     "D": {
       "type": "string"
     },
+    "workingDir": {
+      "type": "string"
+    },
+    "working-dir": {
+      "type": "string"
+    },
     "output-dir": {
       "type": "string"
     },

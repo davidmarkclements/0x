@@ -34,7 +34,9 @@
 
                           Default: false
 
+  --working-dir           Specify the working directory of the profiler.
 
+                          Default: current working directory of the process
 
   --output-dir | -D       Specify artifact output directory.
                           Template variables {outputDir}, {pid}, {timestamp}, {cwd}
