@@ -126,9 +126,9 @@ async function v8 (args) {
   await moveSafe(path.join(args.workingDir, isolateLog), isolateLogPath)
   return {
     ticks: await v8LogToTicks(isolateLogPath, { pathToNodeBinary, collectDelay }),
-    inlined: inlined,
+    inlined,
     pid: proc.pid,
-    folder: folder
+    folder
   }
 }
 

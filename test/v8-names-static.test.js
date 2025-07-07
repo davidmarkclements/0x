@@ -1,6 +1,7 @@
 'use strict'
 
-const { test } = require('tap')
+const { test } = require('node:test')
+const assert = require('node:assert')
 
 const {
   init1,
@@ -24,24 +25,22 @@ const {
 
 const { getProcessedName } = require('./util/classify-frames.js')
 
-test('Test typical examples - backend name transformation', function (t) {
-  t.equal(getProcessedName(init1), init1.name + ' [INIT]')
-  t.equal(getProcessedName(init2), init2.name + ' [INIT]')
-  t.equal(getProcessedName(cpp1), cpp1.name + ' [SHARED_LIB]')
-  t.equal(getProcessedName(cpp2), cpp2.name + ' [SHARED_LIB]')
-  t.equal(getProcessedName(v81), v81.name + ' [CPP]')
-  t.equal(getProcessedName(v82), v82.name + ' [CODE:BuiltIn]')
-  t.equal(getProcessedName(regexp1), regexp1.name + ' [CODE:RegExp]')
-  t.equal(getProcessedName(regexp2), regexp2.name + ' [CODE:RegExp]')
-  t.equal(getProcessedName(native1), '~' + native1.name)
-  t.equal(getProcessedName(native2), '*(anonymous) [eval]:486:24')
-  t.equal(getProcessedName(core1), '*' + core1.name)
-  t.equal(getProcessedName(core2), '~' + core2.name)
-  t.equal(getProcessedName(deps1), '*' + deps1.name)
-  t.equal(getProcessedName(deps2), '~' + deps2.name)
-  t.equal(getProcessedName(app1), '~' + app1.name)
-  t.equal(getProcessedName(app2), '*' + app2.name)
-  t.equal(getProcessedName(inlinable, true), '~' + inlinable.name + ' [INLINABLE]')
-
-  t.end()
+test('Test typical examples - backend name transformation', () => {
+  assert.strictEqual(getProcessedName(init1), init1.name + ' [INIT]')
+  assert.strictEqual(getProcessedName(init2), init2.name + ' [INIT]')
+  assert.strictEqual(getProcessedName(cpp1), cpp1.name + ' [SHARED_LIB]')
+  assert.strictEqual(getProcessedName(cpp2), cpp2.name + ' [SHARED_LIB]')
+  assert.strictEqual(getProcessedName(v81), v81.name + ' [CPP]')
+  assert.strictEqual(getProcessedName(v82), v82.name + ' [CODE:BuiltIn]')
+  assert.strictEqual(getProcessedName(regexp1), regexp1.name + ' [CODE:RegExp]')
+  assert.strictEqual(getProcessedName(regexp2), regexp2.name + ' [CODE:RegExp]')
+  assert.strictEqual(getProcessedName(native1), '~' + native1.name)
+  assert.strictEqual(getProcessedName(native2), '*(anonymous) [eval]:486:24')
+  assert.strictEqual(getProcessedName(core1), '*' + core1.name)
+  assert.strictEqual(getProcessedName(core2), '~' + core2.name)
+  assert.strictEqual(getProcessedName(deps1), '*' + deps1.name)
+  assert.strictEqual(getProcessedName(deps2), '~' + deps2.name)
+  assert.strictEqual(getProcessedName(app1), '~' + app1.name)
+  assert.strictEqual(getProcessedName(app2), '*' + app2.name)
+  assert.strictEqual(getProcessedName(inlinable, true), '~' + inlinable.name + ' [INLINABLE]')
 })

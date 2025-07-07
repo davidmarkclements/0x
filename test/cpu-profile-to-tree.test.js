@@ -1,4 +1,5 @@
-const { test } = require('tap')
+const { test } = require('node:test')
+const assert = require('node:assert')
 const cpuProfile = require('../lib/cpu-profile-to-tree')
 
 const exampleProfile = {
@@ -106,10 +107,9 @@ const expected = {
   unmerged: _expected
 }
 
-test('v8 profile converter works', function (t) {
+test('v8 profile converter works', () => {
   const result = cpuProfile(exampleProfile)
-  t.same(result, expected)
-  t.end()
+  assert.deepStrictEqual(result, expected)
 })
 
 const exampleCpuProfProfile = {
@@ -218,8 +218,7 @@ const expectedCpuProf = {
   unmerged: _expectedCpuProf
 }
 
-test('v8 --cpu-prof profile converter works', function (t) {
+test('v8 --cpu-prof profile converter works', () => {
   const result = cpuProfile(exampleCpuProfProfile)
-  t.same(result, expectedCpuProf)
-  t.end()
+  assert.deepStrictEqual(result, expectedCpuProf)
 })

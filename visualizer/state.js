@@ -21,7 +21,7 @@ module.exports = ({ colors, trees, exclude, merged = false, kernelTracing, title
     optimized: false,
     unoptimized: false,
     renderMergedBtn: !kernelTracing,
-    merged: merged,
+    merged,
     visualizeCpuProfile
   },
   typeFilters: {
