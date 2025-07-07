@@ -52,6 +52,7 @@ async function cmd (argv, banner = defaultBanner) {
       quiet: 'q',
       open: 'o',
       'output-dir': 'outputDir',
+      'working-dir': 'workingDir',
       D: 'outputDir',
       'output-html': 'outputHtml',
       F: 'outputHtml',
@@ -67,6 +68,9 @@ async function cmd (argv, banner = defaultBanner) {
       writeTicks: 'write-ticks',
       onPort: 'on-port',
       P: 'onPort'
+    },
+    default: {
+      workingDir: process.cwd()
     }
   })
 
@@ -82,7 +86,6 @@ async function cmd (argv, banner = defaultBanner) {
   const status = createStatus(args)
   const { pathToNodeBinary, subprocessArgv } = parseSubprocessCommand(args)
 
-  args.workingDir = process.cwd()
   args.status = status
   args.argv = subprocessArgv
   args.pathToNodeBinary = pathToNodeBinary
