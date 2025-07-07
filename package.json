@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "eslint": "^9.29.0",
+    "esprima": "^4.0.1",
     "neostandard": "^0.12.1",
     "rimraf": "^3.0.2"
   },
