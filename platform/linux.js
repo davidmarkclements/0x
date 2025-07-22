@@ -52,7 +52,8 @@ function linux (args, sudo, cb) {
     '--perf-basic-prof',
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit.js')
   ].filter(Boolean).concat(args.argv), {
-    stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe']
+    stdio: ['ignore', 'inherit', 'inherit', 'ignore', 'ignore', 'pipe'],
+    env: args.env
   }).on('exit', function (code) {
     args.onProcessExit(code)
     if (code !== null && code !== 0 && code !== 143 && code !== 130) {
@@ -62,6 +63,8 @@ function linux (args, sudo, cb) {
     }
     filterInternalFunctions(perfdat)
   })
+
+  if (args.onProcessStart) args.onProcessStart(proc)
 
   const folder = getTargetFolder({ outputDir, workingDir, name, pid: proc.pid })
 
