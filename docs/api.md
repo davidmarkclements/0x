@@ -8,6 +8,10 @@ The `opts` argument is an object, with the following properties:
 
 Pass the arguments that the spawned Node process should receive. 
 
+#### `env` (object)
+
+Pass the environment variables that the spawned Node process should receive. 
+
 #### `workingDir` (string)
 
 The base directory where profile folders will be placed. 
@@ -82,6 +86,10 @@ modified array to change the output.
 Called with the exit code when the observed process exits.
 
 Default: ()=>{} (noop)
+
+#### `onProcessStart` (function)
+
+Called after the node child process is spwaned.
 
 #### `status` (function)
 
