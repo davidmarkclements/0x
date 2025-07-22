@@ -33,8 +33,11 @@ async function v8 (args) {
     '-r', path.join(__dirname, '..', 'lib', 'preload', 'soft-exit'),
     ...(onPort ? ['-r', path.join(__dirname, '..', 'lib', 'preload', 'detect-port.js')] : [])
   ].concat(args.argv), {
-    stdio: ['inherit', 'pipe', 'inherit', 'pipe', 'ignore', 'pipe']
+    stdio: ['inherit', 'pipe', 'inherit', 'pipe', 'ignore', 'pipe'],
+    env: args.env
   })
+
+  if (args.onProcessStart) args.onProcessStart(proc)
 
   // Isolate log is created before command is executed
   // Add pid to original args object so if command errors, external handlers can clean up

@@ -113,7 +113,7 @@
     "collectDelay": {
       "type": "number"
     },
-     "kernelTracing": {
+    "kernelTracing": {
       "type": "boolean"
     },
     "kernel-tracing": {
@@ -136,6 +136,11 @@
       "type": "array",
       "items": {}
     },
-    "onProcessExit": {}
+    "env": {
+      "type": "object",
+      "properties": {}
+    },
+    "onProcessExit": {},
+    "onProcessStart": {}
   }
 }
